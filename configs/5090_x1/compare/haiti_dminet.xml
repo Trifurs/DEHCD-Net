@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../haiti_multiclass_lightweight.xml</base_param>
+    <model>
+        <name type="str">DMINet</name>
+        <compare_model type="str">dminet</compare_model>
+        <backbone type="str">compare_native</backbone>
+        <base_channels type="int">16</base_channels>
+        <compare_adapt_batchnorm type="bool">true</compare_adapt_batchnorm>
+        <compare_deep_supervision type="bool">true</compare_deep_supervision>
+    </model>
+    <logging>
+        <run_name type="str">compare_haiti_dminet_5090x1</run_name>
+    </logging>
+    <dataset>
+        <positive_crop_prob type="float">0.60</positive_crop_prob>
+        <rare_crop_prob type="float">0.30</rare_crop_prob>
+        <rare_crop_classes type="list">[2, 3]</rare_crop_classes>
+        <crop_candidate_count type="int">5</crop_candidate_count>
+    </dataset>
+    <augmentation>
+        <optical_scale_jitter type="float">0.08</optical_scale_jitter>
+        <optical_shift_jitter type="float">0.03</optical_shift_jitter>
+        <sar_scale_jitter type="float">0.10</sar_scale_jitter>
+        <sar_shift_jitter type="float">0.03</sar_shift_jitter>
+        <optical_noise_std type="float">0.015</optical_noise_std>
+        <sar_noise_std type="float">0.03</sar_noise_std>
+    </augmentation>
+    <training>
+        <device type="str">cuda:0</device>
+        <batch_size type="int">64</batch_size>
+        <epochs type="int">1000</epochs>
+        <num_workers type="int">16</num_workers>
+        <persistent_workers type="bool">true</persistent_workers>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <early_stop_patience type="int">100</early_stop_patience>
+        <multi_gpu type="str">single</multi_gpu>
+        <gpu_ids type="list">[0]</gpu_ids>
+        <aux_loss_weight type="float">0.35</aux_loss_weight>
+    </training>
+</project>

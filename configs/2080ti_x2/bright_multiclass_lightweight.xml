@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">config.xml</base_param>
+    <model>
+        <backbone type="str">lightweight_convnext</backbone>
+        <base_channels type="int">16</base_channels>
+        <block_type type="str">convnext</block_type>
+        <use_hog type="bool">true</use_hog>
+        <diffusion_steps type="int">2</diffusion_steps>
+        <align_fusion type="bool">true</align_fusion>
+        <input_adaptation type="bool">false</input_adaptation>
+        <input_residual_scale type="float">0.10</input_residual_scale>
+        <adaptive_modality_weight type="bool">false</adaptive_modality_weight>
+        <hog_modulation_levels type="int">2</hog_modulation_levels>
+        <align_start_level type="int">1</align_start_level>
+        <align_max_flow type="float">2.0</align_max_flow>
+        <deep_supervision type="bool">false</deep_supervision>
+        <share_encoder_from_level type="int">2</share_encoder_from_level>
+    </model>
+    <logging>
+        <run_name type="str">bright_multiclass_lightweight</run_name>
+    </logging>
+    <training>
+        <batch_size type="int">12</batch_size>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <num_workers type="int">4</num_workers>
+        <aux_loss_weight type="float">0.0</aux_loss_weight>
+    </training>
+</project>

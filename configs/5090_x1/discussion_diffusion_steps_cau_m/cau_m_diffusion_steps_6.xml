@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../cau_binary_dehcd_m.xml</base_param>
+    <model>
+        <diffusion_steps type="int">6</diffusion_steps>
+    </model>
+    <logging>
+        <run_name type="str">discussion_cau_m_diffusion_steps_6</run_name>
+    </logging>
+</project>

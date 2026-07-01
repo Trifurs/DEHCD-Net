@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <base_param type="path">config.xml</base_param>
+    <task>
+        <name type="str">haiti_optical_sar_change_detection</name>
+        <type type="str">multiclass_damage_change_detection</type>
+        <num_classes type="int">4</num_classes>
+        <ignore_index type="int">255</ignore_index>
+    </task>
+    <dataset>
+        <type type="str">haiti</type>
+        <name type="str">Haiti1</name>
+        <root type="path">/media/trifurs/备份盘1/Download/Hete_CD/Haiti1</root>
+        <candidate_roots type="list">["/media/trifurs/备份盘1/Download/Hete_CD/Haiti1"]</candidate_roots>
+        <splits type="list">["train", "val", "test"]</splits>
+        <optical_dir type="str">Pre_event/S2_20210804</optical_dir>
+        <sar_dirs type="list">["Post_event/S1_ASC_20210817", "Post_event/S1_DESC_20210815"]</sar_dirs>
+        <label_dir type="str">Annotations</label_dir>
+        <optical_band_indices type="list">[0, 1, 2]</optical_band_indices>
+        <sar_band_indices type="list">[[0, 1], [0, 1]]</sar_band_indices>
+        <optical_mask_band_index type="int">3</optical_mask_band_index>
+        <sar_mask_band_indices type="list">[2, 2]</sar_mask_band_indices>
+        <optical_mask_invalid_values type="list">[1]</optical_mask_invalid_values>
+        <sar_mask_valid_values type="list">[0]</sar_mask_valid_values>
+        <label_quality_ignore_policy type="str">all_modalities</label_quality_ignore_policy>
+        <mask_normalization_stats type="bool">true</mask_normalization_stats>
+        <masked_input_policy type="str">keep</masked_input_policy>
+        <optical_suffix type="str"></optical_suffix>
+        <sar_suffixes type="list">["", ""]</sar_suffixes>
+        <label_suffix type="str"></label_suffix>
+        <image_extensions type="list">[".tif", ".tiff"]</image_extensions>
+        <label_mode type="str">multiclass_damage</label_mode>
+        <label_ignore_values type="list">[]</label_ignore_values>
+        <patch_size type="int">128</patch_size>
+        <train_random_crop type="bool">true</train_random_crop>
+        <positive_crop_prob type="float">0.75</positive_crop_prob>
+        <rare_crop_prob type="float">0.75</rare_crop_prob>
+        <rare_crop_classes type="list">[2, 3]</rare_crop_classes>
+        <crop_candidate_count type="int">6</crop_candidate_count>
+        <eval_full_image type="bool">false</eval_full_image>
+        <align_to_optical type="bool">true</align_to_optical>
+        <return_metadata type="bool">false</return_metadata>
+    </dataset>
+    <normalization>
+        <optical>
+            <method type="str">percentile_minmax</method>
+            <lower_percentile type="float">2.0</lower_percentile>
+            <upper_percentile type="float">98.0</upper_percentile>
+            <mean type="list">[]</mean>
+            <std type="list">[]</std>
+        </optical>
+        <sar>
+            <method type="str">robust_zscore</method>
+            <log_transform type="bool">false</log_transform>
+            <lower_percentile type="float">2.0</lower_percentile>
+            <upper_percentile type="float">98.0</upper_percentile>
+            <mean type="list">[]</mean>
+            <std type="list">[]</std>
+        </sar>
+    </normalization>
+    <model>
+        <num_classes type="int">4</num_classes>
+        <backbone type="str">lightweight_convnext</backbone>
+        <base_channels type="int">16</base_channels>
+        <block_type type="str">convnext</block_type>
+        <use_hog type="bool">true</use_hog>
+        <diffusion_steps type="int">2</diffusion_steps>
+        <align_fusion type="bool">true</align_fusion>
+        <input_adaptation type="bool">false</input_adaptation>
+        <input_residual_scale type="float">0.10</input_residual_scale>
+        <adaptive_modality_weight type="bool">false</adaptive_modality_weight>
+        <hog_modulation_levels type="int">2</hog_modulation_levels>
+        <share_encoder_from_level type="int">2</share_encoder_from_level>
+        <align_start_level type="int">1</align_start_level>
+        <align_max_flow type="float">2.0</align_max_flow>
+        <deep_supervision type="bool">false</deep_supervision>
+    </model>
+    <training>
+        <learning_rate type="float">5e-4</learning_rate>
+        <batch_size type="int">24</batch_size>
+        <num_workers type="int">4</num_workers>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <loss type="str">hierarchical_change</loss>
+        <hier_binary_ce_weight type="float">1.0</hier_binary_ce_weight>
+        <hier_binary_dice_weight type="float">0.7</hier_binary_dice_weight>
+        <hier_binary_focal_weight type="float">0.15</hier_binary_focal_weight>
+        <hier_binary_focal_gamma type="float">2.0</hier_binary_focal_gamma>
+        <hier_binary_class_weights type="list">[1.0, 2.8]</hier_binary_class_weights>
+        <hier_foreground_logit_offset type="float">-0.90</hier_foreground_logit_offset>
+        <hier_subclass_ce_weight type="float">0.8</hier_subclass_ce_weight>
+        <hier_subclass_dice_weight type="float">0.2</hier_subclass_dice_weight>
+        <hier_subclass_weights type="list">[1.0, 1.8, 1.3]</hier_subclass_weights>
+        <hier_subclass_label_smoothing type="float">0.02</hier_subclass_label_smoothing>
+        <hier_subclass_focal_weight type="float">0.10</hier_subclass_focal_weight>
+        <hier_subclass_focal_gamma type="float">2.0</hier_subclass_focal_gamma>
+        <hier_foreground_prior_weight type="float">0.15</hier_foreground_prior_weight>
+        <class_weights type="list">[1.0, 1.0, 1.0, 1.0]</class_weights>
+        <class_balanced_sampler type="bool">true</class_balanced_sampler>
+        <sampler_rare_class_threshold type="float">0.03</sampler_rare_class_threshold>
+        <sampler_target_classes type="list">[1, 2, 3]</sampler_target_classes>
+        <sampler_power type="float">1.0</sampler_power>
+        <sampler_max_weight type="float">4.0</sampler_max_weight>
+        <sampler_min_pixels type="int">16</sampler_min_pixels>
+        <aux_loss_weight type="float">0.0</aux_loss_weight>
+    </training>
+    <logging>
+        <run_name type="str">haiti_multiclass_lightweight</run_name>
+    </logging>
+    <inference>
+        <test_time_augmentation type="str">flips</test_time_augmentation>
+    </inference>
+</project>

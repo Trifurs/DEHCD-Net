@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../../bright_multiclass_dehcd_l.xml</base_param>
+    <model>
+        <use_hog type="bool">false</use_hog>
+        <align_fusion type="bool">false</align_fusion>
+        <global_context type="bool">false</global_context>
+        <cross_scale_fusion type="bool">false</cross_scale_fusion>
+    </model>
+    <logging>
+        <run_name type="str">ab_bright_l_no_hog_align_gcb_csf</run_name>
+    </logging>
+</project>

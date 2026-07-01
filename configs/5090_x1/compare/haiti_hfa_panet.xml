@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../haiti_multiclass_lightweight.xml</base_param>
+    <model>
+        <name type="str">HFA-PANet</name>
+        <compare_model type="str">hfa_panet</compare_model>
+        <backbone type="str">compare_native</backbone>
+        <base_channels type="int">16</base_channels>
+        <compare_adapt_batchnorm type="bool">true</compare_adapt_batchnorm>
+        <compare_deep_supervision type="bool">true</compare_deep_supervision>
+    </model>
+    <logging>
+        <run_name type="str">compare_haiti_hfa_panet_5090x1</run_name>
+    </logging>
+    <training>
+        <device type="str">cuda:0</device>
+        <epochs type="int">1000</epochs>
+        <batch_size type="int">64</batch_size>
+        <num_workers type="int">16</num_workers>
+        <persistent_workers type="bool">true</persistent_workers>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <early_stop_patience type="int">100</early_stop_patience>
+        <multi_gpu type="str">single</multi_gpu>
+        <gpu_ids type="list">[0]</gpu_ids>
+        <aux_loss_weight type="float">0.35</aux_loss_weight>
+        <feature_pair_loss_weight type="float">0.02</feature_pair_loss_weight>
+    </training>
+</project>

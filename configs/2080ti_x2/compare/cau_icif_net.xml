@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <base_param type="path">../cau_binary_lightweight.xml</base_param>
+    <model>
+        <name type="str">ICIFNet</name>
+        <compare_model type="str">icif_net</compare_model>
+        <backbone type="str">compare_native</backbone>
+        <base_channels type="int">16</base_channels>
+        <compare_adapt_batchnorm type="bool">true</compare_adapt_batchnorm>
+        <compare_deep_supervision type="bool">true</compare_deep_supervision>
+    </model>
+    <logging>
+        <run_name type="str">compare_cau_icif_net</run_name>
+    </logging>
+    <training>
+        <aux_loss_weight type="float">0.35</aux_loss_weight>
+    </training>
+</project>

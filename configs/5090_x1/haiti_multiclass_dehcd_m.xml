@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <base_param type="path">haiti_multiclass_lightweight.xml</base_param>
+    <model>
+        <name type="str">DEHCD-Net</name>
+        <backbone type="str">dehcd_m</backbone>
+        <base_channels type="int">24</base_channels>
+        <dropout type="float">0.12</dropout>
+        <hog_bins type="int">6</hog_bins>
+        <hog_modulation_levels type="int">2</hog_modulation_levels>
+        <global_context type="bool">true</global_context>
+        <share_encoder_from_level type="int">2</share_encoder_from_level>
+        <!-- <align_max_flow type="float">2.0</align_max_flow> -->
+        <block_type type="str">dehcd</block_type>
+        <!-- <align_start_level type="int">1</align_start_level> -->
+        <cross_scale_fusion type="bool">true</cross_scale_fusion>
+        <deep_supervision type="bool">false</deep_supervision>
+        <input_adaptation type="bool">false</input_adaptation>
+        <input_residual_scale type="float">0.10</input_residual_scale>
+        <adaptive_modality_weight type="bool">true</adaptive_modality_weight>
+        <align_fusion type="bool">false</align_fusion>
+    </model>
+    <training>
+        <batch_size type="int">64</batch_size>
+        <num_workers type="int">16</num_workers>
+        <seed type="int">1234</seed>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <epochs type="int">1000</epochs>
+        <early_stop_patience type="int">100</early_stop_patience>
+        <aux_loss_weight type="float">0.35</aux_loss_weight>
+    </training>
+    <logging>
+        <run_name type="str">haiti_multiclass_dehcd_m_5090x1</run_name>
+    </logging>
+</project>

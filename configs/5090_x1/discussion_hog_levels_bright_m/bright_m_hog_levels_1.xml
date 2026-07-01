@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../bright_multiclass_dehcd_m.xml</base_param>
+    <model>
+        <hog_modulation_levels type="int">1</hog_modulation_levels>
+    </model>
+    <logging>
+        <run_name type="str">discussion_bright_m_hog_levels_1</run_name>
+    </logging>
+</project>

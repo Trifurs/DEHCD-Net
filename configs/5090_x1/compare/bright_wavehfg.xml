@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../bright_multiclass_lightweight.xml</base_param>
+    <model>
+        <name type="str">WaveHFG</name>
+        <compare_model type="str">wavehfg</compare_model>
+        <backbone type="str">compare_native</backbone>
+        <base_channels type="int">16</base_channels>
+        <compare_adapt_batchnorm type="bool">true</compare_adapt_batchnorm>
+        <compare_deep_supervision type="bool">true</compare_deep_supervision>
+    </model>
+    <logging>
+        <run_name type="str">compare_bright_wavehfg_5090x1</run_name>
+    </logging>
+    <training>
+        <device type="str">cuda:0</device>
+        <batch_size type="int">24</batch_size>
+        <num_workers type="int">16</num_workers>
+        <persistent_workers type="bool">true</persistent_workers>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <multi_gpu type="str">single</multi_gpu>
+        <gpu_ids type="list">[0]</gpu_ids>
+        <aux_loss_weight type="float">0.35</aux_loss_weight>
+    </training>
+</project>
