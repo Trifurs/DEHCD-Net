@@ -156,6 +156,111 @@ class HeterogeneousFusionBlock(nn.Module):
         return shared + gate * fused
 
 
+# class HeterogeneousFusionBlock(nn.Module):
+#     """Efficient optical/SAR feature alignment without difference-gated fusion."""
+
+#     def __init__(
+#         self,
+#         channels: int,
+#         dropout: float = 0.0,
+#         norm_type: str = "batch",
+#         norm_groups: int = 8,
+#         block_type: str = "residual",
+#         align: bool = True,
+#         max_flow: float = 2.0,
+#         adaptive_modality_weight: bool = False,
+#     ):
+#         super().__init__()
+#         self.align = bool(align)
+#         self.max_flow = float(max_flow)
+#         self.adaptive_modality_weight = bool(adaptive_modality_weight)
+#         self.optical_proj = ConvNormAct(
+#             channels,
+#             channels,
+#             kernel_size=1,
+#             dropout=dropout,
+#             norm_type=norm_type,
+#             norm_groups=norm_groups,
+#         )
+#         self.sar_proj = ConvNormAct(
+#             channels,
+#             channels,
+#             kernel_size=1,
+#             dropout=dropout,
+#             norm_type=norm_type,
+#             norm_groups=norm_groups,
+#         )
+#         self.fuse = nn.Sequential(
+#             ConvNormAct(
+#                 channels,
+#                 channels,
+#                 kernel_size=3,
+#                 dropout=dropout,
+#                 norm_type=norm_type,
+#                 norm_groups=norm_groups,
+#             ),
+#             make_context_block(
+#                 channels,
+#                 block_type=block_type,
+#                 dropout=dropout,
+#                 norm_type=norm_type,
+#                 norm_groups=norm_groups,
+#             ),
+#             ChannelGate(channels),
+#         )
+#         if self.align:
+#             self.flow_head = nn.Sequential(
+#                 ConvNormAct(
+#                     channels,
+#                     channels,
+#                     kernel_size=3,
+#                     norm_type=norm_type,
+#                     norm_groups=norm_groups,
+#                 ),
+#                 nn.Conv2d(channels, 2, kernel_size=3, padding=1),
+#             )
+#             nn.init.zeros_(self.flow_head[-1].weight)
+#             nn.init.zeros_(self.flow_head[-1].bias)
+#         else:
+#             self.flow_head = None
+#         if self.adaptive_modality_weight:
+#             gate_hidden = max(channels // 4, 8)
+#             self.modality_gate = nn.Sequential(
+#                 nn.Conv2d(channels * 3, gate_hidden, kernel_size=1),
+#                 nn.SiLU(inplace=True),
+#                 nn.Conv2d(gate_hidden, 2, kernel_size=1),
+#             )
+#             nn.init.zeros_(self.modality_gate[-1].weight)
+#             nn.init.zeros_(self.modality_gate[-1].bias)
+#         else:
+#             self.modality_gate = None
+#         self.change_gate = nn.Sequential(
+#             nn.Conv2d(channels * 2, channels, kernel_size=3, padding=1, bias=False),
+#             build_norm_layer(channels, norm_type=norm_type, norm_groups=norm_groups),
+#             nn.Sigmoid(),
+#         )
+
+#     def forward(self, optical: torch.Tensor, sar: torch.Tensor) -> torch.Tensor:
+#         optical = self.optical_proj(optical)
+#         sar = self.sar_proj(sar)
+#         if self.flow_head is not None:
+#             flow = self.max_flow * torch.tanh(self.flow_head(optical + torch.abs(optical - sar)))
+#             sar = warp_with_flow(sar, flow)
+
+#         diff = torch.abs(optical - sar)
+#         if self.modality_gate is not None:
+#             modality_weight = torch.softmax(self.modality_gate(torch.cat([optical, sar, diff], dim=1)), dim=1)
+#             shared = modality_weight[:, :1] * optical + modality_weight[:, 1:] * sar
+#         else:
+#             shared = 0.5 * (optical + sar)
+
+#         interaction = shared + diff + 0.25 * (optical * torch.sigmoid(sar))
+#         fused = self.fuse(interaction)
+
+#         concat_fused = torch.cat([shared, fused], dim=1)
+#         return self.change_gate[1](self.change_gate[0](concat_fused))
+
+
 class CrossScaleMergeBlock(nn.Module):
     """Weighted adjacent-scale interaction without activation-heavy concatenation."""
 
