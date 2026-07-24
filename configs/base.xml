@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project name="DEHCD-Net" description="Difference-enhanced optical-SAR heterogeneous disaster change detection">
+    <task>
+        <ignore_index type="int">255</ignore_index>
+        <positive_label type="int">1</positive_label>
+    </task>
+    <dataset>
+        <splits type="list">["train", "val", "test"]</splits>
+        <patch_size type="int">256</patch_size>
+        <train_random_crop type="bool">true</train_random_crop>
+        <positive_crop_prob type="float">0.70</positive_crop_prob>
+        <rare_crop_prob type="float">0.75</rare_crop_prob>
+        <crop_candidate_count type="int">4</crop_candidate_count>
+        <eval_full_image type="bool">false</eval_full_image>
+        <align_to_optical type="bool">true</align_to_optical>
+        <return_metadata type="bool">false</return_metadata>
+    </dataset>
+    <normalization>
+        <optical>
+            <method type="str">percentile_minmax</method>
+            <lower_percentile type="float">2.0</lower_percentile>
+            <upper_percentile type="float">98.0</upper_percentile>
+            <mean type="list">[]</mean>
+            <std type="list">[]</std>
+        </optical>
+        <sar>
+            <method type="str">robust_zscore</method>
+            <log_transform type="bool">true</log_transform>
+            <lower_percentile type="float">2.0</lower_percentile>
+            <upper_percentile type="float">98.0</upper_percentile>
+            <mean type="list">[]</mean>
+            <std type="list">[]</std>
+        </sar>
+    </normalization>
+    <augmentation>
+        <enabled type="bool">true</enabled>
+        <random_flip type="bool">true</random_flip>
+        <random_rotate90 type="bool">true</random_rotate90>
+    </augmentation>
+    <model>
+        <name type="str">DEHCD-Net</name>
+        <pretrained_backbone type="bool">false</pretrained_backbone>
+        <optical_channels type="str">auto</optical_channels>
+        <sar_channels type="str">auto</sar_channels>
+        <dropout type="float">0.12</dropout>
+        <norm_type type="str">group</norm_type>
+        <norm_groups type="int">8</norm_groups>
+        <block_type type="str">dehcd</block_type>
+        <use_hog type="bool">true</use_hog>
+        <hog_bins type="int">6</hog_bins>
+        <hog_cell_size type="int">8</hog_cell_size>
+        <hog_modulation_levels type="int">2</hog_modulation_levels>
+        <global_context type="bool">true</global_context>
+        <share_encoder_from_level type="int">2</share_encoder_from_level>
+        <align_fusion type="bool">true</align_fusion>
+        <align_start_level type="int">0</align_start_level>
+        <align_max_flow type="float">2.0</align_max_flow>
+        <adaptive_modality_weight type="bool">true</adaptive_modality_weight>
+        <cross_scale_fusion type="bool">true</cross_scale_fusion>
+        <diffusion_steps type="int">3</diffusion_steps>
+        <deep_supervision type="bool">false</deep_supervision>
+        <gradient_checkpointing type="bool">false</gradient_checkpointing>
+        <input_adaptation type="bool">false</input_adaptation>
+        <input_residual_scale type="float">0.10</input_residual_scale>
+    </model>
+    <training>
+        <seed type="int">1234</seed>
+        <device type="str">auto</device>
+        <epochs type="int">100</epochs>
+        <batch_size type="int">8</batch_size>
+        <num_workers type="int">4</num_workers>
+        <persistent_workers type="bool">true</persistent_workers>
+        <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+        <max_train_batches type="int">0</max_train_batches>
+        <max_val_batches type="int">0</max_val_batches>
+        <multi_gpu type="str">single</multi_gpu>
+        <gpu_ids type="list">[0]</gpu_ids>
+        <learning_rate type="float">6e-4</learning_rate>
+        <weight_decay type="float">1e-4</weight_decay>
+        <optimizer type="str">adamw</optimizer>
+        <scheduler type="str">cosine_warmup</scheduler>
+        <warmup_epochs type="int">5</warmup_epochs>
+        <min_lr_ratio type="float">0.01</min_lr_ratio>
+        <loss type="str">ce_dice</loss>
+        <ce_weight type="float">1.0</ce_weight>
+        <dice_weight type="float">1.0</dice_weight>
+        <dice_present_only type="bool">true</dice_present_only>
+        <dice_exclude_background type="bool">true</dice_exclude_background>
+        <focal_weight type="float">0.5</focal_weight>
+        <focal_gamma type="float">2.0</focal_gamma>
+        <lovasz_weight type="float">0.2</lovasz_weight>
+        <lovasz_exclude_background type="bool">true</lovasz_exclude_background>
+        <tversky_weight type="float">0.3</tversky_weight>
+        <tversky_alpha type="float">0.3</tversky_alpha>
+        <tversky_beta type="float">0.7</tversky_beta>
+        <tversky_present_only type="bool">true</tversky_present_only>
+        <tversky_exclude_background type="bool">true</tversky_exclude_background>
+        <label_smoothing type="float">0.01</label_smoothing>
+        <class_balanced_sampler type="bool">true</class_balanced_sampler>
+        <sampler_rare_class_threshold type="float">0.03</sampler_rare_class_threshold>
+        <sampler_power type="float">1.0</sampler_power>
+        <sampler_max_weight type="float">6.0</sampler_max_weight>
+        <sampler_min_pixels type="int">16</sampler_min_pixels>
+        <aux_loss_weight type="float">0.0</aux_loss_weight>
+        <amp type="bool">true</amp>
+        <grad_clip_norm type="float">1.0</grad_clip_norm>
+        <resume type="path" />
+        <save_interval type="int">5</save_interval>
+        <val_interval type="int">1</val_interval>
+        <best_metric type="str">auto</best_metric>
+        <output_dir type="path">auto</output_dir>
+        <checkpoint_dir type="path">auto</checkpoint_dir>
+        <early_stop_patience type="int">30</early_stop_patience>
+        <early_stop_min_delta type="float">0.001</early_stop_min_delta>
+    </training>
+    <logging>
+        <root_dir type="path">runs</root_dir>
+        <log_dir type="path">auto</log_dir>
+        <tensorboard type="bool">true</tensorboard>
+        <validation_images type="int">2</validation_images>
+        <validation_image_interval type="int">1</validation_image_interval>
+        <wandb type="bool">false</wandb>
+        <wandb_project type="str">dehcd-net</wandb_project>
+        <run_name type="str">dehcd</run_name>
+    </logging>
+    <inference>
+        <checkpoint type="path" />
+        <split type="str">test</split>
+        <threshold type="float">0.5</threshold>
+        <save_dir type="path">auto</save_dir>
+        <save_visualization type="bool">true</save_visualization>
+    </inference>
+</project>

@@ -19,7 +19,7 @@ from utils.run_manager import create_run_dir, save_config_snapshot
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train heterogeneous optical-SAR CD model.")
-    parser.add_argument("--config", default="configs/5090_x1/config.xml", help="XML configuration path.")
+    parser.add_argument("--config", default="configs/config.xml", help="XML configuration path.")
     parser.add_argument("--resume", default=None, help="Checkpoint path overriding XML training.resume.")
     parser.add_argument("--epochs", type=int, default=None, help="Override training.epochs for quick runs.")
     parser.add_argument("--batch-size", type=int, default=None, help="Override training.batch_size.")
@@ -500,6 +500,7 @@ def log_validation_images(model, loader, device, config, writers: ExperimentWrit
         num_classes=num_classes,
         ignore_index=ignore_index,
         max_items=max_items,
+        sar_preview_as_rgb=bool(config.get("dataset", {}).get("second_modality_rgb", False)),
     )
     writers.log_image("val/optical_sar_label_prediction", grid, epoch)
     if was_training:

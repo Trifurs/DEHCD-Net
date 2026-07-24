@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../base.xml</base_param>
+    <task>
+        <name type="str">cau_optical_sar_flood_extraction</name>
+        <type type="str">binary_change_detection</type>
+        <num_classes type="int">2</num_classes>
+        <class_names type="list">["background", "flood"]</class_names>
+    </task>
+    <dataset>
+        <type type="str">cau1</type>
+        <name type="str">CAU-Flood</name>
+        <root type="path">data/CAU-Flood</root>
+        <candidate_roots type="list">["data/CAU-Flood", "datasets/CAU-Flood", "data/CAU1"]</candidate_roots>
+        <optical_dir type="str">opt</optical_dir>
+        <sar_dirs type="list">["vv"]</sar_dirs>
+        <label_dir type="str">flood_vv</label_dir>
+        <optical_suffix type="str" />
+        <sar_suffixes type="list">[""]</sar_suffixes>
+        <label_suffix type="str" />
+        <image_extensions type="list">[".png"]</image_extensions>
+        <label_mode type="str">binary_change</label_mode>
+        <rare_crop_prob type="float">0.0</rare_crop_prob>
+        <rare_crop_classes type="list">[]</rare_crop_classes>
+        <label_ignore_values type="list">[]</label_ignore_values>
+        <positive_crop_prob type="float">0.80</positive_crop_prob>
+    </dataset>
+    <model>
+        <num_classes type="int">2</num_classes>
+    </model>
+    <training>
+        <epochs type="int">100</epochs>
+        <batch_size type="int">12</batch_size>
+        <learning_rate type="float">1e-3</learning_rate>
+        <class_weights type="list">[1.0, 8.0]</class_weights>
+        <sampler_rare_class_threshold type="float">0.20</sampler_rare_class_threshold>
+        <sampler_target_classes type="list">[1]</sampler_target_classes>
+        <sampler_max_weight type="float">5.0</sampler_max_weight>
+        <sampler_min_pixels type="int">8</sampler_min_pixels>
+    </training>
+</project>

@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<project>
-    <base_param type="path">../bright_multiclass_dehcd_l.xml</base_param>
-    <logging>
-        <run_name type="str">ab_bright_l_full</run_name>
-    </logging>
-</project>

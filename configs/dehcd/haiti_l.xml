@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../datasets/haiti.xml</base_param>
+    <model>
+        <backbone type="str">dehcd_l</backbone>
+        <base_channels type="int">32</base_channels>
+        <dropout type="float">0.15</dropout>
+    </model>
+    <logging>
+        <run_name type="str">haiti_dehcd_l</run_name>
+    </logging>
+</project>

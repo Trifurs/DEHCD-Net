@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../base.xml</base_param>
+    <task>
+        <name type="str">bright_optical_sar_building_damage_mapping</name>
+        <type type="str">multiclass_damage_change_detection</type>
+        <num_classes type="int">4</num_classes>
+        <class_names type="list">["background", "intact", "damaged", "destroyed"]</class_names>
+    </task>
+    <dataset>
+        <type type="str">bright1</type>
+        <name type="str">BRIGHT</name>
+        <root type="path">data/BRIGHT</root>
+        <candidate_roots type="list">["data/BRIGHT", "datasets/BRIGHT"]</candidate_roots>
+        <optical_dir type="str">pre-event</optical_dir>
+        <sar_dirs type="list">["post-event"]</sar_dirs>
+        <label_dir type="str">target</label_dir>
+        <optical_suffix type="str">_pre_disaster.tif</optical_suffix>
+        <sar_suffixes type="list">["_post_disaster.tif"]</sar_suffixes>
+        <label_suffix type="str">_building_damage.tif</label_suffix>
+        <image_extensions type="list">[".tif", ".tiff", ".png", ".jpg", ".jpeg"]</image_extensions>
+        <source_label_mode type="str">damage_levels</source_label_mode>
+        <label_mode type="str">multiclass_damage</label_mode>
+        <rare_crop_classes type="list">[2, 3]</rare_crop_classes>
+    </dataset>
+    <model>
+        <num_classes type="int">4</num_classes>
+    </model>
+    <training>
+        <epochs type="int">100</epochs>
+        <batch_size type="int">8</batch_size>
+        <learning_rate type="float">1e-3</learning_rate>
+        <class_weights type="list">[0.5, 2.0, 18.0, 14.0]</class_weights>
+        <sampler_target_classes type="list">[2, 3]</sampler_target_classes>
+        <sampler_max_weight type="float">8.0</sampler_max_weight>
+    </training>
+</project>

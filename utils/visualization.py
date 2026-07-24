@@ -66,6 +66,7 @@ def make_validation_grid(
     num_classes: int,
     ignore_index: int = 255,
     max_items: int = 2,
+    sar_preview_as_rgb: bool = False,
 ) -> torch.Tensor:
     pred = torch.argmax(logits.detach().cpu(), dim=1)
     panels = []
@@ -73,7 +74,7 @@ def make_validation_grid(
     for idx in range(count):
         parts = [
             tensor_to_preview(optical[idx], sar=False),
-            tensor_to_preview(sar[idx], sar=True),
+            tensor_to_preview(sar[idx], sar=not bool(sar_preview_as_rgb)),
             colorize_mask(label[idx], num_classes=num_classes, ignore_index=ignore_index),
             colorize_mask(pred[idx], num_classes=num_classes, ignore_index=ignore_index),
         ]

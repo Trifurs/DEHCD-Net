@@ -11,7 +11,7 @@ standalone complexity script, are intentionally excluded from the runnable
 project tree.
 
 The wrappers do project-level adaptation so the official cores can train on the
-three heterogeneous datasets rather than just receiving a raw RGB/RGB-style
+supported disaster-mapping datasets rather than just receiving a raw RGB/RGB-style
 call:
 
 - learn a small optical/SAR pseudo-RGB stem for 1-channel CAU SAR, 1-channel
@@ -28,7 +28,7 @@ call:
 - resize HRSICD to its native 64x64 resolution, train it with raw logits, and
   upsample logits back;
 - convert one-channel binary outputs to the project's two-logit convention;
-- skip missing local pretrained weight files instead of hard failing.
+- skip optional pretrained weight files instead of hard failing.
 
 Source repositories:
 
@@ -40,4 +40,4 @@ Source repositories:
 - https://github.com/ImgSciGroup/HAFF
 
 Losses, sampling, metrics, logging, checkpointing, and dataset preprocessing stay
-in the shared project pipeline so BRIGHT1, Haiti1, and CAU1 remain comparable.
+in the shared project pipeline so BRIGHT, Haiti, CAU-Flood, and xBD remain comparable.

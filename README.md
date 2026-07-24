@@ -1,180 +1,197 @@
 # DEHCD-Net
 
-Official implementation of **DEHCD-Net**: **Difference-Enhanced Heterogeneous Change Detection Network** for disaster-scene optical-SAR heterogeneous change detection.
+This repository provides the implementation of **DEHCD-Net** for the paper
+**Difference-Enhanced Optical-SAR Heterogeneous Change Detection for Multi-Class Disaster Mapping**.
 
-DEHCD-Net is designed for asymmetric disaster observations, where pre-event optical imagery provides structural and semantic reference information and post-event SAR imagery provides all-weather disaster response observations. The model focuses on suppressing cross-modal pseudo-differences while enhancing disaster-induced structural, semantic, and multi-scale changes.
+DEHCD-Net targets rapid disaster mapping from asymmetric observations, especially
+pre-disaster optical imagery and post-disaster SAR imagery. The network is built
+around explicit difference enhancement: modality-induced pseudo-differences are
+suppressed, while disaster-induced structural and semantic changes are preserved
+for binary and multi-class prediction.
 
 ## Highlights
 
-- Difference-enhanced framework for optical-SAR heterogeneous change detection.
-- HOG-based structural prior modulation for shallow edge and contour cues.
-- Difference-aware heterogeneous fusion with bounded SAR-to-optical alignment and gated change evidence.
-- Bidirectional cross-scale fusion for multi-level disaster evidence propagation.
-- Lightweight iterative bottleneck refinement for stable high-level change semantics.
-- Unified training, evaluation, inference, and comparison pipeline for binary and multi-class disaster change detection.
+- Optical-SAR heterogeneous change detection for disaster response.
+- Unified support for binary affected-area detection and multi-class disaster mapping.
+- HOG structural-prior modulation for stable cross-modal geometric cues.
+- Difference Perception Module (DPM) for alignment and difference-aware fusion.
+- Bidirectional Cross-Scale Fusion (BiCSF) for multi-scale feature interaction.
+- Iterative Refinement Block (IRB) for semantic correction at the bottleneck.
+- Compact S/M/L variants using the same training, evaluation, and inference tools.
 
-## Method
+## Method Overview
 
-Given a pre-event optical image and a post-event SAR image, DEHCD-Net predicts a pixel-level change or damage map. The network contains:
+Given a pre-event image and a post-event image, DEHCD-Net predicts a pixel-level
+change or damage map. The implementation contains:
 
-- **Dual encoders** for optical and SAR feature extraction.
-- **Structural prior modulation** using HOG-like orientation histograms.
-- **Difference perception and heterogeneous fusion** for bounded alignment, shared-reference construction, and difference gating.
-- **Bidirectional cross-scale fusion** for combining boundary details, semantic context, and spatial connectivity.
-- **Iterative refinement** for deterministic residual correction of bottleneck features.
-- **Decoder and prediction head** for full-resolution output.
+- dual modality encoders for hierarchical optical and post-event feature extraction;
+- shallow HOG feature modulation to introduce structural priors;
+- difference-aware fusion with bounded alignment and gated change evidence;
+- global-context guided cross-scale fusion;
+- iterative residual refinement before decoding;
+- a task-specific decoder and segmentation head.
 
-The main model variants are:
+The provided model variants are:
 
-- `DEHCD-Net-S`
-- `DEHCD-Net-M`
-- `DEHCD-Net-L`
+| Variant | Backbone name | Typical use |
+| --- | --- | --- |
+| DEHCD-Net-S | `dehcd_s` | Fast debugging and ablation |
+| DEHCD-Net-M | `dehcd_m` | Balanced experiments |
+| DEHCD-Net-L | `dehcd_l` | Main reported setting |
+
+## Datasets
+
+The code supports the main optical-SAR multi-class experiments and auxiliary
+generalization experiments used by the project.
+
+| Dataset | Setting | Task | Modalities | Classes | Patch size |
+| --- | --- | --- | --- | --- | --- |
+| BRIGHT | Primary | Building damage mapping | Optical + SAR | 4 | 256 |
+| Haiti | Primary | Landslide mapping | Optical + SAR | 4 | 128 |
+| CAU-Flood | Auxiliary | Flood extraction | Optical + SAR | 2 | 256 |
+| xBD | Auxiliary | Building damage mapping | Optical + Optical | 5 | 256 |
+
+Dataset roots in the XML files are relative placeholders such as `data/BRIGHT`.
+Edit the corresponding file under `configs/datasets/` to match your prepared data.
 
 ## Repository Structure
 
 ```text
-configs/      XML experiment configurations
-datasets/     Dataset loaders and preprocessing utilities
-models/       DEHCD-Net, backbones, fusion modules, and model builder
-compare/      Adapted comparison models
-tools/        Training, evaluation, inference, visualization, and analysis scripts
-utils/        Config parsing, losses, metrics, logging, checkpoints, and raster I/O
+configs/
+  base.xml              Shared model, optimization, logging, and inference defaults
+  config.xml            Default experiment reference
+  datasets/             Dataset-specific task and preprocessing settings
+  dehcd/                S/M/L DEHCD-Net experiment configs
+datasets/               Dataset loaders
+models/                 DEHCD-Net, backbones, encoders, and fusion modules
+compare/                Comparison-model wrappers
+tools/                  Training, testing, inference, and dataset utilities
+utils/                  Config parsing, losses, metrics, logging, and raster I/O
 ```
 
 ## Installation
 
-Create a Python environment and install the required packages:
+Create an environment with Python 3.10 or later, then install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-## Data Preparation
+For machines with a different CUDA or CPU-only setup, install the matching PyTorch
+build first, then install the remaining dependencies.
 
-The code supports the following disaster optical-SAR change detection datasets:
+## Configuration
 
-| Dataset | Task | Optical input | SAR input | Output |
-| --- | --- | --- | --- | --- |
-| BRIGHT | Building damage assessment | Pre-event optical | Post-event SAR | Multi-class damage map |
-| CAU-Flood | Flood extraction | Pre-event optical | Post-event SAR VV | Binary flood map |
-| Haiti | Landslide change detection | Pre-event optical | Post-event SAR | Multi-class landslide map |
+The XML configuration tree is intentionally compact:
 
-Prepare each dataset according to its official release format, then set the dataset root and split-specific options in the corresponding XML configuration file.
+- `configs/base.xml` stores shared defaults.
+- `configs/datasets/*.xml` stores dataset, task, normalization, loss, and sampling settings.
+- `configs/dehcd/*.xml` stores only the dataset reference, model size, and run name.
 
-A typical paired dataset layout is:
+Example experiment files:
 
 ```text
-dataset_root/
-  train/
-    pre-event/
-    post-event/
-    target/
-  val/
-    pre-event/
-    post-event/
-    target/
-  test/
-    pre-event/
-    post-event/
-    target/
+configs/dehcd/bright_l.xml
+configs/dehcd/haiti_l.xml
+configs/dehcd/cau_flood_l.xml
+configs/dehcd/xbd_m.xml
 ```
 
-Dataset-specific loaders handle channel selection, normalization, label sanitization, valid-mask handling, cropping, and augmentation.
+`configs/config.xml` points to the default experiment.
 
 ## Training
 
-Train with any XML configuration:
+Train with the default config:
 
 ```bash
-python tools/train.py --config <config.xml>
+python tools/train.py
 ```
 
-Short debugging run:
+Train a specific experiment:
 
 ```bash
-python tools/train.py --config <config.xml> --epochs 1 --max-train-batches 20 --max-val-batches 5
+python tools/train.py --config configs/dehcd/bright_l.xml
+python tools/train.py --config configs/dehcd/haiti_l.xml
+python tools/train.py --config configs/dehcd/cau_flood_l.xml
+python tools/train.py --config configs/dehcd/xbd_m.xml
 ```
 
-Smoke test:
+Run a short debugging job:
 
 ```bash
-python tools/smoke_test.py --config <config.xml> --batch-size 2 --backward
+python tools/train.py --config configs/dehcd/bright_s.xml --epochs 1 --max-train-batches 20 --max-val-batches 5
 ```
 
-## Evaluation
+## Evaluation and Inference
 
-Evaluate a trained checkpoint:
+Evaluate a checkpoint:
 
 ```bash
-python tools/evaluate.py --config <config.xml> --checkpoint <checkpoint.pth> --split test
+python tools/evaluate.py --config configs/dehcd/bright_l.xml --checkpoint <checkpoint.pth> --split test
 ```
 
-Run inference and export visualizations:
+Run testing and export predictions:
 
 ```bash
-python tools/infer.py --config <config.xml> --checkpoint <checkpoint.pth> --split test --max-samples 8
+python tools/test.py --train-root runs/train --runs <run_name> --checkpoint best --split test --save-predictions
 ```
 
-## Comparison Experiments
-
-The repository includes wrappers for several representative comparison models:
-
-- `ICIF-Net`
-- `DMINet`
-- `HFA-PANet`
-- `WaveHFG`
-- `HRSICD`
-- `HAFF`
-
-Run a comparison experiment with:
+Run inference on a split:
 
 ```bash
-python tools/run_compare_matrix.py --dataset <dataset> --model <model>
+python tools/infer.py --config configs/dehcd/bright_l.xml --checkpoint <checkpoint.pth> --split test
 ```
 
-Use the dry-run option to inspect scheduled commands:
+## Dataset Utilities
+
+Inspect a configured dataset:
 
 ```bash
-python tools/run_compare_matrix.py --dry-run
+python tools/explore_data.py --config configs/dehcd/bright_l.xml --max-samples 12
+```
+
+Audit label values:
+
+```bash
+python tools/audit_dataset_labels.py --configs configs/dehcd/bright_l.xml --splits train
+```
+
+Prepare supported dataset layouts:
+
+```bash
+python tools/dataset_tools/bright_split.py --src-root data/raw/BRIGHT --dst-root data/BRIGHT
+python tools/dataset_tools/bright_crop_1024_to_256.py --root data/BRIGHT --replace-root
+python tools/dataset_tools/cau_split.py --src-root data/raw/CAU-Flood --dst-root data/CAU-Flood
+python tools/dataset_tools/xbd_split_crop_1024_to_256.py --src-root data/raw/xBD --dst-root data/xBD
 ```
 
 ## Metrics
 
-The project reports confusion-matrix based metrics:
+The project reports:
 
 - `OA`: overall accuracy.
 - `P`: foreground precision.
 - `R`: foreground recall.
 - `F1`: foreground F1 score.
-- `mIoU`: mean intersection over union over all classes.
+- `mIoU`: mean IoU over all classes.
 - `FmIoU`: foreground mean IoU over non-background classes.
 
-For binary change detection, `FmIoU` is equivalent to the IoU of the change class. For multi-class damage or landslide mapping, `FmIoU` better reflects performance on disaster-related foreground categories.
-
-## Outputs
-
-Training outputs are saved under:
-
-```text
-runs/train/
-```
-
-Prediction outputs are saved under:
-
-```text
-runs/predict/
-```
-
-Each run stores logs, checkpoints, configuration snapshots, and exported prediction results when applicable.
+For binary change detection, `FmIoU` is the IoU of the foreground change class.
+For multi-class disaster mapping, it is the mean IoU over foreground disaster classes.
 
 ## Citation
 
-If this repository is useful for your research, please cite the corresponding paper:
+If this repository is useful for your research, please cite:
 
 ```bibtex
-To be continued...
+@misc{liu2026dehcdnet,
+  title  = {Difference-Enhanced Optical-SAR Heterogeneous Change Detection for Multi-Class Disaster Mapping},
+  author = {Liu, Bo and Li, Deren and Xiao, Xiongwu and Shao, Zhenfeng and Li, Yingbing and Duan, Yueming and Luo, Zheng},
+  year   = {2026}
+}
 ```
 
 ## License
 
-Please refer to the project license and the licenses of the included comparison-model implementations before redistribution or commercial use.
+Please check the project license and the licenses of included comparison-model
+implementations before redistribution or commercial use.

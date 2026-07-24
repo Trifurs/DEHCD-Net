@@ -17,7 +17,7 @@ from utils.config import XMLConfigParser
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Explore heterogeneous disaster CD dataset.")
-    parser.add_argument("--config", default="configs/5090_x1/config.xml", help="XML config path.")
+    parser.add_argument("--config", default="configs/config.xml", help="XML config path.")
     parser.add_argument("--data-root", default=None, help="Override dataset root.")
     parser.add_argument("--max-samples", type=int, default=8, help="Samples per split for metadata probing.")
     parser.add_argument("--output-dir", default="outputs/exploration", help="Report output directory.")

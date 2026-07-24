@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../base.xml</base_param>
+    <task>
+        <name type="str">xbd_optical_optical_building_damage_mapping</name>
+        <type type="str">multiclass_damage_change_detection</type>
+        <num_classes type="int">5</num_classes>
+        <class_names type="list">["background", "no damage", "minor damage", "major damage", "destroyed"]</class_names>
+    </task>
+    <dataset>
+        <type type="str">xbd1</type>
+        <name type="str">xBD</name>
+        <root type="path">data/xBD</root>
+        <candidate_roots type="list">["data/xBD", "datasets/xBD", "data/xBD1"]</candidate_roots>
+        <optical_dir type="str">pre-event</optical_dir>
+        <sar_dirs type="list">["post-event"]</sar_dirs>
+        <label_dir type="str">target</label_dir>
+        <optical_suffix type="str">_pre_disaster.png</optical_suffix>
+        <sar_suffixes type="list">["_post_disaster.png"]</sar_suffixes>
+        <label_suffix type="str">_building_damage.png</label_suffix>
+        <image_extensions type="list">[".png"]</image_extensions>
+        <source_label_mode type="str">xbd_damage_levels</source_label_mode>
+        <label_mode type="str">multiclass_damage</label_mode>
+        <label_ignore_values type="list">[5]</label_ignore_values>
+        <class_names type="list">["background", "no damage", "minor damage", "major damage", "destroyed"]</class_names>
+        <second_modality_name type="str">Post-event Optical</second_modality_name>
+        <second_modality_rgb type="bool">true</second_modality_rgb>
+        <rare_crop_classes type="list">[2, 3, 4]</rare_crop_classes>
+    </dataset>
+    <normalization>
+        <sar>
+            <method type="str">percentile_minmax</method>
+            <log_transform type="bool">false</log_transform>
+        </sar>
+    </normalization>
+    <model>
+        <num_classes type="int">5</num_classes>
+    </model>
+    <training>
+        <epochs type="int">100</epochs>
+        <batch_size type="int">12</batch_size>
+        <learning_rate type="float">8e-4</learning_rate>
+        <class_weights type="list">[0.35, 1.0, 4.0, 7.0, 6.0]</class_weights>
+        <sampler_target_classes type="list">[2, 3, 4]</sampler_target_classes>
+        <sampler_max_weight type="float">6.0</sampler_max_weight>
+    </training>
+    <inference>
+        <test_time_augmentation type="str">flips</test_time_augmentation>
+    </inference>
+</project>

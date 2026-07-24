@@ -154,7 +154,7 @@ class HeterogeneousFusionBlock(nn.Module):
         fused = self.fuse(interaction)
         gate = self.change_gate(torch.cat([shared, diff], dim=1))
         return shared + gate * fused
-
+    
 
 # class HeterogeneousFusionBlock(nn.Module):
 #     """Efficient optical/SAR feature alignment without difference-gated fusion."""
@@ -258,7 +258,7 @@ class HeterogeneousFusionBlock(nn.Module):
 #         fused = self.fuse(interaction)
 
 #         concat_fused = torch.cat([shared, fused], dim=1)
-#         return self.change_gate[1](self.change_gate[0](concat_fused))
+#         return self.change_gate[1](self.change_gate[0](concat_fused))    
 
 
 class CrossScaleMergeBlock(nn.Module):

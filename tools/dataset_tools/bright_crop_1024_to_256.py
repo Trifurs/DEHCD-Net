@@ -27,7 +27,7 @@ EXTENSIONS = {".tif", ".tiff"}
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Crop BRIGHT1 1024x1024 tiles into foreground 256x256 patches.")
-    parser.add_argument("--root", default="/media/trifurs/备份盘1/Download/Hete_CD/BRIGHT1")
+    parser.add_argument("--root", default="data/BRIGHT")
     parser.add_argument("--patch-size", type=int, default=256)
     parser.add_argument("--ignore-index", type=int, default=255)
     parser.add_argument("--replace-root", action="store_true", help="Replace root with cropped dataset after creating a backup.")

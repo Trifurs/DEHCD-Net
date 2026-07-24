@@ -19,7 +19,7 @@ from utils.run_manager import create_run_dir, save_config_snapshot
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate heterogeneous CD checkpoint.")
-    parser.add_argument("--config", default="configs/5090_x1/config.xml")
+    parser.add_argument("--config", default="configs/config.xml")
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--batch-size", type=int, default=None)

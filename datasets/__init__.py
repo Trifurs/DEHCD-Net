@@ -2,6 +2,7 @@ from .bright_dataset import BRIGHTDataset
 from .cau_dataset import CAU1Dataset
 from .disaster_dataset import BaseHeterogeneousDisasterDataset, HeterogeneousDisasterDataset
 from .haiti_dataset import HaitiDataset
+from .xbd_dataset import XBDDataset
 
 __all__ = [
     "BaseHeterogeneousDisasterDataset",
@@ -9,6 +10,7 @@ __all__ = [
     "CAU1Dataset",
     "HaitiDataset",
     "HeterogeneousDisasterDataset",
+    "XBDDataset",
     "build_dataset",
 ]
 
@@ -20,6 +22,8 @@ DATASET_REGISTRY = {
     "cau1": CAU1Dataset,
     "haiti": HaitiDataset,
     "haiti1": HaitiDataset,
+    "xbd": XBDDataset,
+    "xbd1": XBDDataset,
     "generic_heterogeneous": HeterogeneousDisasterDataset,
     "heterogeneous_disaster": HeterogeneousDisasterDataset,
 }

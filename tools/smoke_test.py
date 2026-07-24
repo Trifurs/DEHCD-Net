@@ -15,7 +15,7 @@ from utils.config import XMLConfigParser
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a small data/model/loss/backward smoke test.")
-    parser.add_argument("--config", default="configs/5090_x1/config.xml")
+    parser.add_argument("--config", default="configs/config.xml")
     parser.add_argument("--split", default="train", choices=["train", "val", "test"])
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--patch-size", type=int, default=256)

@@ -1,19 +1,21 @@
-import os
+import argparse
 import glob
+import os
 import numpy as np
-import xarray as xr
-import rasterio
-from rasterio.transform import from_origin
 
-# ===================== 【用户配置：仅修改这里！】 =====================
+# ===================== 默认路径，可通过命令行参数覆盖 =====================
 # 1. 存放 .nc 文件的根文件夹（会自动遍历所有子文件夹）
-NC_FOLDER = "/media/trifurs/备份盘/Download/Sen12Landslides/data_harmonized/s1asc"  
+DEFAULT_NC_FOLDER = "data/raw/Sen12Landslides/data_harmonized/s1asc"
 # 2. 导出 TIF 的保存文件夹（自动创建）
-OUTPUT_FOLDER = "/media/trifurs/备份盘/Download/Sen12Landslides/tif/s1asc"  
+DEFAULT_OUTPUT_FOLDER = "data/Sen12Landslides/tif/s1asc"
 # =====================================================================
 
-# 自动创建输出文件夹
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Batch convert NetCDF files to GeoTIFF.")
+    parser.add_argument("--nc-folder", default=DEFAULT_NC_FOLDER, help="Root folder containing .nc files.")
+    parser.add_argument("--output-folder", default=DEFAULT_OUTPUT_FOLDER, help="Output folder for generated GeoTIFF files.")
+    return parser.parse_args()
 
 def get_nodata_for_dtype(dtype):
     """根据数据类型返回合适的 nodata 值"""
@@ -33,6 +35,16 @@ def nc_to_tif(nc_file_path, output_folder):
     :param nc_file_path: NC 文件路径
     :param output_folder: TIF 输出目录
     """
+    try:
+        import rasterio
+        import xarray as xr
+        from rasterio.transform import from_origin
+    except ImportError as exc:
+        raise ImportError(
+            "NetCDF conversion requires xarray and rasterio. "
+            "Install them before running this dataset conversion script."
+        ) from exc
+
     # 1. 读取 NC 文件
     try:
         ds = xr.open_dataset(nc_file_path)
@@ -118,11 +130,18 @@ def nc_to_tif(nc_file_path, output_folder):
     # 关闭文件
     ds.close()
 
-if __name__ == "__main__":
+def main():
+    args = parse_args()
+    nc_folder = os.path.expanduser(args.nc_folder)
+    output_folder = os.path.expanduser(args.output_folder)
+
+    # 自动创建输出文件夹
+    os.makedirs(output_folder, exist_ok=True)
+
     print("🚀 开始批量转换 NC → TIF ...")
     
     # 遍历所有 .nc 文件（包含子文件夹）
-    nc_files = glob.glob(os.path.join(NC_FOLDER, "**", "*.nc"), recursive=True)
+    nc_files = glob.glob(os.path.join(nc_folder, "**", "*.nc"), recursive=True)
     
     if len(nc_files) == 0:
         print("❌ 未找到任何 .nc 文件，请检查输入路径！")
@@ -132,13 +151,16 @@ if __name__ == "__main__":
         # 批量处理
         for nc_file in nc_files:
             # 计算相对路径以保持文件夹结构
-            rel_path = os.path.relpath(nc_file, NC_FOLDER)
+            rel_path = os.path.relpath(nc_file, nc_folder)
             rel_dir = os.path.dirname(rel_path)
             # 构建对应的输出目录
-            current_output_folder = os.path.join(OUTPUT_FOLDER, rel_dir)
+            current_output_folder = os.path.join(output_folder, rel_dir)
             os.makedirs(current_output_folder, exist_ok=True)
             
             nc_to_tif(nc_file, current_output_folder)
 
-    print(f"\n🎉 所有文件处理完成！TIF 保存在：{OUTPUT_FOLDER}")
-    
+    print(f"\n🎉 所有文件处理完成！TIF 保存在：{output_folder}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import argparse
 from pathlib import Path
 from tqdm import tqdm  # 导入进度条库
 
@@ -55,11 +56,17 @@ def split_dataset(src_root, dst_root, val_ratio=0.2):
     print(f"统计: 训练集 {len(train_files)-val_count} 张, 验证集 {val_count} 张, 测试集 {len(test_files)} 张")
 
 if __name__ == "__main__":
-    SOURCE_PATH = "/media/trifurs/备份盘/Download/Hete_CD/CAU"
-    TARGET_PATH = "/media/trifurs/备份盘/Download/Hete_CD/CAU1"
+    parser = argparse.ArgumentParser(description="Split CAU-Flood into train/val/test folders.")
+    parser.add_argument("--src-root", default="data/raw/CAU-Flood")
+    parser.add_argument("--dst-root", default="data/CAU-Flood")
+    parser.add_argument("--val-ratio", type=float, default=0.2)
+    args = parser.parse_args()
+
+    SOURCE_PATH = args.src_root
+    TARGET_PATH = args.dst_root
     
     if os.path.exists(SOURCE_PATH):
-        split_dataset(SOURCE_PATH, TARGET_PATH, val_ratio=0.2)
+        split_dataset(SOURCE_PATH, TARGET_PATH, val_ratio=float(args.val_ratio))
     else:
         print(f"错误：找不到源路径 {SOURCE_PATH}")
         

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../datasets/bright.xml</base_param>
+    <model>
+        <backbone type="str">dehcd_m</backbone>
+        <base_channels type="int">24</base_channels>
+        <dropout type="float">0.12</dropout>
+    </model>
+    <logging>
+        <run_name type="str">bright_dehcd_m</run_name>
+    </logging>
+</project>

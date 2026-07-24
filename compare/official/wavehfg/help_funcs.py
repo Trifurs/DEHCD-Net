@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn.functional as F
 from einops import rearrange
@@ -211,6 +213,7 @@ def save_to_mat(x1, x2, fx1, fx2, cp, file_name):
                 'fx2_0': fx2_0_np, 'fx2_1': fx2_1_np, 'fx2_2': fx2_2_np, 'fx2_3': fx2_3_np, 'fx2_4': fx2_4_np,
                 "final_pred": cp_np}
                 
-        savemat("/media/lidan/ssd2/ChangeFormer/vis/mat/"+file_name+".mat", mdic)
-
+        mat_dir = os.environ.get("WAVEHFG_MAT_DIR", "outputs/wavehfg/mat")
+        os.makedirs(mat_dir, exist_ok=True)
+        savemat(os.path.join(mat_dir, file_name + ".mat"), mdic)
 

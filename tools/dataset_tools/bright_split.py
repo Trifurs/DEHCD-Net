@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import argparse
 from pathlib import Path
 from tqdm import tqdm
 
@@ -84,9 +85,18 @@ def rebalance_bright_dataset_v2(src_root, dst_root, ratio=(4, 1, 1)):
     print(f"\n✅ 处理完成！新数据集已保存在: {dst_root}")
 
 if __name__ == "__main__":
-    SOURCE = "/media/trifurs/备份盘/Download/Hete_CD/BRIGHT"
-    TARGET = "/media/trifurs/备份盘/Download/Hete_CD/BRIGHT1"
+    parser = argparse.ArgumentParser(description="Re-split BRIGHT samples into train/val/test folders.")
+    parser.add_argument("--src-root", default="data/raw/BRIGHT")
+    parser.add_argument("--dst-root", default="data/BRIGHT")
+    parser.add_argument("--ratio", default="4,1,1", help="Train/val/test split ratio.")
+    args = parser.parse_args()
+
+    SOURCE = args.src_root
+    TARGET = args.dst_root
+    ratio = tuple(int(item.strip()) for item in args.ratio.replace(":", ",").split(",") if item.strip())
+    if len(ratio) != 3:
+        raise ValueError("--ratio must contain exactly three values, e.g. 4,1,1")
     
     # 执行划分
-    rebalance_bright_dataset_v2(SOURCE, TARGET, ratio=(4, 1, 1))
+    rebalance_bright_dataset_v2(SOURCE, TARGET, ratio=ratio)
     

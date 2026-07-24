@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <base_param type="path">../base.xml</base_param>
+    <task>
+        <name type="str">haiti_optical_sar_landslide_mapping</name>
+        <type type="str">multiclass_landslide_change_detection</type>
+        <num_classes type="int">4</num_classes>
+        <class_names type="list">["background", "C1", "C2", "C3"]</class_names>
+    </task>
+    <dataset>
+        <type type="str">haiti</type>
+        <name type="str">Haiti</name>
+        <root type="path">data/Haiti</root>
+        <candidate_roots type="list">["data/Haiti", "datasets/Haiti"]</candidate_roots>
+        <optical_dir type="str">Pre_event/S2_20210804</optical_dir>
+        <sar_dirs type="list">["Post_event/S1_ASC_20210817", "Post_event/S1_DESC_20210815"]</sar_dirs>
+        <label_dir type="str">Annotations</label_dir>
+        <optical_band_indices type="list">[0, 1, 2]</optical_band_indices>
+        <sar_band_indices type="list">[[0, 1], [0, 1]]</sar_band_indices>
+        <optical_mask_band_index type="int">3</optical_mask_band_index>
+        <sar_mask_band_indices type="list">[2, 2]</sar_mask_band_indices>
+        <optical_mask_invalid_values type="list">[1]</optical_mask_invalid_values>
+        <sar_mask_valid_values type="list">[0]</sar_mask_valid_values>
+        <label_quality_ignore_policy type="str">all_modalities</label_quality_ignore_policy>
+        <mask_normalization_stats type="bool">true</mask_normalization_stats>
+        <masked_input_policy type="str">keep</masked_input_policy>
+        <optical_suffix type="str"></optical_suffix>
+        <sar_suffixes type="list">["", ""]</sar_suffixes>
+        <label_suffix type="str"></label_suffix>
+        <image_extensions type="list">[".tif", ".tiff"]</image_extensions>
+        <label_mode type="str">multiclass_damage</label_mode>
+        <label_ignore_values type="list">[]</label_ignore_values>
+        <patch_size type="int">128</patch_size>
+        <positive_crop_prob type="float">0.75</positive_crop_prob>
+        <rare_crop_prob type="float">0.75</rare_crop_prob>
+        <rare_crop_classes type="list">[2, 3]</rare_crop_classes>
+        <crop_candidate_count type="int">6</crop_candidate_count>
+    </dataset>
+    <normalization>
+        <sar>
+            <log_transform type="bool">false</log_transform>
+        </sar>
+    </normalization>
+    <model>
+        <num_classes type="int">4</num_classes>
+    </model>
+    <training>
+        <epochs type="int">1000</epochs>
+        <batch_size type="int">24</batch_size>
+        <learning_rate type="float">5e-4</learning_rate>
+        <loss type="str">hierarchical_change</loss>
+        <hier_binary_ce_weight type="float">1.0</hier_binary_ce_weight>
+        <hier_binary_dice_weight type="float">0.7</hier_binary_dice_weight>
+        <hier_binary_focal_weight type="float">0.15</hier_binary_focal_weight>
+        <hier_binary_focal_gamma type="float">2.0</hier_binary_focal_gamma>
+        <hier_binary_class_weights type="list">[1.0, 2.8]</hier_binary_class_weights>
+        <hier_foreground_logit_offset type="float">-0.90</hier_foreground_logit_offset>
+        <hier_subclass_ce_weight type="float">0.8</hier_subclass_ce_weight>
+        <hier_subclass_dice_weight type="float">0.2</hier_subclass_dice_weight>
+        <hier_subclass_weights type="list">[1.0, 1.8, 1.3]</hier_subclass_weights>
+        <hier_subclass_label_smoothing type="float">0.02</hier_subclass_label_smoothing>
+        <hier_subclass_focal_weight type="float">0.10</hier_subclass_focal_weight>
+        <hier_subclass_focal_gamma type="float">2.0</hier_subclass_focal_gamma>
+        <hier_foreground_prior_weight type="float">0.15</hier_foreground_prior_weight>
+        <class_weights type="list">[1.0, 1.0, 1.0, 1.0]</class_weights>
+        <sampler_target_classes type="list">[1, 2, 3]</sampler_target_classes>
+        <sampler_max_weight type="float">4.0</sampler_max_weight>
+        <early_stop_patience type="int">100</early_stop_patience>
+    </training>
+    <inference>
+        <test_time_augmentation type="str">flips</test_time_augmentation>
+    </inference>
+</project>

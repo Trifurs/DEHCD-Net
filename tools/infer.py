@@ -17,7 +17,7 @@ from utils.run_manager import create_run_dir, save_config_snapshot
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run inference and save prediction maps.")
-    parser.add_argument("--config", default="configs/5090_x1/config.xml")
+    parser.add_argument("--config", default="configs/config.xml")
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--split", default=None, choices=["train", "val", "test"])
     parser.add_argument("--save-dir", default=None)
@@ -46,15 +46,24 @@ def tensor_to_preview(tensor):
     return img
 
 
-def save_panel(sample_id: str, optical, sar, pred, save_path: Path, num_classes: int = 2) -> None:
+def save_panel(
+    sample_id: str,
+    optical,
+    sar,
+    pred,
+    save_path: Path,
+    num_classes: int = 2,
+    second_modality_title: str = "SAR",
+    second_modality_rgb: bool = False,
+) -> None:
     import matplotlib.pyplot as plt
 
     save_path.parent.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(10, 3.5))
     axes[0].imshow(tensor_to_preview(optical))
     axes[0].set_title("Optical")
-    axes[1].imshow(tensor_to_preview(sar), cmap="gray")
-    axes[1].set_title("SAR")
+    axes[1].imshow(tensor_to_preview(sar), cmap=None if second_modality_rgb else "gray")
+    axes[1].set_title(second_modality_title)
     axes[2].imshow(pred, cmap="tab10" if num_classes > 2 else "gray", vmin=0, vmax=max(num_classes - 1, 1))
     axes[2].set_title("Prediction")
     for axis in axes:
@@ -114,6 +123,9 @@ def main() -> None:
     threshold = float(inference_cfg.get("threshold", 0.5))
     save_visualization = bool(inference_cfg.get("save_visualization", True))
     num_classes = int(config.get("task", {}).get("num_classes", logits_classes_from_checkpoint(checkpoint, config)))
+    dataset_cfg = config.get("dataset", {})
+    second_modality_title = str(dataset_cfg.get("second_modality_name") or "SAR")
+    second_modality_rgb = bool(dataset_cfg.get("second_modality_rgb", False))
     with torch.no_grad():
         for step, batch in enumerate(tqdm(loader, desc=f"Infer {split}"), start=1):
             optical = batch["optical"].to(device)
@@ -136,6 +148,8 @@ def main() -> None:
                         pred,
                         save_dir / "visualizations" / f"{sample_id}.png",
                         num_classes=num_classes,
+                        second_modality_title=second_modality_title,
+                        second_modality_rgb=second_modality_rgb,
                     )
                 except Exception as exc:
                     logger.warning("Visualization skipped for %s: %s", sample_id, exc)

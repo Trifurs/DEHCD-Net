@@ -311,6 +311,8 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
                     ignore_index=ignore_index,
                     class_names=visual_style["class_names"],
                     class_colors=visual_style["class_colors"],
+                    second_modality_title=visual_style["second_modality_title"],
+                    second_modality_rgb=bool(visual_style["second_modality_rgb"]),
                     save_predictions=bool(args.save_predictions),
                     save_probabilities=bool(args.save_probabilities),
                     save_visuals=save_visuals,
@@ -603,6 +605,8 @@ def save_batch_artifacts(
     ignore_index: int,
     class_names: list[str],
     class_colors: list[list[int]],
+    second_modality_title: str,
+    second_modality_rgb: bool,
     save_predictions: bool,
     save_probabilities: bool,
     save_visuals: bool,
@@ -658,6 +662,8 @@ def save_batch_artifacts(
                 ignore_index=ignore_index,
                 class_names=class_names,
                 class_colors=class_colors,
+                second_modality_title=second_modality_title,
+                second_modality_rgb=second_modality_rgb,
                 path=artifact_dir / "visualizations" / "panels" / f"{safe_id}.png",
                 dpi=dpi,
             )
@@ -802,6 +808,8 @@ def save_visual_panel(
     ignore_index: int,
     class_names: list[str],
     class_colors: list[list[int]],
+    second_modality_title: str,
+    second_modality_rgb: bool,
     path: Path,
     dpi: int,
 ) -> None:
@@ -811,7 +819,12 @@ def save_visual_panel(
     foreground_prob = probability_heatmap(prob, "foreground")
     panels = [
         ("Optical", tensor_preview_array(optical, sar=False), None, None),
-        ("SAR", tensor_preview_array(sar, sar=True), "gray", None),
+        (
+            second_modality_title,
+            tensor_preview_array(sar, sar=not bool(second_modality_rgb)),
+            None if second_modality_rgb else "gray",
+            None,
+        ),
         (
             "Ground truth",
             colorize_mask_array(
@@ -1002,6 +1015,8 @@ def build_visual_style(config: Dict[str, Any], num_classes: int) -> Dict[str, An
         "class_names": class_names,
         "class_colors": class_colors,
         "class_colors_hex": [rgb_to_hex(color) for color in class_colors[:num_classes]],
+        "second_modality_title": str(config.get("dataset", {}).get("second_modality_name") or "SAR"),
+        "second_modality_rgb": bool(config.get("dataset", {}).get("second_modality_rgb", False)),
         "ignore_color": [140, 140, 140],
         "error_legend": {
             "true_negative": [20, 20, 20],
@@ -1031,6 +1046,8 @@ def dataset_key(config: Dict[str, Any]) -> str:
     )
     if "cau" in text or "flood" in text:
         return "cau_binary_flood"
+    if "xbd" in text:
+        return "xbd_multiclass_damage"
     if "haiti" in text:
         return "haiti_multiclass_change"
     if "bright" in text or "building_damage" in text:
@@ -1039,17 +1056,20 @@ def dataset_key(config: Dict[str, Any]) -> str:
 
 
 def default_class_names(config: Dict[str, Any], num_classes: int, dataset: str | None = None) -> list[str]:
+    dataset = dataset or dataset_key(config)
+    if dataset == "bright_multiclass_damage" and int(num_classes) == 4:
+        return ["Background", "Intact", "Damaged", "Destroyed"]
+
     task_cfg = config.get("task", {})
     configured = task_cfg.get("class_names") or config.get("dataset", {}).get("class_names")
     if isinstance(configured, list) and len(configured) >= num_classes:
         return [str(item) for item in configured[:num_classes]]
-    dataset = dataset or dataset_key(config)
     if dataset == "cau_binary_flood":
         names = ["non-flood", "flood"]
     elif int(num_classes) == 2:
         names = ["background", "change"]
-    elif dataset == "bright_multiclass_damage":
-        names = ["background", "minor damage", "major damage", "destroyed"]
+    elif dataset == "xbd_multiclass_damage":
+        names = ["background", "no damage", "minor damage", "major damage", "destroyed"]
     elif dataset == "haiti_multiclass_change":
         names = ["background", "change class 1", "change class 2", "change class 3"]
     else:
@@ -1068,6 +1088,14 @@ def default_class_colors(num_classes: int, dataset: str | None = None) -> list[l
     elif dataset == "bright_multiclass_damage":
         colors = [
             [25, 25, 25],
+            [255, 216, 77],
+            [245, 130, 48],
+            [214, 39, 40],
+        ]
+    elif dataset == "xbd_multiclass_damage":
+        colors = [
+            [25, 25, 25],
+            [55, 180, 85],
             [255, 216, 77],
             [245, 130, 48],
             [214, 39, 40],
