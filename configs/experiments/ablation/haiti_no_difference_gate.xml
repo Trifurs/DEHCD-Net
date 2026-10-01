@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../../dehcd/haiti_l.xml</base_param>
+  <model>
+    <dropout type="float">0.15</dropout>
+    <pretrained_backbone type="bool">false</pretrained_backbone>
+    <encoder_checkpoint type="str" />
+    <deep_supervision type="bool">false</deep_supervision>
+    <difference_gate type="bool">false</difference_gate>
+  </model>
+  <training>
+    <early_stop_patience type="int">0</early_stop_patience>
+    <deterministic type="bool">true</deterministic>
+    <amp type="bool">false</amp>
+    <localization_loss_weight type="float">0.0</localization_loss_weight>
+    <aux_loss_weight type="float">0.0</aux_loss_weight>
+    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
+    <best_metric type="str">foreground_miou</best_metric>
+  </training>
+  <inference>
+    <test_time_augmentation type="str">none</test_time_augmentation>
+    <prediction_rule type="str">damage_argmax</prediction_rule>
+  </inference>
+  <experiment>
+    <id type="str">haiti_no_difference_gate</id>
+    <dataset type="str">haiti</dataset>
+    <suite type="str">ablation</suite>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">haiti_dehcd_l</reference>
+      <factor type="str">no_difference_gate</factor>
+      <allowed_changes type="list">['model.difference_gate']</allowed_changes>
+    </comparison>
+  </experiment>
+  <logging>
+    <run_name type="str">haiti_no_difference_gate</run_name>
+  </logging>
+</project>

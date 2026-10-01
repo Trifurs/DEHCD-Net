@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../../dehcd/cau_flood_l.xml</base_param>
+  <model>
+    <dropout type="float">0.15</dropout>
+    <pretrained_backbone type="bool">false</pretrained_backbone>
+    <encoder_checkpoint type="str" />
+    <deep_supervision type="bool">false</deep_supervision>
+    <name type="str">hrsicd</name>
+    <compare_model type="str">hrsicd</compare_model>
+    <compare_adapt_batchnorm type="bool">false</compare_adapt_batchnorm>
+    <compare_deep_supervision type="bool">false</compare_deep_supervision>
+    <compare_target_channels type="int">3</compare_target_channels>
+    <selective_scan_backend type="str">auto</selective_scan_backend>
+    <changemamba_variant type="str">multimodal</changemamba_variant>
+    <share_damage_encoder type="bool">false</share_damage_encoder>
+  </model>
+  <training>
+    <early_stop_patience type="int">0</early_stop_patience>
+    <deterministic type="bool">true</deterministic>
+    <amp type="bool">false</amp>
+    <localization_loss_weight type="float">0.0</localization_loss_weight>
+    <aux_loss_weight type="float">0.0</aux_loss_weight>
+    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
+    <best_metric type="str">foreground_miou</best_metric>
+  </training>
+  <inference>
+    <test_time_augmentation type="str">none</test_time_augmentation>
+    <prediction_rule type="str">damage_argmax</prediction_rule>
+  </inference>
+  <experiment>
+    <id type="str">cau_flood_hrsicd_original_bn</id>
+    <dataset type="str">cau_flood</dataset>
+    <suite type="str">adapter</suite>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">cau_flood_hrsicd</reference>
+      <factor type="str">batchnorm_adaptation</factor>
+      <allowed_changes type="list">['model.compare_adapt_batchnorm']</allowed_changes>
+    </comparison>
+    <implementation type="str">adapted_input_and_head_original_BN</implementation>
+  </experiment>
+  <logging>
+    <run_name type="str">cau_flood_hrsicd_original_bn</run_name>
+  </logging>
+</project>

@@ -12,9 +12,16 @@ from .official_adapters import (
     ICIFNetOfficial,
     WaveHFGOfficial,
 )
+from .damage_adapters import ChangeOSOfficial, DamageFormerOfficial, ChangeMambaOfficial
 
 
 _MODEL_REGISTRY: dict[str, type[nn.Module]] = {
+    "changeos": ChangeOSOfficial,
+    "change_os": ChangeOSOfficial,
+    "damageformer": DamageFormerOfficial,
+    "damage_former": DamageFormerOfficial,
+    "changemamba": ChangeMambaOfficial,
+    "change_mamba": ChangeMambaOfficial,
     "icif": ICIFNetOfficial,
     "icif_net": ICIFNetOfficial,
     "icifnet": ICIFNetOfficial,
@@ -43,6 +50,7 @@ def build_compare_model(
     target_channels: int = 3,
     adapt_batchnorm: bool = True,
     deep_supervision: bool = True,
+    model_config: dict | None = None,
 ) -> nn.Module:
     key = normalize_compare_model_name(name)
     if key not in _MODEL_REGISTRY:
@@ -56,6 +64,8 @@ def build_compare_model(
         target_channels=target_channels,
         adapt_batchnorm=adapt_batchnorm,
         deep_supervision=deep_supervision,
+        **({"model_config": model_config} if _MODEL_REGISTRY[key] in
+           {ChangeOSOfficial, DamageFormerOfficial, ChangeMambaOfficial} else {}),
     )
 
 

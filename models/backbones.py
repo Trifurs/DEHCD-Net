@@ -127,9 +127,11 @@ class GRN(nn.Module):
         self.eps = eps
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        gx = torch.norm(x, p=2, dim=(2, 3), keepdim=True)
+        # FP16 spatial L2 reductions can overflow on large feature maps.
+        work = x.float()
+        gx = torch.norm(work, p=2, dim=(2, 3), keepdim=True)
         nx = gx / (gx.mean(dim=1, keepdim=True) + self.eps)
-        return x + self.gamma * (x * nx) + self.beta
+        return (work + self.gamma * (work * nx) + self.beta).to(dtype=x.dtype)
 
 
 class ConvNeXtBlock(nn.Module):

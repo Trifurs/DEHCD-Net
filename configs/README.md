@@ -14,3 +14,16 @@ python tools/evaluate.py --config configs/dehcd/haiti_l.xml --checkpoint <checkp
 ```
 
 Dataset roots are intentionally placeholders such as `data/BRIGHT`; edit the corresponding dataset base file or pass a modified copy for your environment.
+
+## Controlled experiments
+
+`experiments/catalog.json` indexes 174 fully resolved-through-inheritance experiments.
+All generated experiment overlays use FP32 (`training.amp=false`) for every model.
+Use `tools/run_multiseed.py` to select main, ablation, recipe, sensitivity, adapter, auxiliary, head_recipe or optimizer_recipe suites.
+For model comparisons use these controlled overlays, not the ordinary single-run
+presets above. Main experiments share primary-only supervision and each control
+names its reference and permitted changes; see [fair comparisons](../docs/FAIR_COMPARISONS.md).
+`tools/build_event_cv.py` generates additional cross_event catalogs from verified metadata.
+See [the protocol](../docs/EXPERIMENT_PROTOCOL.md) before running.
+`--runtime-profile rtx5090` applies the shared hardware settings in `runtime/rtx5090.json`;
+see [execution settings](../docs/RUNTIME_PROFILE.md).

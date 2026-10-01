@@ -65,6 +65,7 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--min-foreground-pixels", type=int, default=1)
+    parser.add_argument("--drop-background-train", action="store_true", help="Filter training patches only; validation/test always retain background.")
     parser.add_argument("--dry-run", action="store_true", help="Only count patches; do not write files.")
     parser.add_argument("--overwrite", action="store_true", help="Remove dst-root before writing if it already exists.")
     return parser.parse_args()
@@ -99,6 +100,7 @@ def main() -> None:
 
     stats: dict[str, Any] = {
         "source_root": str(src_root),
+        "background_policy": "train_only_filtered" if args.drop_background_train else "keep_all_splits",
         "output_root": str(dst_root),
         "tiers": tiers,
         "ratio": list(ratio),
@@ -143,6 +145,7 @@ def main() -> None:
             source_size=int(args.source_size),
             ignore_values=ignore_values,
             min_foreground_pixels=int(args.min_foreground_pixels),
+            drop_background=bool(args.drop_background_train) and split == "train",
             dry_run=bool(args.dry_run),
             tqdm=tqdm,
         )
@@ -327,6 +330,7 @@ def crop_partition(
     min_foreground_pixels: int,
     dry_run: bool,
     tqdm: Any,
+    drop_background: bool = False,
 ) -> dict[str, Any]:
     split_stats: dict[str, Any] = {
         "source_samples": len(samples),
@@ -351,7 +355,7 @@ def crop_partition(
                     split_stats["candidate_patches"] += 1
                     patch_counts = count_label_pixels(label_patch, ignore_values)
                     foreground_pixels = sum(count for value, count in patch_counts.items() if value > 0)
-                    if foreground_pixels < min_foreground_pixels:
+                    if drop_background and foreground_pixels < min_foreground_pixels:
                         split_stats["dropped_background_patches"] += 1
                         continue
                     merge_counts(split_stats["class_pixel_counts"], patch_counts)

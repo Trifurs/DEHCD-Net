@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import json
 import os
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
@@ -53,6 +54,8 @@ class XMLConfigParser:
     def parse(self) -> ConfigNode:
         if not self.config_path.exists():
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
+        if self.config_path.suffix.lower() == ".json":
+            return ConfigNode(json.loads(self.config_path.read_text(encoding="utf-8")))
         data = self._parse_file(self.config_path, visited=set())
         return ConfigNode(data)
 

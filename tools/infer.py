@@ -11,12 +11,15 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from utils.config import XMLConfigParser
 from utils.checkpoint import load_model_state
+from utils.prediction import predict_outputs, resolve_tta, decode_predictions, prediction_rule
+from utils.protocol import verify_checkpoint_config, config_digest, file_digest, dataset_identity, atomic_json
 from utils.logger import setup_logger
 from utils.run_manager import create_run_dir, save_config_snapshot
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run inference and save prediction maps.")
+    parser.add_argument("--tta", choices=["none", "flips", "d4"], default=None)
     parser.add_argument("--config", default="configs/config.xml")
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--split", default=None, choices=["train", "val", "test"])
@@ -109,13 +112,17 @@ def main() -> None:
     else:
         device = torch.device(device_name)
 
+    from utils.runtime import configure_runtime
+    execution = configure_runtime(config.get("training", {}), device)
     dataset = build_dataset(config, split=split, training=False)
     loader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
     checkpoint = torch.load(checkpoint_path, map_location=device)
+    verify_checkpoint_config(checkpoint, config)
     model = build_model(
         config,
         optical_channels=int(checkpoint.get("optical_channels", dataset.num_optical_channels)),
         sar_channels=int(checkpoint.get("sar_channels", dataset.num_sar_channels)),
+        initialize_encoder=False,
     ).to(device)
     load_model_state(model, checkpoint["model"])
     model.eval()
@@ -130,9 +137,12 @@ def main() -> None:
         for step, batch in enumerate(tqdm(loader, desc=f"Infer {split}"), start=1):
             optical = batch["optical"].to(device)
             sar = batch["sar"].to(device)
-            logits = extract_logits(model(optical, sar))
+            model_output = predict_outputs(model, optical, sar, amp=bool(config.get("training", {}).get("amp", True)) and device.type == "cuda", tta_mode=resolve_tta(config, args.tta))
+            logits = model_output["logits"]
             prob = torch.softmax(logits, dim=1)
-            if logits.shape[1] == 2:
+            if prediction_rule(config) != "damage_argmax":
+                pred = decode_predictions(model_output, config).squeeze(0).cpu().numpy().astype("uint8")
+            elif logits.shape[1] == 2:
                 pred = (prob[:, 1] >= threshold).squeeze(0).detach().cpu().numpy().astype("uint8")
             else:
                 pred = torch.argmax(prob, dim=1).squeeze(0).detach().cpu().numpy().astype("uint8")

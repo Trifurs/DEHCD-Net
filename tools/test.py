@@ -6,6 +6,7 @@ import csv
 import json
 import re
 import sys
+import warnings
 from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
@@ -18,6 +19,7 @@ if str(PROJECT_ROOT) not in sys.path:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate saved training runs on a test split.")
     parser.add_argument("--train-root", default="runs/train", help="Directory containing training run folders.")
+    parser.add_argument("--result-file", default=None, help="Exact result JSON path for a single run; artifacts go directly under output-root.")
     parser.add_argument("--output-root", default="runs/test", help="Directory for per-run test result files.")
     parser.add_argument(
         "--runs",
@@ -39,7 +41,7 @@ def parse_args() -> argparse.Namespace:
         "--tta",
         default=None,
         choices=["none", "flips", "d4"],
-        help="Test-time augmentation. Defaults to config value, or flips for Haiti runs, or none.",
+        help="Test-time augmentation. Defaults to the explicit config value, otherwise none.",
     )
     parser.add_argument("--no-amp", action="store_true", help="Disable mixed precision.")
     parser.add_argument("--skip-existing", action="store_true", help="Skip runs with an existing result JSON.")
@@ -90,8 +92,9 @@ def discover_runs(train_root: Path, patterns: Iterable[str] | None) -> List[Path
         raise FileNotFoundError(f"Training root not found: {train_root}")
 
     all_runs = sorted(
-        [path for path in train_root.iterdir() if path.is_dir() and (path / "config_snapshot.json").exists()],
-        key=lambda path: path.name,
+        [path.parent for path in train_root.rglob("config_snapshot.json")]
+        if not patterns or any(p.lower() in {"latest", "last"} for p in patterns) else [],
+        key=lambda path: str(path),
     )
     if not patterns:
         return all_runs
@@ -141,7 +144,9 @@ def resolve_checkpoint(run_dir: Path, selector: str) -> Path:
     if lowered == "best":
         path = checkpoint_dir / "best.pth"
     elif lowered in {"last", "latest"}:
-        path = latest_epoch_checkpoint(checkpoint_dir)
+        path = checkpoint_dir / "last.pth"
+        if not path.exists():
+            path = latest_epoch_checkpoint(checkpoint_dir)
     else:
         path = checkpoint_dir / value
 
@@ -192,6 +197,12 @@ def apply_runtime_overrides(config: Dict[str, Any], args: argparse.Namespace) ->
     return config
 
 
+from utils.model_metadata import model_metadata
+from utils.damage_metrics import DamageHeadMeter
+from utils.prediction import predict_outputs, resolve_tta, decode_predictions, prediction_rule
+from utils.protocol import config_digest, file_digest, verify_checkpoint_config, dataset_identity
+
+
 def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) -> Dict[str, Any]:
     import torch
     from torch.utils.data import DataLoader
@@ -207,6 +218,8 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
     checkpoint_path = resolve_checkpoint(run_dir, args.checkpoint)
     device = get_device(config, args.device)
     train_cfg = config.get("training", {})
+    from utils.runtime import configure_runtime
+    execution = configure_runtime(train_cfg, device)
     inference_cfg = config.get("inference", {})
     task_cfg = config.get("task", {})
     num_classes = int(task_cfg.get("num_classes", config.get("model", {}).get("num_classes", 2)))
@@ -214,19 +227,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
     batch_size = int(train_cfg.get("batch_size", 4))
     num_workers = int(train_cfg.get("num_workers", 4))
     amp = bool(train_cfg.get("amp", True)) and device.type == "cuda"
-    configured_tta = inference_cfg.get("test_time_augmentation", inference_cfg.get("tta"))
-    if args.tta is not None:
-        tta_mode = str(args.tta).lower()
-    elif configured_tta not in (None, ""):
-        tta_mode = str(configured_tta).lower()
-    elif _is_haiti_config(config):
-        tta_mode = "flips"
-    else:
-        tta_mode = "none"
-    if tta_mode in {"", "off", "false"}:
-        tta_mode = "none"
-    if tta_mode not in {"none", "flips", "d4"}:
-        raise ValueError(f"Unsupported test-time augmentation: {tta_mode}")
+    tta_mode = resolve_tta(config, args.tta)
 
     dataset = build_dataset(config, split=args.split, training=False)
     loader = DataLoader(
@@ -238,14 +239,18 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         persistent_workers=num_workers > 0,
     )
 
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    for unused in ("optimizer", "scheduler", "scaler", "rng_state"):
+        checkpoint.pop(unused, None)
     if "model" not in checkpoint:
         raise KeyError(f"Checkpoint does not contain a model state: {checkpoint_path}")
 
+    verify_checkpoint_config(checkpoint, config)
     model = build_model(
         config,
         optical_channels=int(checkpoint.get("optical_channels", dataset.num_optical_channels)),
         sar_channels=int(checkpoint.get("sar_channels", dataset.num_sar_channels)),
+        initialize_encoder=False,
     ).to(device)
     load_model_state(model, checkpoint["model"])
     model.eval()
@@ -263,6 +268,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             save_json(profile, artifact_dir / "model_profile.json")
 
     meter = ConfusionMatrixMeter(num_classes=num_classes, ignore_index=ignore_index)
+    damage_head_meter = DamageHeadMeter(num_classes, ignore_index)
     total_loss = 0.0
     seen_batches = 0
     visualized = 0
@@ -272,16 +278,26 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
     save_visuals = bool(args.visualize or visualize_count > 0)
     heatmap_specs = parse_heatmap_specs(args.heatmap_classes, num_classes)
     sample_metric_rows: list[Dict[str, Any]] = []
+    seen_samples = 0
+    sample_counts = []
+    event_meters = {}
+    sample_info = {s["id"]: s for s in dataset.samples}
 
+    from utils.progress import RunProgress
+    reporter = RunProgress(artifact_dir / "progress.json", stage="test")
+    total_batches = min(len(loader), args.max_batches) if args.max_batches > 0 else len(loader)
+    reporter.phase("test", total_batches)
     with torch.no_grad():
-        progress = tqdm(loader, desc=f"Test {run_dir.name}", leave=False)
+        progress = tqdm(loader, total=total_batches, desc=f"Test {run_dir.name}", leave=False,
+                        dynamic_ncols=True, mininterval=1.0, disable=not sys.stderr.isatty())
         for step, batch in enumerate(progress, start=1):
             optical = batch["optical"].to(device, non_blocking=True)
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
-            logits = predict_logits(model, optical, sar, amp=amp, tta_mode=tta_mode)
+            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=tta_mode)
+            logits = model_output["logits"]
             loss = segmentation_loss(
-                logits.float(),
+                model_output,
                 label,
                 train_cfg,
                 num_classes=num_classes,
@@ -289,18 +305,24 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             )
             total_loss += float(loss.item())
             seen_batches += 1
-            pred = torch.argmax(logits, dim=1)
-            meter.update(pred, label)
+            seen_samples += int(label.shape[0])
+            pred = decode_predictions(model_output, config)
+            damage_head_meter.update(model_output, label)
             if args.save_sample_metrics:
-                sample_metric_rows.extend(
-                    compute_sample_metric_rows(
-                        batch=batch,
-                        pred=pred,
-                        label=label,
-                        num_classes=num_classes,
-                        ignore_index=ignore_index,
-                    )
-                )
+                pred_cpu, label_cpu = pred.detach().cpu(), batch["label"]
+                for i, sample_id in enumerate(batch["id"]):
+                    local = ConfusionMatrixMeter(num_classes, ignore_index).update(pred_cpu[i], label_cpu[i])
+                    meter.matrix += local.matrix
+                    sample_metric_rows.append({"id": sample_id, **local.compute()})
+                    info = sample_info[sample_id]
+                    sample_counts.append({"id": sample_id, "group": info.get("group"), "event": info.get("event"),
+                                          "confusion_matrix": local.matrix.long().tolist()})
+                    event = info.get("event")
+                    if event:
+                        event_meters.setdefault(event, ConfusionMatrixMeter(num_classes, ignore_index)).matrix += local.matrix
+            else:
+                meter.update(pred, label)
+            reporter.batch(step)
             if args.save_predictions or save_visuals or args.save_probabilities:
                 visualized = save_batch_artifacts(
                     batch=batch,
@@ -325,6 +347,10 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
                 break
 
     metrics = meter.compute()
+    if args.save_sample_metrics:
+        save_json(sample_counts, artifact_dir / "sample_confusion_matrices.json")
+        save_json({e: {"confusion_matrix": m.matrix.long().tolist(), "metrics": m.compute()}
+                   for e, m in event_meters.items()}, artifact_dir / "per_event_metrics.json")
     if args.save_sample_metrics and sample_metric_rows:
         write_sample_metrics(sample_metric_rows, artifact_dir / "sample_metrics.csv", num_classes=num_classes)
     confusion_plot_error = None
@@ -337,13 +363,20 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             )
         except Exception as exc:
             confusion_plot_error = str(exc)
-            print(f"Warning: confusion matrix plot skipped for {run_dir.name}: {exc}", file=sys.stderr)
+            warnings.warn(f"Confusion matrix plot skipped for {run_dir.name}: {exc}", stacklevel=2)
     best_name = primary_metric_name(num_classes, train_cfg.get("best_metric_resolved", train_cfg.get("best_metric", "auto")))
     result = {
-        "train_run": run_dir.name,
+        "schema_version": 1,
+        "evaluated_samples": seen_samples,
+        "config_sha256": config_digest(checkpoint.get("config", config)),
+        "checkpoint_sha256": file_digest(checkpoint_path),
+        "dataset_identity": dataset_identity(dataset),
+        "seed": config.get("training", {}).get("seed"),
+        "experiment": config.get("experiment", {}),
+        "train_run": run_identifier(run_dir, config),
         "train_run_dir": str(run_dir),
         "artifact_dir": str(artifact_dir),
-        "checkpoint": str(checkpoint_path),
+        "checkpoint": str(checkpoint_path.resolve()),
         "checkpoint_selector": args.checkpoint,
         "checkpoint_epoch": int(checkpoint.get("epoch", -1)),
         "checkpoint_best_metric_name": checkpoint.get("best_metric_name"),
@@ -354,6 +387,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         "best_metric_value": float(metrics.get(best_name, metrics.get("primary_score", 0.0))),
         "metrics": metrics,
         "confusion_matrix": meter.matrix.long().tolist(),
+        "damage_head_metrics": damage_head_meter.compute(),
         "model_profile": profile,
         "dataset": {
             "type": config.get("dataset", {}).get("type"),
@@ -363,12 +397,15 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             "optical_channels": int(dataset.num_optical_channels),
             "sar_channels": int(dataset.num_sar_channels),
         },
+        "implementation": model_metadata(model, device),
         "runtime": {
+            "execution": execution,
             "device": str(device),
             "batch_size": batch_size,
             "num_workers": num_workers,
             "amp": amp,
             "test_time_augmentation": tta_mode,
+            "prediction_rule": prediction_rule(config),
             "max_batches": int(args.max_batches),
         },
         "artifacts": {
@@ -388,64 +425,14 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         f"{format_metrics(metrics, num_classes)} "
         f"{best_name}={result['best_metric_value']:.4f}"
     )
+    reporter.finish()
     return result
 
 
-def predict_logits(model, optical, sar, amp: bool, tta_mode: str):
-    import torch
-
-    from utils.model_outputs import extract_logits
-
-    def forward_once(optical_batch, sar_batch):
-        amp_context = torch.amp.autocast("cuda", enabled=True) if amp else nullcontext()
-        with amp_context:
-            return extract_logits(model(optical_batch, sar_batch))
-
-    if tta_mode == "none":
-        return forward_once(optical, sar)
-
-    logits_list = []
-    if tta_mode == "flips":
-        for flip_h, flip_v in [(False, False), (True, False), (False, True), (True, True)]:
-            optical_aug = _flip_tensor(optical, flip_h=flip_h, flip_v=flip_v)
-            sar_aug = _flip_tensor(sar, flip_h=flip_h, flip_v=flip_v)
-            logits = forward_once(optical_aug, sar_aug)
-            logits_list.append(_flip_tensor(logits, flip_h=flip_h, flip_v=flip_v))
-    elif tta_mode == "d4":
-        for rot_k in range(4):
-            for flip_h in (False, True):
-                optical_aug = _apply_d4(optical, rot_k=rot_k, flip_h=flip_h)
-                sar_aug = _apply_d4(sar, rot_k=rot_k, flip_h=flip_h)
-                logits = forward_once(optical_aug, sar_aug)
-                logits_list.append(_invert_d4(logits, rot_k=rot_k, flip_h=flip_h))
-    else:
-        raise ValueError(f"Unsupported test-time augmentation: {tta_mode}")
-    return torch.stack(logits_list, dim=0).mean(dim=0)
-
-
-def _flip_tensor(tensor, flip_h: bool, flip_v: bool):
-    dims = []
-    if flip_v:
-        dims.append(-2)
-    if flip_h:
-        dims.append(-1)
-    if not dims:
-        return tensor
-    return tensor.flip(dims=dims)
-
-
-def _apply_d4(tensor, rot_k: int, flip_h: bool):
-    out = tensor.rot90(int(rot_k), dims=(-2, -1))
-    if flip_h:
-        out = out.flip(dims=(-1,))
-    return out
-
-
-def _invert_d4(tensor, rot_k: int, flip_h: bool):
-    out = tensor
-    if flip_h:
-        out = out.flip(dims=(-1,))
-    return out.rot90(-int(rot_k), dims=(-2, -1))
+def run_identifier(run_dir, config):
+    if run_dir.name.startswith("seed_") and config.get("experiment", {}).get("id"):
+        return f"{config['experiment']['id']}__{run_dir.name}"
+    return run_dir.name
 
 
 def _is_haiti_config(config: Dict[str, Any]) -> bool:
@@ -557,16 +544,18 @@ def profile_model(model, dataset, device, args: argparse.Namespace) -> Dict[str,
             "buffer_memory_mb": float(buffer_bytes / (1024 ** 2)),
         },
         "complexity": {
-            "macs": total_macs,
-            "gmacs": float(total_macs / 1e9),
-            "flops_2x_macs": int(total_macs * 2),
-            "gflops_2x_macs": float(total_macs * 2 / 1e9),
+            "macs": None,
+            "partial_module_operation_estimate": total_macs,
+            "gmacs": None,
+            "flops_2x_macs": None,
+            "gflops_2x_macs": None,
+            "complete": False,
             "macs_by_type": {key: int(value) for key, value in sorted(macs_by_type.items())},
             "top_modules_by_macs": [
                 {"module": name, "macs": int(value), "gmacs": float(value / 1e9)}
                 for name, value in top_modules
             ],
-            "note": "Hook-based approximation for module operations; functional ops such as grid_sample, HOG scatter/atan, interpolation, and softmax are not fully counted.",
+            "note": "PARTIAL module-operation estimate, not total MACs/FLOPs. Excludes selective SSM scan, Swin functional attention/projections, einsum, grid_sample, HOG, interpolation and softmax. Norm estimates are mixed operations. Do not use it to rank architectures; measure same-device latency with tools/benchmark.py.",
         },
     }
 
@@ -681,7 +670,7 @@ def save_batch_artifacts(
                 )
             visualized += 1
         except Exception as exc:
-            print(f"Warning: visualization skipped for {sample_id}: {exc}", file=sys.stderr)
+            warnings.warn(f"Visualization skipped for {sample_id}: {exc}", stacklevel=2)
     return visualized
 
 
@@ -1138,11 +1127,11 @@ def rgb_to_hex(color: list[int]) -> str:
     return "#" + "".join(f"{int(channel):02x}" for channel in color[:3])
 
 
-def save_result(result: Dict[str, Any], output_root: Path) -> Path:
+def save_result(result: Dict[str, Any], output_root: Path, destination=None) -> Path:
+    from utils.protocol import atomic_json
     output_root.mkdir(parents=True, exist_ok=True)
-    output_path = output_root / f"{result['train_run']}.json"
-    with output_path.open("w", encoding="utf-8") as file:
-        json.dump(result, file, ensure_ascii=False, indent=2)
+    output_path = Path(destination) if destination else output_root / f"{result['train_run']}.json"
+    atomic_json(output_path, result)
     return output_path
 
 
@@ -1188,24 +1177,30 @@ def main() -> None:
     train_root = Path(args.train_root)
     output_root = Path(args.output_root)
     runs = discover_runs(train_root, args.runs)
+    if args.result_file and len(runs) != 1:
+        raise ValueError("--result-file requires exactly one run")
     results: list[Dict[str, Any]] = []
 
     print(f"Discovered {len(runs)} training run(s). Saving test results to {output_root}")
     for run_dir in runs:
-        output_path = output_root / f"{run_dir.name}.json"
+        identifier = run_identifier(run_dir, load_config_snapshot(run_dir))
+        output_path = Path(args.result_file) if args.result_file else output_root / f"{identifier}.json"
         if args.skip_existing and output_path.exists():
             print(f"Skip existing result: {output_path}")
             continue
         try:
-            result = evaluate_run(run_dir, args, artifact_dir=output_root / run_dir.name)
+            result = evaluate_run(run_dir, args, artifact_dir=output_root if args.result_file else output_root / identifier)
         except Exception as exc:
             print(f"{run_dir.name}: FAILED - {exc}", file=sys.stderr)
             raise
-        saved_path = save_result(result, output_root)
+        if args.result_file:
+            write_summary([result], output_root)
+        saved_path = save_result(result, output_root, destination=output_path)
         results.append(result)
         print(f"Saved {saved_path}")
 
-    write_summary(results, output_root)
+    if not args.result_file:
+        write_summary(results, output_root)
     if results:
         print(f"Saved summary: {output_root / 'summary.csv'}")
 

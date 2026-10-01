@@ -1,0 +1,137 @@
+"""Campaign dashboard and explicitly provisional wall-clock ETA."""
+from __future__ import annotations
+
+import csv
+import statistics
+import sys
+import time
+from pathlib import Path
+
+from utils.campaign_layout import run_path, result_path, summary_path
+from utils.progress import read_status, write_status, duration
+
+
+class CampaignProgress:
+    def __init__(self, plan, output):
+        self.plan, self.output = plan, Path(output)
+        self.started = time.monotonic()
+        self.last_plain = self.last_write = 0.0
+        self.durations, self.completed = {}, set()
+        self.jobs = {job["id"]: job for job in plan["jobs"]}
+        for job in plan["jobs"]:
+            summary = read_status(run_path(output, job, plan) / "training_summary.json")
+            run = run_path(output, job, plan)
+            if (summary and result_path(output, job, plan).exists()
+                    and not (run / "failure.json").exists() and not (run / "test/failure.json").exists()):
+                self.completed.add(job["id"])
+                self.durations[job["id"]] = summary["seconds"]
+        self.bars = []
+        if sys.stderr.isatty():
+            from tqdm import tqdm
+            self.bars = [tqdm(total=len(self.jobs), desc="Overall", position=0, dynamic_ncols=True,
+                              bar_format="{desc}: {percentage:5.1f}%|{bar}| {n_fmt}/{total_fmt} [{postfix}]"),
+                         tqdm(total=1, desc="Epoch", position=1, dynamic_ncols=True,
+                              bar_format="{desc}: {percentage:5.1f}%|{bar}| {n_fmt}/{total_fmt} [{postfix}]"),
+                         tqdm(total=1, desc="Batch", position=2, dynamic_ncols=True,
+                              bar_format="{desc}: {percentage:5.1f}%|{bar}| {n_fmt}/{total_fmt} [{postfix}]")]
+        self.write_index()
+
+    def work(self, job):
+        cfg = job["config"]
+        splits = self.plan["data"][job["data_key"]]["splits"]
+        pixels = int(cfg["dataset"].get("patch_size", 256)) ** 2
+        return max(1, int(cfg["training"]["epochs"]) *
+                   (splits["train"]["samples"] + 0.4 * splits["val"]["samples"]) * pixels)
+
+    def model_key(self, job):
+        model = job["config"].get("model", {})
+        return model.get("compare_model") or (model.get("name"), model.get("variant", model.get("size", model.get("backbone"))))
+
+    def remaining(self, current, state):
+        observations = [(self.jobs[key], seconds / self.work(self.jobs[key])) for key, seconds in self.durations.items()]
+        if current is not None and state.get("stage") == "train" and state.get("estimated_epoch_seconds"):
+            full_time = state["estimated_epoch_seconds"] * current["config"]["training"]["epochs"]
+            observations.append((current, full_time / self.work(current)))
+        if not observations:
+            return None
+        total = 0.0
+        for job in self.plan["jobs"]:
+            if job["id"] in self.completed: continue
+            exact = [rate for known, rate in observations if known["experiment"] == job["experiment"]]
+            family = [rate for known, rate in observations if self.model_key(known) == self.model_key(job)]
+            dataset = [rate for known, rate in observations if known["dataset"] == job["dataset"]]
+            rate = statistics.median(exact or family or dataset or [rate for _, rate in observations])
+            if current and job["id"] == current["id"]:
+                if state.get("stage") == "test":
+                    total += state.get("eta_seconds") or 0.0
+                    continue
+                fraction = state.get("fraction", 0.0)
+                total += max(0.0, 1.0 - fraction) * self.work(job) * rate
+            else:
+                total += self.work(job) * rate
+            splits = self.plan["data"][job["data_key"]]["splits"]
+            total += 0.4 * splits["test"]["samples"] * int(job["config"]["dataset"].get("patch_size", 256)) ** 2 * rate
+        return total
+
+    def refresh(self, job=None, state=None, status="running", force=False):
+        state = state or {}
+        now = time.monotonic()
+        if not force and now - self.last_write < 1.0: return
+        self.last_write = now
+        eta = self.remaining(job, state)
+        payload = {"status": status, "completed_jobs": len(self.completed), "total_jobs": len(self.jobs),
+                   "percent": 100 * len(self.completed) / len(self.jobs), "session_elapsed_seconds": now - self.started,
+                   "estimated_remaining_seconds": eta, "eta_note": "Provisional; unseen models use measured family/dataset rates; includes scheduled epochs and test estimate.",
+                   "measured_experiments": len({self.jobs[key]["experiment"] for key in self.durations}),
+                   "current_job": job["id"] if job else None, "current": state, "updated_at": time.time()}
+        if status == "complete": payload["estimated_remaining_seconds"] = 0.0
+        write_status(self.output / "progress.json", payload)
+        phase = state.get("phase", "preparing")
+        lines = [f"Overall {len(self.completed)}/{len(self.jobs)} | ETA ~{duration(payload['estimated_remaining_seconds'])} (estimate)",
+                 f"Current: {job['id'] if job else status}",
+                 f"Epoch {state.get('epoch', 0)}/{state.get('epochs', 0)} | {phase} {state.get('phase_done', 0)}/{state.get('phase_total', 0)} | run ETA ~{duration(state.get('eta_seconds'))}",
+                 f"Output: {self.output}"]
+        (self.output / "progress.txt").write_text("\n".join(lines) + "\n")
+        if self.bars:
+            overall, epoch, batch = self.bars
+            overall.n = len(self.completed)
+            overall.set_postfix_str(f"ETA ~{duration(eta)} (estimate)", refresh=False)
+            epoch.total = max(state.get("epochs", 1), 1)
+            epoch.n = state.get("completed_epoch", 0)
+            label = job["id"] if job else "Epoch"
+            epoch.set_description_str(label if len(label) <= 46 else label[:43] + "...", refresh=False)
+            epoch.set_postfix_str(f"run ETA ~{duration(state.get('eta_seconds'))}", refresh=False)
+            batch.total = max(state.get("phase_total", 1), 1)
+            batch.n = state.get("phase_done", 0)
+            batch.set_description_str(phase.capitalize(), refresh=False)
+            loss_text = f"loss={state['loss']:.4f} " if state.get("loss") is not None else ""
+            batch.set_postfix_str(f"{loss_text}ETA ~{duration(state.get('phase_eta_seconds'))}", refresh=False)
+            for bar in self.bars: bar.refresh()
+        elif force or now - self.last_plain >= 30:
+            print(" | ".join(lines[:3]), flush=True)
+            self.last_plain = now
+
+    def finish_job(self, job):
+        self.completed.add(job["id"])
+        summary = read_status(run_path(self.output, job, self.plan) / "training_summary.json")
+        self.durations[job["id"]] = summary["seconds"]
+        self.write_index()
+        self.refresh(force=True)
+
+    def write_index(self):
+        path = summary_path(self.output, self.plan, "jobs.csv")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", newline="", encoding="utf-8") as stream:
+            fields = ["dataset", "suite", "experiment", "seed", "status", "run_directory", "test_result"]
+            writer = csv.DictWriter(stream, fieldnames=fields); writer.writeheader()
+            for job in self.plan["jobs"]:
+                run = run_path(self.output, job, self.plan)
+                state = "complete" if job["id"] in self.completed else ("failed" if (run / "failure.json").exists() or (run / "test/failure.json").exists() else
+                         ("trained" if (run / "training_summary.json").exists() else "pending"))
+                writer.writerow({"dataset": job["dataset"], "suite": job["config"]["experiment"]["suite"],
+                    "experiment": job["experiment"], "seed": job["seed"], "status": state,
+                    "run_directory": str(run.relative_to(self.output)),
+                    "test_result": str(result_path(self.output, job, self.plan).relative_to(self.output))})
+
+    def close(self):
+        for bar in reversed(self.bars): bar.close()

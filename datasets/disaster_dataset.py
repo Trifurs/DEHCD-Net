@@ -75,7 +75,14 @@ class BaseHeterogeneousDisasterDataset(Dataset):
         self.return_metadata = bool(self.dataset_cfg.get("return_metadata", False))
 
         self.split_root = self.root / split
-        self.samples = self._build_index()
+        from utils.prepared_data import attach_prepared_split
+        if attach_prepared_split(self):
+            return
+        if self.dataset_cfg.get("manifest"):
+            from utils.split_manifest import load_manifest_index
+            self.samples = load_manifest_index(self, self.dataset_cfg["manifest"])
+        else:
+            self.samples = self._build_index()
         if not self.samples:
             raise RuntimeError(f"No paired samples found under {self.split_root}")
         self.num_optical_channels, self.num_sar_channels, self.sar_channel_counts = self._infer_channels()
@@ -141,8 +148,11 @@ class BaseHeterogeneousDisasterDataset(Dataset):
         for mapping in sar_maps:
             all_ids |= set(mapping)
         missing = sorted(all_ids - set(paired_ids), key=natural_key)
+        if missing and bool(self.dataset_cfg.get("strict_pairs", False)):
+            raise ValueError(f"Incomplete modality/label pairs under {self.split_root}: {missing[:5]} (total {len(missing)})")
         if missing:
-            print(f"[{self.__class__.__name__}] Warning: skipped {len(missing)} incomplete sample ids, e.g. {missing[:5]}")
+            import warnings
+            warnings.warn(f"[{self.__class__.__name__}] skipped {len(missing)} incomplete sample ids, e.g. {missing[:5]}", stacklevel=2)
 
         return [
             {
@@ -171,7 +181,7 @@ class BaseHeterogeneousDisasterDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
+    def _load_base_sample(self, index: int) -> Dict[str, Any]:
         sample = self.samples[index]
         optical_np, optical_meta = read_raster(sample["optical"])
         optical_np = select_bands(optical_np, self.optical_band_indices, source=sample["optical"])
@@ -205,6 +215,17 @@ class BaseHeterogeneousDisasterDataset(Dataset):
             sar = resize_tensor(sar, (height, width), mode="bilinear")
             label = resize_label(label, (height, width))
 
+        item = {"id": sample["id"], "optical": optical, "sar": sar, "label": label}
+        if self.return_metadata:
+            item["metadata"] = {"optical": optical_meta, "sar": sar_meta,
+                                "label": label_meta, "paths": sample}
+        return item
+
+    def __getitem__(self, index: int) -> Dict[str, Any]:
+        prepared = getattr(self, "_prepared_split", None)
+        item = prepared.get(index) if prepared is not None else self._load_base_sample(index)
+        optical, sar, label = item["optical"], item["sar"], item["label"]
+
         if self.patch_size > 0 and (self.training or not self.eval_full_image):
             crop_mode = "random" if self.training and self.train_random_crop else "center"
             optical, sar, label = crop_or_pad_sample(
@@ -235,15 +256,14 @@ class BaseHeterogeneousDisasterDataset(Dataset):
                 sar_noise_std=float(self.augmentation_cfg.get("sar_noise_std", 0.0) or 0.0),
             )
 
-        item: Dict[str, Any] = {"id": sample["id"], "optical": optical, "sar": sar, "label": label}
-        if self.return_metadata:
-            item["metadata"] = {
-                "optical": optical_meta,
-                "sar": sar_meta,
-                "label": label_meta,
-                "paths": sample,
-            }
+        item.update(optical=optical, sar=sar, label=label)
         return item
+
+    def load_label_for_stats(self, sample: Dict[str, Any]) -> torch.Tensor:
+        label_np, _ = read_raster(sample["label"])
+        label = torch.from_numpy(label_np[0] if label_np.ndim == 3 else label_np)
+        return prepare_label(label, self.label_mode, self.ignore_index, self.num_classes,
+                             self.label_ignore_values)
 
 
 def resolve_dataset_root(dataset_cfg: Dict[str, Any]) -> str:

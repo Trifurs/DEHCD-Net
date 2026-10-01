@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from typing import Any, Dict, Optional
 
 import torch
@@ -9,7 +11,7 @@ from torch.utils.checkpoint import checkpoint
 
 from .backbones import ConvNormAct, make_context_block
 from .encoders import build_encoder
-from .fusion import BidirectionalCrossScaleFusion, DiffusionRefinementBlock, GlobalContextBridge, HeterogeneousFusionBlock
+from .fusion import BidirectionalCrossScaleFusion, DiffusionRefinementBlock, GlobalContextBridge, HeterogeneousFusionBlock, PlainFusionBlock
 
 
 MODEL_DISPLAY_NAME = "DEHCD-Net"
@@ -190,6 +192,8 @@ class DEHCDNet(nn.Module):
         hog_cell_size: int = 8,
         hog_modulation_levels: int = 2,
         diffusion_steps: int = 0,
+        fusion_mode: str = "dpm",
+        difference_gate: bool = True,
         align_fusion: bool = True,
         align_start_level: int = 1,
         align_max_flow: float = 2.0,
@@ -201,6 +205,10 @@ class DEHCDNet(nn.Module):
         share_encoder_from_level: int = 2,
         deep_supervision: bool = False,
         gradient_checkpointing: bool = False,
+        hog_prior: str = "orientation",
+        bicsf_mode: str = "original",
+        gcb_mode: str = "original",
+        irb_mode: str = "iterative",
     ):
         super().__init__()
         self.use_hog = bool(use_hog)
@@ -227,6 +235,13 @@ class DEHCDNet(nn.Module):
             else nn.Identity()
         )
         self.hog = HOGFeatureExtractor(bins=hog_bins, cell_size=hog_cell_size) if self.use_hog else None
+        from .capacity_controls import IntensityPrior, IndependentScaleConvControl, FeedForwardRefinementControl
+        if hog_prior not in {"orientation", "intensity_control"}:
+            raise ValueError("hog_prior must be orientation or intensity_control")
+        if hog_prior == "intensity_control":
+            if not self.use_hog:
+                raise ValueError("intensity_control requires use_hog=true to retain modulation capacity")
+            self.hog = IntensityPrior(hog_bins, hog_cell_size)
         encoder_optical_channels = optical_channels
         encoder_sar_channels = sar_channels
         self.optical_encoder, optical_channels_list = build_encoder(
@@ -293,9 +308,13 @@ class DEHCDNet(nn.Module):
                 for idx in range(hog_levels)
             ]
         )
+        if fusion_mode not in {"dpm", "plain", "plain_matched"}:
+            raise ValueError(f"Unsupported fusion_mode: {fusion_mode}")
+        fusion_cls = HeterogeneousFusionBlock if fusion_mode == "dpm" else PlainFusionBlock
+        fusion_kwargs = {"matched": fusion_mode == "plain_matched"} if fusion_mode != "dpm" else {}
         self.fusion_blocks = nn.ModuleList(
             [
-                HeterogeneousFusionBlock(
+                fusion_cls(
                     channel,
                     dropout=dropout,
                     norm_type=norm_type,
@@ -304,6 +323,8 @@ class DEHCDNet(nn.Module):
                     align=bool(align_fusion) and idx >= int(align_start_level),
                     max_flow=align_max_flow,
                     adaptive_modality_weight=adaptive_modality_weight,
+                    difference_gate=difference_gate,
+                    **fusion_kwargs,
                 )
                 for idx, channel in enumerate(channels)
             ]
@@ -352,6 +373,20 @@ class DEHCDNet(nn.Module):
             if int(diffusion_steps) > 0
             else nn.Identity()
         )
+        for name, mode in (("cross_scale_fusion", bicsf_mode), ("global_context", gcb_mode)):
+            if mode not in {"original", "conv_matched"}:
+                raise ValueError(f"Unknown capacity control {name}: {mode}")
+            if mode == "conv_matched":
+                original = getattr(self, name)
+                if isinstance(original, nn.Identity):
+                    raise ValueError(f"{name} must be enabled to define the matching budget")
+                setattr(self, name, IndependentScaleConvControl(channels, original))
+        if irb_mode not in {"iterative", "feedforward_matched"}:
+            raise ValueError(f"Unknown irb_mode: {irb_mode}")
+        if irb_mode == "feedforward_matched":
+            if int(diffusion_steps) <= 0:
+                raise ValueError("feedforward_matched requires diffusion_steps > 0")
+            self.diffusion_refine = FeedForwardRefinementControl(self.diffusion_refine)
         self.dec2 = DecoderBlock(channels[3], channels[2], channels[2], dropout=dropout, norm_type=norm_type, norm_groups=norm_groups, block_type=block_type)
         self.dec1 = DecoderBlock(channels[2], channels[1], channels[1], dropout=dropout, norm_type=norm_type, norm_groups=norm_groups, block_type=block_type)
         self.dec0 = DecoderBlock(channels[1], channels[0], channels[0], dropout=dropout, norm_type=norm_type, norm_groups=norm_groups, block_type=block_type)
@@ -437,6 +472,7 @@ def build_model(
     config: Dict[str, Any],
     optical_channels: Optional[int] = None,
     sar_channels: Optional[int] = None,
+    initialize_encoder: bool = True,
 ) -> nn.Module:
     model_cfg = config.get("model", {})
     if optical_channels is None:
@@ -448,7 +484,7 @@ def build_model(
     if compare_name or _is_compare_model_name(model_name):
         from compare import build_compare_model
 
-        return build_compare_model(
+        return _configure_group_norm(build_compare_model(
             name=str(compare_name or model_name),
             optical_channels=optical_channels,
             sar_channels=sar_channels,
@@ -457,8 +493,9 @@ def build_model(
             target_channels=int(model_cfg.get("compare_target_channels", model_cfg.get("target_channels", 3))),
             adapt_batchnorm=bool(model_cfg.get("compare_adapt_batchnorm", True)),
             deep_supervision=bool(model_cfg.get("compare_deep_supervision", True)),
-        )
-    return DEHCDNet(
+            model_config={**model_cfg, "_initialize_encoder": initialize_encoder},
+        ), model_cfg)
+    return _configure_group_norm(DEHCDNet(
         optical_channels=optical_channels,
         sar_channels=sar_channels,
         num_classes=int(model_cfg.get("num_classes", config.get("task", {}).get("num_classes", 2))),
@@ -474,6 +511,8 @@ def build_model(
         diffusion_steps=int(model_cfg.get("diffusion_steps", 0)),
         backbone=str(model_cfg.get("backbone", "lightweight_convnext")),
         pretrained_backbone=bool(model_cfg.get("pretrained_backbone", False)),
+        fusion_mode=str(model_cfg.get("fusion_mode", "dpm")),
+        difference_gate=bool(model_cfg.get("difference_gate", True)),
         align_fusion=bool(model_cfg.get("align_fusion", True)),
         align_start_level=int(model_cfg.get("align_start_level", 1)),
         align_max_flow=float(model_cfg.get("align_max_flow", 2.0)),
@@ -485,7 +524,23 @@ def build_model(
         share_encoder_from_level=int(model_cfg.get("share_encoder_from_level", 2)),
         deep_supervision=bool(model_cfg.get("deep_supervision", False)),
         gradient_checkpointing=bool(model_cfg.get("gradient_checkpointing", False)),
-    )
+        hog_prior=str(model_cfg.get("hog_prior", "orientation")),
+        bicsf_mode=str(model_cfg.get("bicsf_mode", "original")),
+        gcb_mode=str(model_cfg.get("gcb_mode", "original")),
+        irb_mode=str(model_cfg.get("irb_mode", "iterative")),
+    ), model_cfg)
+
+
+def _configure_group_norm(model: nn.Module, config: Dict[str, Any]) -> nn.Module:
+    value = config.get("group_norm_eps")
+    if value is not None:
+        eps = float(value)
+        if not math.isfinite(eps) or eps <= 0:
+            raise ValueError("model.group_norm_eps must be finite and positive")
+        for layer in model.modules():
+            if isinstance(layer, nn.GroupNorm):
+                layer.eps = eps
+    return model
 
 
 def _coerce_channels(value: Any, name: str) -> int:

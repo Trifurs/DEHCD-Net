@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../../dehcd/bright_l.xml</base_param>
+  <model>
+    <dropout type="float">0.15</dropout>
+    <pretrained_backbone type="bool">false</pretrained_backbone>
+    <encoder_checkpoint type="str" />
+    <deep_supervision type="bool">false</deep_supervision>
+    <name type="str">changemamba</name>
+    <compare_model type="str">changemamba</compare_model>
+    <compare_adapt_batchnorm type="bool">false</compare_adapt_batchnorm>
+    <compare_deep_supervision type="bool">false</compare_deep_supervision>
+    <compare_target_channels type="int">3</compare_target_channels>
+    <selective_scan_backend type="str">auto</selective_scan_backend>
+    <changemamba_variant type="str">multimodal</changemamba_variant>
+    <share_damage_encoder type="bool">false</share_damage_encoder>
+  </model>
+  <training>
+    <early_stop_patience type="int">0</early_stop_patience>
+    <deterministic type="bool">true</deterministic>
+    <amp type="bool">false</amp>
+    <localization_loss_weight type="float">1.0</localization_loss_weight>
+    <aux_loss_weight type="float">0.0</aux_loss_weight>
+    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
+    <best_metric type="str">foreground_miou</best_metric>
+    <loss type="str">damage_ce_lovasz</loss>
+    <optimizer type="str">adamw</optimizer>
+    <learning_rate type="float">0.0001</learning_rate>
+    <weight_decay type="float">0.005</weight_decay>
+    <scheduler type="str">none</scheduler>
+  </training>
+  <inference>
+    <test_time_augmentation type="str">none</test_time_augmentation>
+    <prediction_rule type="str">damage_argmax</prediction_rule>
+  </inference>
+  <experiment>
+    <id type="str">bright_changemamba_optimizer_recipe</id>
+    <dataset type="str">bright</dataset>
+    <suite type="str">optimizer_recipe</suite>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">recipe_bundle</kind>
+      <reference type="str">bright_changemamba_head_recipe</reference>
+      <factor type="str">optimizer_recipe</factor>
+      <allowed_changes type="list">['training.optimizer', 'training.learning_rate', 'training.weight_decay', 'training.scheduler']</allowed_changes>
+    </comparison>
+    <implementation type="str">official_head_and_optimizer_recipe_project_data_and_budget</implementation>
+    <pretraining type="str">scratch</pretraining>
+    <protocol_scope type="str">reference_optimizer_control_not_official_benchmark</protocol_scope>
+  </experiment>
+  <logging>
+    <run_name type="str">bright_changemamba_optimizer_recipe</run_name>
+  </logging>
+</project>

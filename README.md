@@ -1,7 +1,11 @@
 # DEHCD-Net
 
-This repository provides the implementation of **DEHCD-Net** for the paper
-**Difference-Enhanced Optical-SAR Heterogeneous Change Detection for Multi-Class Disaster Mapping**.
+Implementation for **Selective Difference Learning for Multi-Class Disaster Mapping
+from Pre-Disaster Optical and Post-Disaster SAR Imagery**.
+
+The experiment protocol is documented in [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md).
+Configurations declare the data, optimization, precision and comparison factors used by each experiment.
+
 
 DEHCD-Net targets rapid disaster mapping from asymmetric observations, especially
 pre-disaster optical imagery and post-disaster SAR imagery. The network is built
@@ -160,7 +164,7 @@ Prepare supported dataset layouts:
 
 ```bash
 python tools/dataset_tools/bright_split.py --src-root data/raw/BRIGHT --dst-root data/BRIGHT
-python tools/dataset_tools/bright_crop_1024_to_256.py --root data/BRIGHT --replace-root
+python tools/dataset_tools/bright_crop_1024_to_256.py --root data/BRIGHT
 python tools/dataset_tools/cau_split.py --src-root data/raw/CAU-Flood --dst-root data/CAU-Flood
 python tools/dataset_tools/xbd_split_crop_1024_to_256.py --src-root data/raw/xBD --dst-root data/xBD
 ```
@@ -185,7 +189,7 @@ If this repository is useful for your research, please cite:
 
 ```bibtex
 @misc{liu2026dehcdnet,
-  title  = {Difference-Enhanced Optical-SAR Heterogeneous Change Detection for Multi-Class Disaster Mapping},
+  title  = {Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery},
   author = {Liu, Bo and Li, Deren and Xiao, Xiongwu and Shao, Zhenfeng and Li, Yingbing and Duan, Yueming and Luo, Zheng},
   year   = {2026}
 }
@@ -195,3 +199,38 @@ If this repository is useful for your research, please cite:
 
 Please check the project license and the licenses of included comparison-model
 implementations before redistribution or commercial use.
+
+
+## Controlled experiments
+
+For model comparisons use `configs/experiments/` with `tools/run_multiseed.py`;
+the single-run examples above are ordinary presets, not the controlled
+comparison. See [the controlled-factor specification](docs/FAIR_COMPARISONS.md).
+
+The registry now includes ChangeOS-R50, DamageFormer and ChangeMamba (MMBDA/BDA),
+with dual-head structures, explicit auxiliary-supervision controls and pinned upstream source records. See
+[baseline setup and adaptations](compare/UPSTREAM.md),
+[experiment protocol](docs/EXPERIMENT_PROTOCOL.md), and
+[experiment capabilities](docs/EXPERIMENT_STATUS.md).
+`configs/experiments/catalog.json` contains 174 configurations; generating or dry-running
+a plan does not launch training. Use a separate campaign directory for each fixed execution protocol.
+
+For RTX 5090 training, pass `--runtime-profile rtx5090` to the multiseed runner.
+See [hardware settings and batch sizes](docs/RUNTIME_PROFILE.md).
+
+## One-command local campaign
+
+In the configured Python environment:
+
+```bash
+python -W ignore tools/run_all.py
+```
+
+This launcher runs all 174 configurations with seeds 42, 1051 and 2060 (522 runs),
+using the RTX 5090 profile. It reads `~/桌面/myData/Hete_CD/{BRIGHT1,Haiti1,CAU1,xBD1}`
+and writes everything under `~/桌面/myResult/DEHCD-Net`. Override `--data-base` or
+`--output` when needed. Repeating the command resumes the same campaign.
+
+The console shows overall, epoch and batch progress with provisional remaining
+wall time. Warnings are hidden; failures remain visible. Full best/last training
+checkpoints are retained. See [progress, shared preparation and result layout](docs/RUN_WORKFLOW.md).

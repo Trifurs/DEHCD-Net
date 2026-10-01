@@ -122,7 +122,7 @@ class HaitiDataset(BaseHeterogeneousDisasterDataset):
             if int(mask_band) in sar_bands:
                 raise ValueError(f"Haiti SAR mask band for pass {idx} must not be listed in sar_band_indices.")
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
+    def _load_base_sample(self, index: int) -> Dict[str, Any]:
         sample = self.samples[index]
         optical_np, optical_meta = read_raster(sample["optical"])
         optical_mask = self._mask_from_band(
@@ -191,36 +191,6 @@ class HaitiDataset(BaseHeterogeneousDisasterDataset):
             sar_invalid_masks = [_resize_bool_mask(mask, (height, width)) for mask in sar_invalid_masks]
 
         label = self._apply_quality_ignore(label, optical_invalid, sar_invalid_masks)
-
-        if self.patch_size > 0 and (self.training or not self.eval_full_image):
-            crop_mode = "random" if self.training and self.train_random_crop else "center"
-            optical, sar, label = crop_or_pad_sample(
-                optical,
-                sar,
-                label,
-                crop_size=self.patch_size,
-                mode=crop_mode,
-                ignore_index=self.ignore_index,
-                positive_crop_prob=self.positive_crop_prob if self.training else 0.0,
-                rare_crop_prob=self.rare_crop_prob if self.training else 0.0,
-                rare_crop_classes=self.rare_crop_classes,
-                crop_candidate_count=self.crop_candidate_count if self.training else 1,
-            )
-
-        if self.training and bool(self.augmentation_cfg.get("enabled", True)):
-            optical, sar, label = apply_augmentation(
-                optical,
-                sar,
-                label,
-                random_flip=bool(self.augmentation_cfg.get("random_flip", True)),
-                random_rotate90=bool(self.augmentation_cfg.get("random_rotate90", True)),
-                optical_scale_jitter=float(self.augmentation_cfg.get("optical_scale_jitter", 0.0) or 0.0),
-                optical_shift_jitter=float(self.augmentation_cfg.get("optical_shift_jitter", 0.0) or 0.0),
-                sar_scale_jitter=float(self.augmentation_cfg.get("sar_scale_jitter", 0.0) or 0.0),
-                sar_shift_jitter=float(self.augmentation_cfg.get("sar_shift_jitter", 0.0) or 0.0),
-                optical_noise_std=float(self.augmentation_cfg.get("optical_noise_std", 0.0) or 0.0),
-                sar_noise_std=float(self.augmentation_cfg.get("sar_noise_std", 0.0) or 0.0),
-            )
 
         item: Dict[str, Any] = {"id": sample["id"], "optical": optical, "sar": sar, "label": label}
         if self.return_metadata:

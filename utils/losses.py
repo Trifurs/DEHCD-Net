@@ -98,12 +98,13 @@ def hierarchical_change_loss(
     subclass only on pixels that are labelled foreground.
     """
 
+    logits = logits.float()
     if num_classes <= 2:
         return _standard_segmentation_loss_tensor(logits, target, config, num_classes, ignore_index)
 
     valid = target != ignore_index
     if not bool(valid.any()):
-        return logits.new_tensor(0.0)
+        return logits.sum() * 0.0
 
     background_logit = logits[:, :1]
     foreground_logit = torch.logsumexp(logits[:, 1:], dim=1, keepdim=True)
@@ -124,13 +125,27 @@ def hierarchical_change_loss(
 
     binary_ce_weight = float(config.get("hier_binary_ce_weight", 1.0) or 0.0)
     if binary_ce_weight > 0:
-        loss = loss + binary_ce_weight * F.cross_entropy(
-            binary_logits,
-            binary_target,
-            weight=binary_weights,
-            ignore_index=ignore_index,
-            label_smoothing=float(config.get("hier_binary_label_smoothing", 0.0) or 0.0),
-        )
+        reduction = str(config.get("hier_binary_reduction", "pixel_mean"))
+        smoothing = float(config.get("hier_binary_label_smoothing", 0.0) or 0.0)
+        if reduction == "pixel_mean":
+            binary_ce = F.cross_entropy(binary_logits, binary_target, weight=binary_weights,
+                                       ignore_index=ignore_index, label_smoothing=smoothing)
+        elif reduction == "class_mean":
+            # Foreground/background contribute separately instead of allowing
+            # >90% background pixels to dominate the localization objective.
+            pointwise = F.cross_entropy(binary_logits, binary_target, reduction="none",
+                                       ignore_index=ignore_index, label_smoothing=smoothing)
+            means, weights = [], []
+            for cls in (0, 1):
+                mask = binary_target == cls
+                if mask.any():
+                    means.append(pointwise[mask].mean())
+                    weights.append(binary_weights[cls] if binary_weights is not None else logits.new_tensor(1.))
+            weights = torch.stack(weights)
+            binary_ce = (torch.stack(means) * weights).sum() / weights.sum().clamp_min(1e-8)
+        else:
+            raise ValueError(f"Unknown hier_binary_reduction: {reduction}")
+        loss = loss + binary_ce_weight * binary_ce
 
     binary_dice_weight = float(config.get("hier_binary_dice_weight", 0.7) or 0.0)
     if binary_dice_weight > 0:
@@ -223,7 +238,28 @@ def ce_dice_loss(
     return ce_weight * ce + dice_weight * dl
 
 
-def segmentation_loss(
+def segmentation_loss(model_output, target, config, num_classes, ignore_index=255):
+    def fp32(value):
+        if isinstance(value, torch.Tensor):
+            return value.float() if value.is_floating_point() else value
+        if isinstance(value, dict):
+            return {k: fp32(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return type(value)(fp32(v) for v in value)
+        return value
+    logits = extract_logits(model_output)
+    with torch.autocast(device_type=logits.device.type, enabled=False):
+        if not torch.any(target != ignore_index):
+            zero = logits.float().sum() * 0.0
+            supervise_localization = (str(config.get("loss", "ce_dice")).lower() in {"damage_ce_lovasz", "changeos_native"}
+                                      or float(config.get("localization_loss_weight", 1.0)) > 0)
+            if supervise_localization and isinstance(model_output, dict) and "localization_logits" in model_output:
+                zero = zero + model_output["localization_logits"].float().sum() * 0.0
+            return zero
+        return _segmentation_loss_impl(fp32(model_output), target, config, num_classes, ignore_index)
+
+
+def _segmentation_loss_impl(
     model_output: Any,
     target: torch.Tensor,
     config: Dict[str, Any],
@@ -231,7 +267,22 @@ def segmentation_loss(
     ignore_index: int = 255,
 ) -> torch.Tensor:
     logits = extract_logits(model_output)
+    loss_name = str(config.get("loss", "ce_dice")).lower()
+    loc = model_output.get("localization_logits") if isinstance(model_output, dict) else None
+    if loss_name in {"damage_ce_lovasz", "changeos_native"}:
+        if loc is None:
+            raise ValueError(f"{loss_name} requires a model with localization_logits")
+        return dual_head_native_loss(logits, loc, target, loss_name, ignore_index)
     loss = _segmentation_loss_tensor(logits, target, config, num_classes, ignore_index)
+    if loc is not None:
+        # The common main table disables this auxiliary objective explicitly.
+        # Independent controls retain it without changing the primary loss.
+        weight = float(config.get("localization_loss_weight", 1.0))
+        if weight < 0:
+            raise ValueError("localization_loss_weight must be nonnegative")
+        if weight > 0:
+            loc_target = localization_target(target, ignore_index)
+            loss = loss + weight * ce_dice_loss(loc, loc_target, 2, ignore_index)
     aux_logits = extract_aux_logits(model_output)
     aux_weight = float(config.get("aux_loss_weight", config.get("deep_supervision_weight", 0.0)) or 0.0)
     if aux_weight > 0 and aux_logits:
@@ -280,7 +331,43 @@ def _segmentation_loss_tensor(
     loss_name = str(config.get("loss", "ce_dice")).strip().lower()
     if loss_name in {"hierarchical_change", "hierarchical", "change_hierarchy", "binary_subclass"}:
         return hierarchical_change_loss(logits, target, config, num_classes, ignore_index)
+    if loss_name not in {"ce_dice", "compound"}:
+        raise ValueError(f"Unsupported loss: {loss_name}")
     return _standard_segmentation_loss_tensor(logits, target, config, num_classes, ignore_index)
+
+
+def localization_target(target, ignore_index=255):
+    return torch.where(target == ignore_index, ignore_index, (target > 0).long())
+
+
+def dual_head_native_loss(damage, loc, target, recipe, ignore_index=255):
+    """Explicit official head recipes, evaluated in FP32 by segmentation_loss.
+
+    DamageFormer/BRIGHT-Mamba: CE_loc + CE_dam + .5 Lovasz_loc + .75 Lovasz_dam.
+    ChangeOS: BCE_loc + Tversky_loc(alpha_FN=.9) + CE_dam + all-class Dice_dam.
+    Whole-batch Lovasz and smooth=1 Dice match the cited sources. Ignore labels
+    are masked for both heads, including localization on all-background batches.
+    """
+    loc_target = localization_target(target, ignore_index)
+    ce = F.cross_entropy(damage, target, ignore_index=ignore_index)
+    if recipe == "damage_ce_lovasz":
+        loc_ce = F.cross_entropy(loc, loc_target, ignore_index=ignore_index)
+        dp, dt = flatten_probs(damage.softmax(1), target, ignore_index)
+        lp, lt = flatten_probs(loc.softmax(1), loc_target, ignore_index)
+        return ce + loc_ce + .75 * lovasz_softmax_flat(dp, dt) + .5 * lovasz_softmax_flat(lp, lt)
+    valid = target != ignore_index
+    # ChangeOS's original 1-channel logit is represented as [0, z].
+    z = (loc[:, 1] - loc[:, 0])[valid]
+    y = (loc_target[valid] > 0).float()
+    bce = F.binary_cross_entropy_with_logits(z, y)
+    p = z.sigmoid()
+    tp = (p * y).sum()
+    fn, fp = y.sum() - tp, p.sum() - tp
+    loc_tversky = 1 - (tp + 1.) / (tp + .9 * fn + .1 * fp + 1.)
+    dp, dt = flatten_probs(damage.softmax(1), target, ignore_index)
+    one_hot = F.one_hot(dt, damage.shape[1]).float()
+    damage_dice = 1 - ((2 * (dp * one_hot).sum(0) + 1.) / (dp.sum(0) + one_hot.sum(0) + 1.)).mean()
+    return ce + bce + loc_tversky + damage_dice
 
 
 def _standard_segmentation_loss_tensor(

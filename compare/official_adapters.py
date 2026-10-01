@@ -84,6 +84,7 @@ class OfficialCompareAdapter(nn.Module):
     ):
         super().__init__()
         self.num_classes = int(num_classes)
+        self.core_precision_policy = "fp32"
         self.output_channels = int(output_channels)
         self.resize_to = int(resize_to) if resize_to else None
         self.output_is_probability = bool(output_is_probability)
@@ -140,7 +141,7 @@ class OfficialCompareAdapter(nn.Module):
         if self.output_is_probability:
             logits = torch.logit(logits.clamp(min=1e-4, max=1.0 - 1e-4))
         if logits.shape[1] == 1 and self.num_classes == 2:
-            logits = torch.cat([-logits, logits], dim=1)
+            logits = torch.cat([torch.zeros_like(logits), logits], dim=1)
         elif logits.shape[1] == self.num_classes:
             pass
         elif logits.shape[1] == self.output_channels:

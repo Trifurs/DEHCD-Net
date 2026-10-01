@@ -26,21 +26,27 @@ def compute_change_metrics(
 class ConfusionMatrixMeter:
     num_classes: int = 2
     ignore_index: Optional[int] = 255
+    device: Optional[torch.device] = None
 
     def __post_init__(self) -> None:
-        self.matrix = torch.zeros((self.num_classes, self.num_classes), dtype=torch.float64)
+        self.matrix = torch.zeros((self.num_classes, self.num_classes), dtype=torch.float64, device=self.device)
+        self._hist_layout = None
 
     def reset(self) -> None:
         self.matrix.zero_()
 
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> "ConfusionMatrixMeter":
+        if self.matrix.is_cuda:
+            return self._update_cuda(preds, target)
         preds = preds.detach().cpu().long().view(-1)
         target = target.detach().cpu().long().view(-1)
         mask = _valid_mask(target, self.ignore_index)
         preds = preds[mask]
         target = target[mask]
         class_mask = (target >= 0) & (target < self.num_classes)
-        preds = preds[class_mask].clamp(0, self.num_classes - 1)
+        preds = preds[class_mask]
+        if torch.any((preds < 0) | (preds >= self.num_classes)):
+            raise ValueError("Prediction class index is outside the configured class range")
         target = target[class_mask]
         if target.numel() == 0:
             return self
@@ -49,8 +55,32 @@ class ConfusionMatrixMeter:
         self.matrix += counts.reshape(self.num_classes, self.num_classes)
         return self
 
+    def _update_cuda(self, preds, target):
+        preds = preds.detach().to(self.matrix.device).long().reshape(-1)
+        target = target.detach().to(self.matrix.device).long().reshape(-1)
+        if preds.shape != target.shape:
+            raise ValueError("Prediction and target shapes differ")
+        valid = _valid_mask(target, self.ignore_index) & (target >= 0) & (target < self.num_classes)
+        if bool((((preds < 0) | (preds >= self.num_classes)) & valid).any()):
+            raise ValueError("Prediction class index is outside the configured class range")
+        if target.numel() == 0:
+            return self
+        bins = self.num_classes ** 2
+        # Partition integer counts to avoid a single heavily contended background
+        # bin. Integer accumulation is exact, including under deterministic mode.
+        n = target.numel()
+        if self._hist_layout is None or self._hist_layout[0] != n:
+            offsets = (torch.arange(n, device=target.device) // 4096) * (bins + 1)
+            self._hist_layout = (n, offsets, torch.ones(n, dtype=torch.int64, device=target.device))
+        _, offsets, ones = self._hist_layout
+        indices = torch.where(valid, target * self.num_classes + preds, bins) + offsets
+        counts = torch.zeros(((n + 4095) // 4096) * (bins + 1), dtype=torch.int64, device=target.device)
+        counts.scatter_add_(0, indices, ones)
+        self.matrix += counts.reshape(-1, bins + 1).sum(0)[:bins].reshape_as(self.matrix)
+        return self
+
     def compute(self) -> Dict[str, float]:
-        cm = self.matrix
+        cm = self.matrix.detach().cpu()
         total = cm.sum().clamp(min=1.0)
         oa = torch.diag(cm).sum() / total
 
@@ -111,7 +141,7 @@ class ConfusionMatrixMeter:
             "macro_recall": _mean_valid(recall, valid_iou),
             "macro_f1": _mean_valid(f1, valid_iou),
             "primary_score": primary_iou,
-            "valid_pixels": float(total.item()),
+            "valid_pixels": float(cm.sum().item()),
         }
         pred_total = cm.sum(dim=0).clamp(min=0.0)
         target_total = cm.sum(dim=1).clamp(min=0.0)
@@ -119,6 +149,8 @@ class ConfusionMatrixMeter:
             metrics["pred_foreground_ratio"] = float((pred_total[1:].sum() / total).item())
             metrics["target_foreground_ratio"] = float((target_total[1:].sum() / total).item())
         for idx in range(self.num_classes):
+            metrics[f"class_{idx}_support"] = float(target_total[idx].item())
+            metrics[f"class_{idx}_union"] = float(union[idx].item())
             metrics[f"class_{idx}_precision"] = float(precision[idx].item())
             metrics[f"class_{idx}_recall"] = float(recall[idx].item())
             metrics[f"class_{idx}_f1"] = float(f1[idx].item())

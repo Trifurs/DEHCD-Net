@@ -1,0 +1,8 @@
+# Optional source-build requirements for ChangeMamba's CUDA extension.
+# Use the existing, matching torch + torchvision environment. Do not replace
+# torch with a different wheel just to build the extension.
+ninja>=1.11
+packaging>=23
+# Runtime dependencies already included by requirements.txt:
+# torch, torchvision, timm==0.6.13, einops==0.7.0, opencv-python, numpy
+# nvcc and a supported C++ compiler are external build prerequisites.

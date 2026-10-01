@@ -2,8 +2,11 @@
 
 This folder now keeps the official model code from each comparison repository
 under `compare/official/<model_name>/`. The project registry uses thin wrappers
-from `official_adapters.py` so every model exposes the same
-`forward(optical, sar) -> logits` interface as DEHCD-Net.
+from `official_adapters.py` and `damage_adapters.py`. All models expose
+`forward(optical, sar)`; use `extract_logits(output)` for the primary prediction.
+The new damage baselines also return localization logits. The controlled main comparison
+uses the same primary-only objective for every model; separate auxiliary/native
+head controls supervise localization. See [controlled comparisons](../docs/FAIR_COMPARISONS.md).
 
 Only files required by the registered model entrypoints are retained. Broken or
 unrelated repository utilities, such as HAFF's unused `ACnet.py` and WaveHFG's
@@ -16,19 +19,22 @@ call:
 
 - learn a small optical/SAR pseudo-RGB stem for 1-channel CAU SAR, 1-channel
   BRIGHT SAR, and 4-channel Haiti SAR stacks;
-- replace BatchNorm in the official cores with GroupNorm for small-batch
-  heterogeneous training;
-- keep official multi-output heads as `aux_logits` so ICIF-Net, DMINet,
-  HFA-PANet, and HAFF get deep supervision through the shared loss;
-- keep HFA-PANet feature pairs for the optional lightweight modality-alignment
-  loss enabled in its comparison XML files;
+- replace BatchNorm with GroupNorm in the main adapted baseline protocol;
+  `configs/experiments/adapter/` contains original-BN controls for all four datasets;
+- optionally expose multi-output heads as `aux_logits`; experiment main configurations
+  disable optional deep supervision for the six legacy models; the new damage
+  models retain their localization head, with its auxiliary weight explicitly zero
+  in the main table and one in separate `auxiliary/` controls;
+- retain HFA-PANet feature pairs for optional modality-alignment loss; it is disabled
+  in the experiment main configurations;
 - replace final prediction heads where needed so multiclass datasets use native
   `num_classes` logits;
-- run the official model core in FP32 so older paper-code operators remain safe under project-level AMP;
+- run official cores in FP32; all generated experiment configurations also disable AMP for DEHCD-Net, so the comparison uses one precision policy;
 - resize HRSICD to its native 64x64 resolution, train it with raw logits, and
   upsample logits back;
 - convert one-channel binary outputs to the project's two-logit convention;
-- skip optional pretrained weight files instead of hard failing.
+- support explicit local encoder checkpoints outside the controlled scratch
+  protocol; controlled experiments reject pretrained weights in the common-recipe comparison.
 
 Source repositories:
 
@@ -41,3 +47,9 @@ Source repositories:
 
 Losses, sampling, metrics, logging, checkpointing, and dataset preprocessing stay
 in the shared project pipeline so BRIGHT, Haiti, CAU-Flood, and xBD remain comparable.
+
+These are **adapted baselines**, not reproductions of the official training recipes.
+Input stems, changed heads, normalization, resizing, precision and losses must be
+disclosed with the results. **ChangeOS-R50, DamageFormer and ChangeMamba are now
+registered.** See [pinned sources, variants, head recipes and CUDA setup](UPSTREAM.md)
+and [experiment protocol](../docs/EXPERIMENT_PROTOCOL.md).

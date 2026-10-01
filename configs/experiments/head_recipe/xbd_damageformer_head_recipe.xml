@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../../dehcd/xbd_l.xml</base_param>
+  <model>
+    <dropout type="float">0.15</dropout>
+    <pretrained_backbone type="bool">false</pretrained_backbone>
+    <encoder_checkpoint type="str" />
+    <deep_supervision type="bool">false</deep_supervision>
+    <name type="str">damageformer</name>
+    <compare_model type="str">damageformer</compare_model>
+    <compare_adapt_batchnorm type="bool">false</compare_adapt_batchnorm>
+    <compare_deep_supervision type="bool">false</compare_deep_supervision>
+    <compare_target_channels type="int">3</compare_target_channels>
+    <selective_scan_backend type="str">auto</selective_scan_backend>
+    <changemamba_variant type="str">bda</changemamba_variant>
+    <share_damage_encoder type="bool">true</share_damage_encoder>
+  </model>
+  <training>
+    <early_stop_patience type="int">0</early_stop_patience>
+    <deterministic type="bool">true</deterministic>
+    <amp type="bool">false</amp>
+    <localization_loss_weight type="float">1.0</localization_loss_weight>
+    <aux_loss_weight type="float">0.0</aux_loss_weight>
+    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
+    <best_metric type="str">foreground_miou</best_metric>
+    <loss type="str">damage_ce_lovasz</loss>
+  </training>
+  <inference>
+    <test_time_augmentation type="str">none</test_time_augmentation>
+    <prediction_rule type="str">damage_argmax</prediction_rule>
+  </inference>
+  <experiment>
+    <id type="str">xbd_damageformer_head_recipe</id>
+    <dataset type="str">xbd</dataset>
+    <suite type="str">head_recipe</suite>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">xbd_damageformer_original_bn</reference>
+      <factor type="str">head_objective</factor>
+      <allowed_changes type="list">['training.loss', 'training.localization_loss_weight']</allowed_changes>
+    </comparison>
+    <implementation type="str">official_architecture_project_input_native_head_loss</implementation>
+    <pretraining type="str">scratch</pretraining>
+    <protocol_scope type="str">head_recipe_control_not_official_benchmark</protocol_scope>
+  </experiment>
+  <logging>
+    <run_name type="str">xbd_damageformer_head_recipe</run_name>
+  </logging>
+</project>

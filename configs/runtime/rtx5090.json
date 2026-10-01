@@ -1,0 +1,25 @@
+{
+  "id": "rtx5090_v1",
+  "description": "RTX 5090 32 GiB; fixed dataset-wide microbatches; FP32 tensors with TF32 math. Keep original epochs, learning rates, loss and checkpoint selection.",
+  "training": {
+    "amp": false,
+    "allow_tf32": true,
+    "optimizer_fused": true,
+    "foreach_gradient_clip": true,
+    "cpu_threads": 8,
+    "num_workers": 8,
+    "prefetch_factor": 2,
+    "persistent_workers": true,
+    "augmentation_seed_mode": "sample_draw",
+    "progress_interval": 20,
+    "save_interval": 0
+  },
+  "datasets": {
+    "bright": {"batch_size": 4, "gradient_accumulation_steps": 2},
+    "haiti": {"batch_size": 24, "gradient_accumulation_steps": 1},
+    "cau_flood": {"batch_size": 4, "gradient_accumulation_steps": 3},
+    "xbd": {"batch_size": 4, "gradient_accumulation_steps": 3}
+  },
+  "logging": {"validation_images": 0},
+  "inference": {"profile_model": false}
+}

@@ -1,0 +1,243 @@
+{
+  "compare/official/changemamba/vmamba.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/vmamba.py",
+    "upstream_sha256": "e512a42b27b2899680c02dcf996db21e84336154e633e193801e6f1e70f6906d"
+  },
+  "compare/official/changemamba/Mamba_backbone.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/Mamba_backbone.py",
+    "upstream_sha256": "ca64a875a2f418d2fd6b7352b0d425be8ad297520f6fc977edbdb4aebd00dcc8"
+  },
+  "compare/official/changemamba/ChangeMambaMMBDA.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/ChangeMambaMMBDA.py",
+    "upstream_sha256": "8054bab3fb7013486f7f9622550a612bcc5dfbffb3bc6f43206d95ebb894f821"
+  },
+  "compare/official/changemamba/ChangeMambaBDA.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/ChangeMambaBDA.py",
+    "upstream_sha256": "5697a96526c9de6a4c423213dc7ebdea555374f56473fe3c0fe457ef0c3873a5"
+  },
+  "compare/official/changemamba/ChangeDecoder_BRIGHT.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/ChangeDecoder_BRIGHT.py",
+    "upstream_sha256": "4dbb363253278a44636f39e1d187bea3acc83c1a172bc016f2da13decd51eb84"
+  },
+  "compare/official/changemamba/ChangeDecoder.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/ChangeDecoder.py",
+    "upstream_sha256": "39ff800da5fb8c965d62b69ea3828aa640daea9b123fe016ffe4c5987c7b80ed"
+  },
+  "compare/official/changemamba/SemanticDecoder.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/SemanticDecoder.py",
+    "upstream_sha256": "d499faad5bb84c9fce49ccd34def570e65e4b0551eca648ec4a5c5c30d0001d1"
+  },
+  "compare/official/changemamba/builders.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/builders.py",
+    "upstream_sha256": "0951c1fd51595783bb8434f4e52ad3fc0e7b298b6c3305f692af6f1f621cd13a"
+  },
+  "compare/official/changemamba/decoder_factory.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/decoder_factory.py",
+    "upstream_sha256": "e501e39a5d8c7b38be966feed99d595fe82bcab3f0c94e27bf1936ce1cfc8e99"
+  },
+  "compare/official/changemamba/model_utils.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/model_utils.py",
+    "upstream_sha256": "505f541aa5a957a926fc43e35c246e92c571163eabd20d854083d089743619d8"
+  },
+  "compare/official/changemamba/csm_triton.py": {
+    "upstream_path": "upstream-changemamba/changedetection/models/csm_triton.py",
+    "upstream_sha256": "fb90b6599563ffe56cbf3c9f48c69e4983f1ef36e6c44d6a68a9885e2c7b9ed3"
+  },
+  "compare/official/changemamba/checkpoints.py": {
+    "upstream_path": "upstream-changemamba/changedetection/checkpoints.py",
+    "upstream_sha256": "4d657ad1bd78a038057409899c8c69e3a1619350076a951f4f775769ed41085c"
+  },
+  "compare/official/changemamba/logging_utils.py": {
+    "upstream_path": "upstream-changemamba/changedetection/logging_utils.py",
+    "upstream_sha256": "96eaf7b5e295c640e64eb37d93fbca52f9467e6597d824fe8eb12bbd750bfe19"
+  },
+  "compare/official/changemamba/LICENSE": {
+    "upstream_path": "upstream-changemamba/LICENSE",
+    "upstream_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "compare/kernels/selective_scan/test_selective_scan.py": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/test_selective_scan.py",
+    "upstream_sha256": "a859881b5c879f081b9067c7765471bf5fed61812eef2def88445f9e42391743"
+  },
+  "compare/kernels/selective_scan/README.md": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/README.md",
+    "upstream_sha256": "5bf668f17db1e8da2cc511bd36d5f652ac7a2588912ce9c70094af860f4f42de"
+  },
+  "compare/kernels/selective_scan/setup.py": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/setup.py",
+    "upstream_sha256": "8d0040704dc5d6379c5f7222db258c9d281449f39f0578916d7513447ecdb2a4"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/reverse_scan.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/reverse_scan.cuh",
+    "upstream_sha256": "a257f066e80ba1c852b97416bf8ebf69b9f4d0d99c66110ea2cc8add7ba9170c"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/static_switch.h": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/static_switch.h",
+    "upstream_sha256": "1eb3ebf9f2f231be1bfad83ad15612031e24980336c0019f2d742bce599f704c"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/uninitialized_copy.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/uninitialized_copy.cuh",
+    "upstream_sha256": "80d81db2fe2c47d0e89b9b29643fda533ed065d2157d9a1c6a41a1078c057de6"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/selective_scan.h": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/selective_scan.h",
+    "upstream_sha256": "a137e4c785fed3d6f9c6c4315978ff99ec7ef464e76f5ed043d22ede3f0e927f"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/selective_scan_common.h": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/selective_scan_common.h",
+    "upstream_sha256": "e4569b7a2994a0687f8d6db4e72b968d6c164a5f65da7c568a596affa98bcbf6"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_core_fwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_core_fwd.cu",
+    "upstream_sha256": "ac11838b57e65cb920d3f4dc7f2a816b6c46c68708a1d6ba107050378e8583ce"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cus/selective_scan.cpp": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cus/selective_scan.cpp",
+    "upstream_sha256": "36617cb69e093441742a07a4090b8bb1fc4b84b1d5f810176e5ff5b9c5f49b05"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_fwd_kernel.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_fwd_kernel.cuh",
+    "upstream_sha256": "462836f2391ed56ee1c2f314915bc0fced20541fd212a86ff668b10fa9984127"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_core_bwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_core_bwd.cu",
+    "upstream_sha256": "02a11cfa68a7ba229ad6cab4115d0c1607fa2890c0393212f3edf59695e0edb3"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_bwd_kernel.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cus/selective_scan_bwd_kernel.cuh",
+    "upstream_sha256": "acb418bfe8f22a2a03cc12751b40133f67953c4a86db586e3dc8104bfb16d120"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_core_fwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_core_fwd.cu",
+    "upstream_sha256": "a6f26063fc6d9dd445a94db37215ef5b7445638725306a0aa72c72b240817068"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_bwd_kernel_ndstate.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_bwd_kernel_ndstate.cuh",
+    "upstream_sha256": "9c6a2eb656279c4aa97a2a48bb3a3ca7b54a52516e4d42a6c53c7d7a2c2559c3"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_fwd_kernel_ndstate.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_fwd_kernel_ndstate.cuh",
+    "upstream_sha256": "6d2513803e709857df510479dbf1569b4e636b257c1935fa84d8aac61d4d6e21"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_ndstate.h": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_ndstate.h",
+    "upstream_sha256": "050d21c4ed2af598ed44860b5e670a16bea93fd0a2b3843f2b30b97ab9ca3889"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_ndstate.cpp": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_ndstate.cpp",
+    "upstream_sha256": "593d02900e61fbbf3db6b198970c50da3bb9ab0dbe82b63bee19e6e8a1ad7b9f"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_core_bwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusndstate/selective_scan_core_bwd.cu",
+    "upstream_sha256": "1f18df2ffd7424e265eb3294920b289476c97cef8ded33c94d21dc97eb5f6d9c"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd2.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd2.cu",
+    "upstream_sha256": "037264b2fe400d957fa213ae0d0bc77246758df47b08f1410cb6c32ed4b74c2c"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd.cu",
+    "upstream_sha256": "41290dcd35e9d1cbad806e74628dd8e50a92390c0faca7f9d272a71adfa875c8"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_bwd_kernel_nrow.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_bwd_kernel_nrow.cuh",
+    "upstream_sha256": "c032037f556f6eac656b305ed34e5a11551a4c97b59f87a6d2bb26dfff434556"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd2.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd2.cu",
+    "upstream_sha256": "0972aa901086f86262d003400a485cdb2078e9e6c1a4ded9b139545b94f3b2a3"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_nrow.cpp": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_nrow.cpp",
+    "upstream_sha256": "8756be5e9553f1a0406aa0dd41be54d774c709163564e1e9084c938f2c28e45e"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd3.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd3.cu",
+    "upstream_sha256": "fb09ce5b9afd65f5896acbdc577377bbca1dade1c3537b6c56dfcfa5d086d812"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd3.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd3.cu",
+    "upstream_sha256": "39e77a9a753e25a8b7fecbc702077340702ad5e45574723cebbd2b8585b38403"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd4.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd4.cu",
+    "upstream_sha256": "3c869301f355513d1645947cc1089467662e7e1a575de7d4ec57a1267239e016"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_bwd.cu",
+    "upstream_sha256": "dbecbf8a79dd87d329cb716782cb6e422e67be790d8e35cc64938a65c9446815"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_fwd_kernel_nrow.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_fwd_kernel_nrow.cuh",
+    "upstream_sha256": "210e104eaccd77437d79afdb90e4b538e3d390d60f728ae4d1b935a146578e36"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd4.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusnrow/selective_scan_core_fwd4.cu",
+    "upstream_sha256": "5d8ad87a0b7426470c5c0a6509bf6e441bf170a81e8b6f165a4562b24d80a7c1"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_core_fwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_core_fwd.cu",
+    "upstream_sha256": "3aef23d427d57c6841d9b0e2aa69e29e4e2006317bf365cbadbac387d98aa364"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_bwd_kernel_oflex.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_bwd_kernel_oflex.cuh",
+    "upstream_sha256": "1fe88c5648d3d4c08d6d2fec33348c377e2129d952b5609b3d2dfaa2b21382bc"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_fwd_kernel_oflex.cuh": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_fwd_kernel_oflex.cuh",
+    "upstream_sha256": "acee14c649c5d6d0860dfb0bf85442c1c1e6e9652125934b06de50c7f91cc2be"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_oflex.cpp": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_oflex.cpp",
+    "upstream_sha256": "fb572e7990bf172d5342aaef28bb17216e6d9db19486e6f863f143ed26132018"
+  },
+  "compare/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_core_bwd.cu": {
+    "upstream_path": "upstream-changemamba/kernels/selective_scan/csrc/selective_scan/cusoflex/selective_scan_core_bwd.cu",
+    "upstream_sha256": "1ef772da7d88f4cad71cfeb09fb8b952dda786c36fbb86e380495ba415770e03"
+  },
+  "compare/kernels/selective_scan/LICENSE": {
+    "upstream_path": "upstream-changemamba/LICENSE",
+    "upstream_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "compare/official/damageformer/model.py": {
+    "upstream_path": "upstream-bright/bda_benchmark/model/DamageFormer.py",
+    "upstream_sha256": "f6880a0af203544f4f5b351f3dd73f0c2d6d4cdeb69eb2294fc3e8d7b2f7efe6"
+  },
+  "compare/official/damageformer/LICENSE": {
+    "upstream_path": "upstream-bright/LICENSE",
+    "upstream_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "compare/official/changeos/LICENSE-ever": {
+    "upstream_path": "upstream-ever/LICENSE",
+    "upstream_sha256": "4cc76fff8a2f2444c9946551b82acf4e370bd48f7014360122956ceb18c5005e"
+  },
+  "compare/official/changeos/LICENSE": {
+    "upstream_path": "upstream-torchange-src/LICENSE",
+    "upstream_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "compare/official/changeos/model.py": {
+    "upstream_path": "upstream-torchange-src/torchange/models/changeos.py",
+    "upstream_sha256": "f94ff8f4f6c90dafd2929a6b629b9e148e0d55b14061fb2fcaa3bf3059dec9e1",
+    "modification": "standalone port/extraction; see source header and UPSTREAM.md"
+  },
+  "compare/official/changeos/heads.py": {
+    "upstream_path": "upstream-torchange-src/torchange/models/changeos.py",
+    "upstream_sha256": "f94ff8f4f6c90dafd2929a6b629b9e148e0d55b14061fb2fcaa3bf3059dec9e1",
+    "modification": "standalone port/extraction; see source header and UPSTREAM.md"
+  },
+  "compare/official/changeos/fpn.py": {
+    "upstream_path": "upstream-ever/ever/module/fpn.py",
+    "upstream_sha256": "c5597fbf49fb1d76552c76bd458462f10ae67b05f052a191ac7aeee8743b1c27",
+    "modification": "standalone port/extraction; see source header and UPSTREAM.md"
+  },
+  "compare/official/changeos/ops.py": {
+    "upstream_path": "upstream-ever/ever/module/ops.py",
+    "upstream_sha256": "97ba1faa26a497db41b332badb3a887d52dc5d7c2089d0bc5b4c5751ac4a81f9",
+    "modification": "standalone port/extraction; see source header and UPSTREAM.md"
+  },
+  "compare/official/changeos/se_block.py": {
+    "upstream_path": "upstream-ever/ever/module/se_block.py",
+    "upstream_sha256": "233b0500cceeffa70956a7981a29899a1dac451383c1b7b2af3944c861e03086",
+    "modification": "standalone port/extraction; see source header and UPSTREAM.md"
+  }
+}

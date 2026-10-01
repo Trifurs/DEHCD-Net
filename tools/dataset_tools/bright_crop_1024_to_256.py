@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--patch-size", type=int, default=256)
     parser.add_argument("--ignore-index", type=int, default=255)
     parser.add_argument("--replace-root", action="store_true", help="Replace root with cropped dataset after creating a backup.")
+    parser.add_argument("--drop-background-train", action="store_true", help="Filter training patches only; validation/test always retain background.")
     parser.add_argument("--dry-run", action="store_true", help="Only count candidate/kept patches; do not write files.")
     parser.add_argument("--backup-suffix", default=None, help="Optional suffix for the backup directory.")
     return parser.parse_args()
@@ -58,6 +59,7 @@ def main() -> None:
         "total_source_samples": 0,
         "total_candidate_patches": 0,
         "total_kept_patches": 0,
+        "background_policy": "train_only_filtered" if args.drop_background_train else "keep_all_splits",
         "total_dropped_background_patches": 0,
     }
 
@@ -79,6 +81,7 @@ def main() -> None:
                 ignore_index=int(args.ignore_index),
                 rasterio_module=rasterio,
                 window_cls=Window,
+                drop_background=bool(args.drop_background_train) and split == "train",
                 dry_run=bool(args.dry_run),
             )
             stats["splits"][split] = split_stats
@@ -119,6 +122,7 @@ def crop_split(
     rasterio_module: Any,
     window_cls: Any,
     dry_run: bool,
+    drop_background: bool = False,
 ) -> dict[str, Any]:
     split_root = root / split
     optical_root = split_root / OPTICAL_DIR
@@ -168,7 +172,7 @@ def crop_split(
                     label_patch = label_src.read(1, window=window)
                     split_stats["candidate_patches"] += 1
                     foreground_mask = (label_patch != ignore_index) & (label_patch > 0)
-                    if not bool(foreground_mask.any()):
+                    if drop_background and not bool(foreground_mask.any()):
                         split_stats["dropped_background_patches"] += 1
                         continue
                     update_class_counts(split_stats["class_pixel_counts"], label_patch, ignore_index)
