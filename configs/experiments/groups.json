@@ -1,0 +1,2566 @@
+{
+  "schema_version": 1,
+  "seeds": [
+    42,
+    1051,
+    2060
+  ],
+  "groups": {
+    "main": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_changeos",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_damageformer",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_changemamba",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_changeos",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_damageformer",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_changemamba",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      }
+    ],
+    "main_bright": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_changeos",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_damageformer",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      },
+      {
+        "canonical_id": "bright_changemamba",
+        "role": "model",
+        "paper_refs": [
+          "Table 2"
+        ]
+      }
+    ],
+    "qualitative": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.14"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.13"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      }
+    ],
+    "efficiency": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      }
+    ],
+    "confusion": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "bright_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_icif_net",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dminet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hfa_panet",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_wavehfg",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_hrsicd",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_haff",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changeos",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_damageformer",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_changemamba",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Figs.8–11"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      }
+    ],
+    "scaling": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      },
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      },
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      }
+    ],
+    "scaling_bright": [
+      {
+        "canonical_id": "bright_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      }
+    ],
+    "sensitivity": [
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "reference",
+        "paper_refs": [
+          "Figs.18/19"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hog_bins_2",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hog_bins_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hog_bins_8",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hog_bins_10",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_0",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_1",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_2",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_5",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_6",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_7",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_8",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_hog_levels_1",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_hog_levels_3",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      },
+      {
+        "canonical_id": "bright_m_hog_levels_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ]
+      }
+    ],
+    "irb_steps": [
+      {
+        "canonical_id": "bright_m_irb_steps_0",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 0,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_1",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 1,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_2",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 2,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "default",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 3,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 4,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_5",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 5,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_6",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 6,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_7",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 7,
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_irb_steps_8",
+        "role": "point",
+        "paper_refs": [
+          "Fig.18"
+        ],
+        "x": 8,
+        "reference": "bright_dehcd_m"
+      }
+    ],
+    "hog_levels": [
+      {
+        "canonical_id": "bright_m_hog_levels_1",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 1,
+        "levels": [
+          0
+        ],
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_dehcd_m",
+        "role": "default",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 2,
+        "levels": [
+          0,
+          1
+        ],
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_hog_levels_3",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 3,
+        "levels": [
+          0,
+          1,
+          2
+        ],
+        "reference": "bright_dehcd_m"
+      },
+      {
+        "canonical_id": "bright_m_hog_levels_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 4,
+        "levels": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "reference": "bright_dehcd_m"
+      }
+    ],
+    "data_statistics": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "data",
+        "paper_refs": [
+          "Table 1"
+        ],
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "data",
+        "paper_refs": [
+          "Table 1"
+        ],
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "data",
+        "paper_refs": [
+          "Table 1"
+        ],
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "data",
+        "paper_refs": [
+          "Table 1"
+        ],
+        "postprocess_only": true
+      }
+    ],
+    "ablation": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_irb",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog_no_dpm_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "bright_all_off",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_irb",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog_no_dpm_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      },
+      {
+        "canonical_id": "haiti_all_off",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ]
+      }
+    ],
+    "fig17_bright": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          0,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_no_irb",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_no_hog_no_dpm_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "canonical_id": "bright_all_off",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "features": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.12"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "checkpoint",
+        "paper_refs": [
+          "Fig.12"
+        ],
+        "display_seed": 42,
+        "postprocess_only": true
+      }
+    ],
+    "capacity": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Additional capacity comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_hog_intensity_matched",
+        "role": "control",
+        "paper_refs": [
+          "Additional capacity comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_dpm_conv_matched",
+        "role": "control",
+        "paper_refs": [
+          "Additional capacity comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_bicsf_conv_matched",
+        "role": "control",
+        "paper_refs": [
+          "Additional capacity comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_irb_feedforward_matched",
+        "role": "control",
+        "paper_refs": [
+          "Additional capacity comparison"
+        ]
+      }
+    ],
+    "dpm": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Additional dpm comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_flow",
+        "role": "control",
+        "paper_refs": [
+          "Additional dpm comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_difference_gate",
+        "role": "control",
+        "paper_refs": [
+          "Additional dpm comparison"
+        ]
+      }
+    ],
+    "recipe": [
+      {
+        "canonical_id": "bright_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Additional recipe comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_ce_dice_full_sampling",
+        "role": "control",
+        "paper_refs": [
+          "Additional recipe comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_weighted_sampler",
+        "role": "control",
+        "paper_refs": [
+          "Additional recipe comparison"
+        ]
+      },
+      {
+        "canonical_id": "bright_no_class_weights",
+        "role": "control",
+        "paper_refs": [
+          "Additional recipe comparison"
+        ]
+      }
+    ],
+    "main_haiti": [
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_changeos",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_damageformer",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      },
+      {
+        "canonical_id": "haiti_changemamba",
+        "role": "model",
+        "paper_refs": [
+          "Table 3"
+        ]
+      }
+    ],
+    "scaling_haiti": [
+      {
+        "canonical_id": "haiti_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "haiti_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      }
+    ],
+    "fig17_haiti": [
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "reference",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          0,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_irb",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          1,
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog_no_dpm",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_no_hog_no_dpm_no_bicsf",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "canonical_id": "haiti_all_off",
+        "role": "control",
+        "paper_refs": [
+          "Fig.17"
+        ],
+        "modules": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "hog_bins": [
+      {
+        "canonical_id": "haiti_hog_bins_2",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 2,
+        "reference": "haiti_dehcd_l"
+      },
+      {
+        "canonical_id": "haiti_hog_bins_4",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 4,
+        "reference": "haiti_dehcd_l"
+      },
+      {
+        "canonical_id": "haiti_dehcd_l",
+        "role": "default",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 6,
+        "reference": "haiti_dehcd_l"
+      },
+      {
+        "canonical_id": "haiti_hog_bins_8",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 8,
+        "reference": "haiti_dehcd_l"
+      },
+      {
+        "canonical_id": "haiti_hog_bins_10",
+        "role": "point",
+        "paper_refs": [
+          "Fig.19"
+        ],
+        "x": 10,
+        "reference": "haiti_dehcd_l"
+      }
+    ],
+    "main_xbd": [
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      },
+      {
+        "canonical_id": "xbd_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 5"
+        ]
+      }
+    ],
+    "scaling_xbd": [
+      {
+        "canonical_id": "xbd_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "xbd_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "xbd_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      }
+    ],
+    "main_cau_flood": [
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_icif_net",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_dminet",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_hfa_panet",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_wavehfg",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_hrsicd",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      },
+      {
+        "canonical_id": "cau_flood_haff",
+        "role": "model",
+        "paper_refs": [
+          "Table 4"
+        ]
+      }
+    ],
+    "scaling_cau_flood": [
+      {
+        "canonical_id": "cau_flood_dehcd_s",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "s"
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_m",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "m"
+      },
+      {
+        "canonical_id": "cau_flood_dehcd_l",
+        "role": "size",
+        "paper_refs": [
+          "Figs.15/16"
+        ],
+        "x": "l"
+      }
+    ]
+  },
+  "note": "Views reference canonical IDs only. Union IDs before expanding seeds."
+}

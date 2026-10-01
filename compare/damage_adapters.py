@@ -21,11 +21,10 @@ def _load_torchvision_encoder(encoder, path):
 class DamageBaseline(nn.Module):
     """Returns damage and localization logits; the protocol selects supervision.
 
-    Building datasets derive localization from damage labels (class > 0).
-    Binary flood/change datasets use the foreground mask as an explicitly
-    adapted auxiliary task; they are not native building-damage reproductions.
-    The controlled main comparison uses primary logits only; auxiliary/native-loss
-    controls explicitly supervise both heads. Both structures remain intact.
+    The formal comparison supervises only the primary damage/change logits.
+    The localization branch is retained for structure and checkpoint compatibility;
+    its unsupervised outputs are diagnostic only. This is a common-protocol
+    architecture adaptation, not a reproduction of official benchmark recipes.
     """
     def __init__(self, name, optical_channels, sar_channels, num_classes,
                  adapt_batchnorm=True, model_config=None, **unused):

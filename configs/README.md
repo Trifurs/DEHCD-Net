@@ -1,29 +1,15 @@
-# Configuration Layout
+# Configuration layout
 
-The XML files use a small inheritance tree so most variables live in one place.
+`base.xml`, `datasets/*.xml`, `dehcd/*.xml` and `runtime/*.json` are shared templates. Only the 80 XML files indexed by `experiments/catalog.json` define formal canonical experiments. Templates may contain settings that the formal overlays replace; do not treat direct template runs as formal comparison results.
 
-- `base.xml` stores shared model, optimization, logging, and inference defaults.
-- `datasets/*.xml` store task definitions, dataset layout, normalization, loss, and sampling policy.
-- `dehcd/*.xml` store only the DEHCD-Net size variant and run name.
-
-Use any variant directly, for example:
+The catalog is derived from formal configuration metadata. `experiments/groups.json` references canonical IDs without copying scientific settings. Multiple selected groups take the ID union before expanding seeds `[42, 1051, 2060]`: 240 target tasks in total, including compatible existing work.
 
 ```bash
-python tools/train.py --config configs/dehcd/bright_l.xml
-python tools/evaluate.py --config configs/dehcd/haiti_l.xml --checkpoint <checkpoint.pth>
+python -W ignore tools/run_all.py --dry-run
+python -W ignore tools/run_all.py --preflight-only
+python -W ignore tools/run_all.py
 ```
 
-Dataset roots are intentionally placeholders such as `data/BRIGHT`; edit the corresponding dataset base file or pass a modified copy for your environment.
+Use `--groups main ablation sensitivity scaling` to select shared views without duplicating their full reference. Dataset order is BRIGHT, Haiti, xBD, CAU-Flood. The local launcher uses the common RTX 5090 profile and data under `~/桌面/myData/Hete_CD`; `--data-base` and `--output` override locations.
 
-## Controlled experiments
-
-`experiments/catalog.json` indexes 174 fully resolved-through-inheritance experiments.
-All generated experiment overlays use FP32 (`training.amp=false`) for every model.
-Use `tools/run_multiseed.py` to select main, ablation, recipe, sensitivity, adapter, auxiliary, head_recipe or optimizer_recipe suites.
-For model comparisons use these controlled overlays, not the ordinary single-run
-presets above. Main experiments share primary-only supervision and each control
-names its reference and permitted changes; see [fair comparisons](../docs/FAIR_COMPARISONS.md).
-`tools/build_event_cv.py` generates additional cross_event catalogs from verified metadata.
-See [the protocol](../docs/EXPERIMENT_PROTOCOL.md) before running.
-`--runtime-profile rtx5090` applies the shared hardware settings in `runtime/rtx5090.json`;
-see [execution settings](../docs/RUNTIME_PROFILE.md).
+See [generated coverage](../docs/EXPERIMENT_CATALOG.md), [protocol](../docs/EXPERIMENT_PROTOCOL.md), and [runtime settings](../docs/RUNTIME_PROFILE.md). FP32 tensors and TF32 math are recorded separately. Fixed training budgets, foreground_miou selection and disabled ordinary early stopping apply to every formal experiment.

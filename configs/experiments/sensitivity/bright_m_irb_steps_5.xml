@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../main/bright_dehcd_m.xml</base_param>
+  <experiment>
+    <id type="str">bright_m_irb_steps_5</id>
+    <canonical_id type="str">bright_m_irb_steps_5</canonical_id>
+    <dataset type="str">bright</dataset>
+    <suite type="str">sensitivity</suite>
+    <model_variant type="str">m</model_variant>
+    <roles type="list">['sensitivity']</roles>
+    <uses type="list">[{'group': 'sensitivity', 'role': 'point', 'paper_refs': ['Fig.18']}, {'group': 'irb_steps', 'role': 'point', 'paper_refs': ['Fig.18'], 'x': 5, 'reference': 'bright_dehcd_m'}]</uses>
+    <paper_refs type="list">['Fig.18']</paper_refs>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">bright_dehcd_m</reference>
+      <factor type="str">diffusion_steps</factor>
+      <allowed_changes type="list">['model.diffusion_steps']</allowed_changes>
+    </comparison>
+  </experiment>
+  <logging>
+    <run_name type="str">bright_m_irb_steps_5</run_name>
+  </logging>
+  <model>
+    <diffusion_steps type="int">5</diffusion_steps>
+  </model>
+</project>

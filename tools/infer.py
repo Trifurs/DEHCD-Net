@@ -11,7 +11,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from utils.config import XMLConfigParser
 from utils.checkpoint import load_model_state
-from utils.prediction import predict_outputs, resolve_tta, decode_predictions, prediction_rule
+from utils.prediction import (predict_outputs, resolve_tta, decode_predictions, prediction_rule,
+                              validate_evaluation_labels, evaluation_coverage)
 from utils.protocol import verify_checkpoint_config, config_digest, file_digest, dataset_identity, atomic_json
 from utils.logger import setup_logger
 from utils.run_manager import create_run_dir, save_config_snapshot
@@ -91,6 +92,8 @@ def main() -> None:
     config: Dict[str, Any] = XMLConfigParser(args.config).parse().as_dict()
     inference_cfg = config.get("inference", {})
     checkpoint_path = args.checkpoint or inference_cfg.get("checkpoint")
+    if not checkpoint_path:
+        raise ValueError("Provide --checkpoint or inference.checkpoint in the configuration")
     split = args.split or inference_cfg.get("split", "test")
     root_dir = str(config.get("logging", {}).get("root_dir", "runs"))
     run_name = str(config.get("logging", {}).get("run_name", Path(args.config).stem))
@@ -116,7 +119,7 @@ def main() -> None:
     execution = configure_runtime(config.get("training", {}), device)
     dataset = build_dataset(config, split=split, training=False)
     loader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)  # Trusted local run checkpoint.
     verify_checkpoint_config(checkpoint, config)
     model = build_model(
         config,
@@ -127,25 +130,22 @@ def main() -> None:
     load_model_state(model, checkpoint["model"])
     model.eval()
 
-    threshold = float(inference_cfg.get("threshold", 0.5))
     save_visualization = bool(inference_cfg.get("save_visualization", True))
     num_classes = int(config.get("task", {}).get("num_classes", logits_classes_from_checkpoint(checkpoint, config)))
     dataset_cfg = config.get("dataset", {})
     second_modality_title = str(dataset_cfg.get("second_modality_name") or "SAR")
     second_modality_rgb = bool(dataset_cfg.get("second_modality_rgb", False))
+    seen_samples = 0
     with torch.no_grad():
         for step, batch in enumerate(tqdm(loader, desc=f"Infer {split}"), start=1):
             optical = batch["optical"].to(device)
             sar = batch["sar"].to(device)
             model_output = predict_outputs(model, optical, sar, amp=bool(config.get("training", {}).get("amp", True)) and device.type == "cuda", tta_mode=resolve_tta(config, args.tta))
             logits = model_output["logits"]
-            prob = torch.softmax(logits, dim=1)
-            if prediction_rule(config) != "damage_argmax":
-                pred = decode_predictions(model_output, config).squeeze(0).cpu().numpy().astype("uint8")
-            elif logits.shape[1] == 2:
-                pred = (prob[:, 1] >= threshold).squeeze(0).detach().cpu().numpy().astype("uint8")
-            else:
-                pred = torch.argmax(prob, dim=1).squeeze(0).detach().cpu().numpy().astype("uint8")
+            if "label" in batch:
+                validate_evaluation_labels(batch["label"], num_classes, int(config.get("task", {}).get("ignore_index", 255)))
+            pred = decode_predictions(model_output, config).squeeze(0).cpu().numpy().astype("uint8")
+            seen_samples += int(optical.shape[0])
             sample_id = batch["id"][0]
             scale = 255 if logits.shape[1] == 2 else 1
             save_png(pred * scale, save_dir / "masks" / f"{sample_id}.png")
@@ -165,7 +165,15 @@ def main() -> None:
                     logger.warning("Visualization skipped for %s: %s", sample_id, exc)
             if args.max_samples > 0 and step >= args.max_samples:
                 break
-    logger.info("Saved predictions to %s", save_dir)
+    coverage = evaluation_coverage(seen_samples, len(dataset), limit=args.max_samples)
+    atomic_json(run_dir / "prediction_manifest.json", {
+        "schema_version": 2, **coverage, "split": split, "checkpoint": str(Path(checkpoint_path).resolve()),
+        "checkpoint_sha256": file_digest(checkpoint_path), "config_sha256": config_digest(checkpoint.get("config", config)),
+        "dataset_identity": dataset_identity(dataset), "prediction_directory": str(save_dir),
+        "runtime": {"execution": execution, "prediction_rule": prediction_rule(config),
+                    "test_time_augmentation": resolve_tta(config, args.tta), "max_samples": args.max_samples},
+        "mask_encoding": {"binary": "0=background, 255=foreground", "multiclass": "integer class IDs"}})
+    logger.info("Saved %s predictions (%s) to %s", seen_samples, coverage["status"], save_dir)
 
 
 def logits_classes_from_checkpoint(checkpoint: Dict[str, Any], config: Dict[str, Any]) -> int:

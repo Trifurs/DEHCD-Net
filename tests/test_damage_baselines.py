@@ -9,7 +9,6 @@ from utils.losses import segmentation_loss
 from utils.prediction import predict_outputs, decode_predictions
 from utils.config import XMLConfigParser
 from utils.experiment_statistics import paired_seed_comparison, holm_adjust
-from tools.build_event_cv import event_folds
 
 ROOT = Path(__file__).resolve().parents[1]
 torch.set_num_threads(2)
@@ -26,7 +25,7 @@ class DamageBaselineTests(unittest.TestCase):
         from utils.model_metadata import model_metadata
         self.assertEqual('fp32', model_metadata(model, 'cpu')['core_precision_policy'])
 
-    def test_native_head_metrics_keep_foreground_conditioning_explicit(self):
+    def test_diagnostic_head_metrics_keep_foreground_conditioning_explicit(self):
         from utils.damage_metrics import DamageHeadMeter
         # Full-map accuracy is 3/4, while damage on the two true foreground
         # pixels is perfect; the separate reports must not conflate the two.
@@ -34,13 +33,15 @@ class DamageBaselineTests(unittest.TestCase):
         pred = torch.tensor([[[1, 1], [2, 0]]])
         logits = torch.nn.functional.one_hot(pred, 3).permute(0,3,1,2).float()*5
         loc = torch.nn.functional.one_hot((labels>0).long(),2).permute(0,3,1,2).float()*5
-        meter = DamageHeadMeter(3); meter.update({'logits':logits,'localization_logits':loc},labels)
+        meter = DamageHeadMeter(3, localization_supervised=False); meter.update({'logits':logits,'localization_logits':loc},labels)
         result = meter.compute()
         self.assertEqual(2, result['labeled_foreground_pixels'])
         self.assertEqual(1., result['conditional_damage_hmean_f1'])
-        self.assertEqual(1., result['localization_f1'])
+        self.assertIsNone(result['localization_f1'])
+        self.assertFalse(result['localization_supervised'])
+        self.assertEqual(1., result['diagnostic_localization_f1'])
 
-    def test_real_models_multiclass_backward_all_parameters(self):
+    def test_real_models_multiclass_primary_backward_and_dual_heads(self):
         for name in ('changeos', 'damageformer', 'changemamba'):
             with self.subTest(model=name):
                 torch.manual_seed(17)
@@ -52,11 +53,14 @@ class DamageBaselineTests(unittest.TestCase):
                 self.assertEqual((2, 4, 64, 64), tuple(out['logits'].shape))
                 self.assertEqual((2, 2, 64, 64), tuple(out['localization_logits'].shape))
                 target = torch.randint(0, 4, (2, 64, 64)); target[:, :2] = 255
-                recipe = 'changeos_native' if name == 'changeos' else 'damage_ce_lovasz'
-                loss = segmentation_loss(out, target, {'loss': recipe}, 4)
+                out['logits'].retain_grad(); out['localization_logits'].retain_grad()
+                loss = segmentation_loss(out, target, {'loss': 'ce_dice', 'localization_loss_weight': 0}, 4)
                 loss.backward()
-                for key, parameter in model.named_parameters():
-                    self.assertIsNotNone(parameter.grad, key)
+                self.assertIsNotNone(out['logits'].grad)
+                self.assertIsNone(out['localization_logits'].grad)
+                active = [(key, parameter) for key, parameter in model.named_parameters() if parameter.grad is not None]
+                self.assertTrue(active)
+                for key, parameter in active:
                     self.assertTrue(torch.isfinite(parameter.grad).all(), key)
                 norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 5., error_if_nonfinite=True)
                 self.assertTrue(torch.isfinite(norm))
@@ -68,20 +72,22 @@ class DamageBaselineTests(unittest.TestCase):
                 del model, out, loss, odd
                 gc.collect()
 
-    def test_binary_and_xbd_native_bn_variants(self):
+    def test_binary_and_five_class_adapted_dual_heads(self):
         for name in ('changeos', 'damageformer', 'changemamba'):
             for classes, sar_channels in ((2, 1), (5, 3)):
                 with self.subTest(model=name, classes=classes):
                     cfg = {'model': {'name': name, 'num_classes': classes, 'selective_scan_backend': 'torch',
-                        'compare_adapt_batchnorm': False, 'share_damage_encoder': classes == 5,
+                        'compare_adapt_batchnorm': True, 'share_damage_encoder': classes == 5,
                         'changemamba_variant': 'bda' if classes == 5 else 'multimodal'}}
                     model = build_model(cfg, 3, sar_channels).train()
                     out = model(torch.randn(2,3,64,64), torch.randn(2,sar_channels,64,64))
                     self.assertEqual(classes, out['logits'].shape[1])
-                    loss = segmentation_loss(out, torch.randint(0, classes, (2,64,64)), {'loss':'ce_dice'}, classes)
+                    loss = segmentation_loss(out, torch.randint(0, classes, (2,64,64)), {'loss':'ce_dice', 'localization_loss_weight': 0}, classes)
                     self.assertTrue(torch.isfinite(loss))
                     loss.backward()
-                    self.assertTrue(all(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters()))
+                    active = [p for p in model.parameters() if p.grad is not None]
+                    self.assertTrue(active)
+                    self.assertTrue(all(torch.isfinite(p.grad).all() for p in active))
                     del model, out, loss
                     gc.collect()
 
@@ -95,20 +101,21 @@ class DamageBaselineTests(unittest.TestCase):
             actual = predict_outputs(Pointwise(),x,y,False,mode)
             for key in expected:
                 torch.testing.assert_close(actual[key],expected[key])
-        for recipe in ('ce_dice','damage_ce_lovasz','changeos_native'):
+        for recipe in ('ce_dice', 'hierarchical_change'):
             out = {'logits': torch.randn(2,4,8,8,requires_grad=True),
                    'localization_logits': torch.randn(2,2,8,8,requires_grad=True)}
             labels = torch.full((2,8,8),255)
-            loss = segmentation_loss(out, labels, {'loss':recipe}, 4)
+            loss = segmentation_loss(out, labels, {'loss':recipe, 'localization_loss_weight': 0}, 4)
             self.assertEqual(0.,loss.item());loss.backward()
-            self.assertTrue(all(value.grad is not None and not value.grad.any() for value in out.values()))
-            # Mixed ignored pixels must receive zero gradient in both heads.
+            self.assertIsNotNone(out['logits'].grad); self.assertFalse(out['logits'].grad.any())
+            self.assertIsNone(out['localization_logits'].grad)
+            # Ignored pixels receive zero gradient; the localization head stays unsupervised.
             for value in out.values(): value.grad = None
             labels[:,4:] = 0
-            segmentation_loss(out,labels,{'loss':recipe},4).backward()
-            for value in out.values():
-                self.assertTrue(torch.isfinite(value.grad).all())
-                self.assertFalse(value.grad[:,:,:4].any())
+            segmentation_loss(out,labels,{'loss':recipe, 'localization_loss_weight': 0},4).backward()
+            self.assertTrue(torch.isfinite(out['logits'].grad).all())
+            self.assertFalse(out['logits'].grad[:,:,:4].any())
+            self.assertIsNone(out['localization_logits'].grad)
 
     def test_changeos_object_vote_requires_correct_taxonomy(self):
         loc = torch.zeros(1,2,6,6);loc[:,0]=1;loc[:,1,1:3,1:3]=3
@@ -176,19 +183,13 @@ class ScanAndControlTests(unittest.TestCase):
                     grad = model.diffusion_refine.step_scale.grad
                     self.assertGreater(float(grad.max() - grad.min()), 0.)
 
-    def test_seed_statistics_and_event_holdouts(self):
-        result=paired_seed_comparison(dict.fromkeys(range(5),.8),dict.fromkeys(range(5),.7),repeats=1000)
+    def test_seed_statistics(self):
+        result=paired_seed_comparison(dict.fromkeys((42,1051,2060),.8),dict.fromkeys((42,1051,2060),.7),repeats=1000)
         self.assertAlmostEqual(.1,result['mean_difference'])
-        self.assertEqual(.0625,result['p_value'])
+        self.assertEqual(.25,result['p_value'])
         self.assertEqual([.03,.08,.08],holm_adjust([.01,.04,.04]))
         with self.assertRaises(ValueError): paired_seed_comparison({1:.8,2:.7},{1:.2,3:.2})
-        rows=[{'id':str(i),'source_split':'train','split':'train','group':str(i),'event':str(i//2)} for i in range(8)]
-        folds=event_folds(rows);self.assertEqual(4,len(folds))
-        self.assertEqual({str(i) for i in range(4)},{f[0] for f in folds})
-        for test,val,assigned in folds:
-            self.assertNotEqual(test,val)
-            self.assertEqual({test},{r['event'] for r in assigned if r['split']=='test'})
-            self.assertEqual({val},{r['event'] for r in assigned if r['split']=='val'})
+
 
 
 if __name__ == '__main__':

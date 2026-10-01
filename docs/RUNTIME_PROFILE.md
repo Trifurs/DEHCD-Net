@@ -13,8 +13,7 @@ Use a new output directory whenever these settings change.
 | CAU-Flood | 256×256 | 4 | 3 | 12 | 100 | 0.001 |
 | xBD | 256×256 | 4 | 3 | 12 | 100 | 0.0008 |
 
-The explicit optimizer-recipe controls retain their own declared learning rates
-and schedules. No model-specific automatic batch reduction, resolution change,
+No model-specific automatic batch reduction, resolution change,
 pretraining, early stopping or shorter epoch budget is applied. The final partial
 accumulation window uses its actual number of microbatches. Accumulation preserves
 the nominal batch budget but is not mathematically identical to a large physical
@@ -61,7 +60,7 @@ python tools/run_multiseed.py --suite all --seeds 42 1051 2060 \
   --device cuda:0 --output runs/all_3seeds_rtx5090 --resume
 ```
 
-The catalog contains 174 configurations (522 runs at three seeds). Split overlap
+The catalog contains 80 unique configurations (240 target tasks at three seeds). Compatible existing training counts toward this target; the reuse manifest identifies remaining work. Split overlap
 checks remain mandatory. Disk requirements include full best/last model and
 optimizer states for every run; disabling periodic archives does not make those
 states small. Reserve sufficient storage before launching the whole catalog.

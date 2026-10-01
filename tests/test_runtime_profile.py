@@ -95,16 +95,16 @@ class RuntimeProfileTests(unittest.TestCase):
                 self.assertEqual(original[key], cfg[key])
             self.assertNotEqual(config_digest(original), config_digest(cfg))
             configs[row['id']] = cfg
-        self.assertEqual(170, len(validate_design(configs)))
+        self.assertEqual(76, len(validate_design(configs)))
 
-    def test_runtime_plan_has_522_jobs_and_profiles_references(self):
+    def test_runtime_plan_has_240_jobs_and_profiles_references(self):
         args = SimpleNamespace(catalog=str(ROOT / 'configs/experiments/catalog.json'), suite=['all'],
             datasets=['bright', 'haiti', 'cau_flood', 'xbd'], experiments=None, config=None,
             seeds=[42, 1051, 2060], data_root=[], manifest=[], encoder_checkpoint=[],
             device='cuda:0', num_workers=None, epochs=None, batch_size=None,
             gradient_accumulation_steps=None, fingerprint='stat', runtime_profile='rtx5090')
         plan = make_plan(args)
-        self.assertEqual(522, len(plan['jobs']))
+        self.assertEqual(240, len(plan['jobs']))
         self.assertTrue(all(j['config']['training']['num_workers'] == 8 for j in plan['jobs']))
         args.experiments = ['haiti_no_bicsf']; args.num_workers = 2
         plan = make_plan(args)
@@ -139,6 +139,18 @@ class RuntimeProfileTests(unittest.TestCase):
         self.assertEqual(2, dataset.reads)
         compute_label_distribution(dataset, 2, 255, max_samples=1)
         self.assertEqual(3, dataset.reads)
+
+    def test_evaluation_determinism_without_named_profile(self):
+        old = torch.are_deterministic_algorithms_enabled()
+        cudnn = (torch.backends.cudnn.benchmark, torch.backends.cudnn.deterministic)
+        try:
+            info = configure_runtime({'deterministic': True}, torch.device('cpu'))
+            self.assertTrue(info['deterministic_algorithms'])
+            self.assertTrue(info['cudnn_deterministic'])
+            self.assertFalse(info['cudnn_benchmark'])
+        finally:
+            torch.use_deterministic_algorithms(old, warn_only=True)
+            torch.backends.cudnn.benchmark, torch.backends.cudnn.deterministic = cudnn
 
     def test_runtime_precision_is_explicit(self):
         a, b = torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32

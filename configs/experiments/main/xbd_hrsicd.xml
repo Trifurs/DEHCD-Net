@@ -30,8 +30,13 @@
   </inference>
   <experiment>
     <id type="str">xbd_hrsicd</id>
+    <canonical_id type="str">xbd_hrsicd</canonical_id>
     <dataset type="str">xbd</dataset>
     <suite type="str">main</suite>
+    <model_variant type="str">hrsicd</model_variant>
+    <roles type="list">['main', 'qualitative', 'efficiency']</roles>
+    <uses type="list">[{'group': 'main', 'role': 'model', 'paper_refs': ['Table 5']}, {'group': 'main_xbd', 'role': 'model', 'paper_refs': ['Table 5']}, {'group': 'qualitative', 'role': 'checkpoint', 'paper_refs': ['Fig.14'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'efficiency', 'role': 'checkpoint', 'paper_refs': ['Figs.15/16'], 'display_seed': 42, 'postprocess_only': True}]</uses>
+    <paper_refs type="list">['Table 5', 'Fig.14', 'Figs.15/16']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

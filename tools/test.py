@@ -81,7 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--save-sample-metrics",
         action="store_true",
-        help="Save per-sample metrics CSV. Useful for selecting best/worst qualitative examples.",
+        help="Save per-sample metrics CSV for error analysis; qualitative comparison samples must be fixed before inspecting scores.",
     )
     return parser.parse_args()
 
@@ -198,8 +198,9 @@ def apply_runtime_overrides(config: Dict[str, Any], args: argparse.Namespace) ->
 
 
 from utils.model_metadata import model_metadata
-from utils.damage_metrics import DamageHeadMeter
-from utils.prediction import predict_outputs, resolve_tta, decode_predictions, prediction_rule
+from utils.damage_metrics import DamageHeadMeter, localization_is_supervised
+from utils.prediction import (predict_outputs, resolve_tta, decode_predictions, prediction_rule,
+                              check_evaluation_tensors, validate_evaluation_labels, evaluation_coverage)
 from utils.protocol import config_digest, file_digest, verify_checkpoint_config, dataset_identity
 
 
@@ -239,7 +240,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         persistent_workers=num_workers > 0,
     )
 
-    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)  # Trusted local run checkpoint.
     for unused in ("optimizer", "scheduler", "scaler", "rng_state"):
         checkpoint.pop(unused, None)
     if "model" not in checkpoint:
@@ -268,7 +269,8 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             save_json(profile, artifact_dir / "model_profile.json")
 
     meter = ConfusionMatrixMeter(num_classes=num_classes, ignore_index=ignore_index)
-    damage_head_meter = DamageHeadMeter(num_classes, ignore_index)
+    damage_head_meter = DamageHeadMeter(num_classes, ignore_index,
+        localization_supervised=localization_is_supervised(checkpoint.get("config", config)))
     total_loss = 0.0
     seen_batches = 0
     visualized = 0
@@ -294,6 +296,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             optical = batch["optical"].to(device, non_blocking=True)
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
+            validate_evaluation_labels(label, num_classes, ignore_index)
             model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=tta_mode)
             logits = model_output["logits"]
             loss = segmentation_loss(
@@ -303,6 +306,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
                 num_classes=num_classes,
                 ignore_index=ignore_index,
             )
+            check_evaluation_tensors({"loss": loss})
             total_loss += float(loss.item())
             seen_batches += 1
             seen_samples += int(label.shape[0])
@@ -346,7 +350,10 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             if args.max_batches > 0 and step >= args.max_batches:
                 break
 
+    coverage = evaluation_coverage(seen_samples, len(dataset), limit=args.max_batches)
     metrics = meter.compute()
+    if metrics["valid_pixels"] <= 0:
+        raise ValueError("Evaluation contains no valid labelled pixels")
     if args.save_sample_metrics:
         save_json(sample_counts, artifact_dir / "sample_confusion_matrices.json")
         save_json({e: {"confusion_matrix": m.matrix.long().tolist(), "metrics": m.compute()}
@@ -366,8 +373,8 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             warnings.warn(f"Confusion matrix plot skipped for {run_dir.name}: {exc}", stacklevel=2)
     best_name = primary_metric_name(num_classes, train_cfg.get("best_metric_resolved", train_cfg.get("best_metric", "auto")))
     result = {
-        "schema_version": 1,
-        "evaluated_samples": seen_samples,
+        "schema_version": 2,
+        **coverage,
         "config_sha256": config_digest(checkpoint.get("config", config)),
         "checkpoint_sha256": file_digest(checkpoint_path),
         "dataset_identity": dataset_identity(dataset),
@@ -425,7 +432,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         f"{format_metrics(metrics, num_classes)} "
         f"{best_name}={result['best_metric_value']:.4f}"
     )
-    reporter.finish()
+    reporter.finish("complete" if coverage["complete"] else "partial")
     return result
 
 
@@ -448,7 +455,7 @@ def _is_haiti_config(config: Dict[str, Any]) -> bool:
 def save_json(payload: Dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as file:
-        json.dump(payload, file, ensure_ascii=False, indent=2)
+        json.dump(payload, file, ensure_ascii=False, indent=2, allow_nan=False)
 
 
 def profile_model(model, dataset, device, args: argparse.Namespace) -> Dict[str, Any]:
@@ -1142,6 +1149,10 @@ def write_summary(results: List[Dict[str, Any]], output_root: Path) -> None:
     fixed_fields = [
         "train_run",
         "split",
+        "status",
+        "complete",
+        "evaluated_samples",
+        "expected_samples",
         "artifact_dir",
         "checkpoint",
         "checkpoint_epoch",
@@ -1186,8 +1197,21 @@ def main() -> None:
         identifier = run_identifier(run_dir, load_config_snapshot(run_dir))
         output_path = Path(args.result_file) if args.result_file else output_root / f"{identifier}.json"
         if args.skip_existing and output_path.exists():
-            print(f"Skip existing result: {output_path}")
-            continue
+            from tools.validate_results import validate_result
+            existing = json.loads(output_path.read_text())
+            effective = apply_runtime_overrides(load_config_snapshot(run_dir), args)
+            try:
+                validate_result(existing, expected_config=config_digest(effective), verify_files=True)
+                runtime = existing.get("runtime", {})
+                if (runtime.get("test_time_augmentation") != resolve_tta(effective, args.tta)
+                        or runtime.get("prediction_rule") != prediction_rule(effective)
+                        or existing.get("checkpoint_sha256") != file_digest(resolve_checkpoint(run_dir, args.checkpoint))):
+                    raise ValueError("Existing result uses a different checkpoint or decoding rule")
+            except (KeyError, ValueError, OSError) as exc:
+                print(f"Re-evaluate existing result: {output_path} ({exc})")
+            else:
+                print(f"Skip verified complete result: {output_path}")
+                continue
         try:
             result = evaluate_run(run_dir, args, artifact_dir=output_root if args.result_file else output_root / identifier)
         except Exception as exc:

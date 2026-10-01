@@ -1,1049 +1,4704 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "seeds": [
+    42,
+    1051,
+    2060
+  ],
+  "unique_configurations": 80,
+  "target_tasks": 240,
+  "counts_by_dataset": {
+    "bright": 39,
+    "haiti": 23,
+    "xbd": 9,
+    "cau_flood": 9
+  },
   "experiments": [
     {
       "id": "bright_dehcd_s",
+      "canonical_id": "bright_dehcd_s",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "s",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        },
+        {
+          "group": "scaling_bright",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_dehcd_s.xml"
     },
     {
       "id": "bright_dehcd_m",
+      "canonical_id": "bright_dehcd_m",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "m",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling",
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        },
+        {
+          "group": "scaling_bright",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        },
+        {
+          "group": "sensitivity",
+          "role": "reference",
+          "paper_refs": [
+            "Figs.18/19"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "default",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 3,
+          "reference": "bright_dehcd_m"
+        },
+        {
+          "group": "hog_levels",
+          "role": "default",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 2,
+          "levels": [
+            0,
+            1
+          ],
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16",
+        "Figs.18/19",
+        "Fig.18",
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_dehcd_m.xml"
     },
     {
       "id": "bright_dehcd_l",
+      "canonical_id": "bright_dehcd_l",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "l",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling",
+        "data_statistics",
+        "ablation",
+        "features",
+        "capacity",
+        "dpm",
+        "recipe"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "scaling_bright",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "data_statistics",
+          "role": "data",
+          "paper_refs": [
+            "Table 1"
+          ],
+          "postprocess_only": true
+        },
+        {
+          "group": "ablation",
+          "role": "reference",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "reference",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "group": "features",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.12"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "capacity",
+          "role": "reference",
+          "paper_refs": [
+            "Additional capacity comparison"
+          ]
+        },
+        {
+          "group": "dpm",
+          "role": "reference",
+          "paper_refs": [
+            "Additional dpm comparison"
+          ]
+        },
+        {
+          "group": "recipe",
+          "role": "reference",
+          "paper_refs": [
+            "Additional recipe comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16",
+        "Table 1",
+        "Fig.17",
+        "Fig.12",
+        "Additional capacity comparison",
+        "Additional dpm comparison",
+        "Additional recipe comparison"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_dehcd_l.xml"
     },
     {
       "id": "bright_icif_net",
+      "canonical_id": "bright_icif_net",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "icif_net",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_icif_net.xml"
     },
     {
-      "id": "bright_icif_net_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_icif_net_original_bn.xml"
-    },
-    {
       "id": "bright_dminet",
+      "canonical_id": "bright_dminet",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "dminet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_dminet.xml"
     },
     {
-      "id": "bright_dminet_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_dminet_original_bn.xml"
-    },
-    {
       "id": "bright_hfa_panet",
+      "canonical_id": "bright_hfa_panet",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "hfa_panet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_hfa_panet.xml"
     },
     {
-      "id": "bright_hfa_panet_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_hfa_panet_original_bn.xml"
-    },
-    {
       "id": "bright_wavehfg",
+      "canonical_id": "bright_wavehfg",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "wavehfg",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_wavehfg.xml"
     },
     {
-      "id": "bright_wavehfg_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_wavehfg_original_bn.xml"
-    },
-    {
       "id": "bright_hrsicd",
+      "canonical_id": "bright_hrsicd",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "hrsicd",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_hrsicd.xml"
     },
     {
-      "id": "bright_hrsicd_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_hrsicd_original_bn.xml"
-    },
-    {
       "id": "bright_haff",
+      "canonical_id": "bright_haff",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "haff",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_haff.xml"
     },
     {
-      "id": "bright_haff_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_haff_original_bn.xml"
-    },
-    {
       "id": "bright_changeos",
+      "canonical_id": "bright_changeos",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "changeos",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_changeos.xml"
     },
     {
-      "id": "bright_changeos_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_changeos_original_bn.xml"
-    },
-    {
       "id": "bright_damageformer",
+      "canonical_id": "bright_damageformer",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "damageformer",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_damageformer.xml"
     },
     {
-      "id": "bright_damageformer_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_damageformer_original_bn.xml"
-    },
-    {
       "id": "bright_changemamba",
+      "canonical_id": "bright_changemamba",
       "dataset": "bright",
       "suite": "main",
+      "model_variant": "changemamba",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "main_bright",
+          "role": "model",
+          "paper_refs": [
+            "Table 2"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 2",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "bright_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/bright_changemamba.xml"
     },
     {
-      "id": "bright_changemamba_original_bn",
-      "dataset": "bright",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/bright_changemamba_original_bn.xml"
-    },
-    {
-      "id": "bright_changeos_localization_aux",
-      "dataset": "bright",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/bright_changeos_localization_aux.xml"
-    },
-    {
-      "id": "bright_damageformer_localization_aux",
-      "dataset": "bright",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/bright_damageformer_localization_aux.xml"
-    },
-    {
-      "id": "bright_changemamba_localization_aux",
-      "dataset": "bright",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/bright_changemamba_localization_aux.xml"
-    },
-    {
       "id": "haiti_dehcd_s",
+      "canonical_id": "haiti_dehcd_s",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "s",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        },
+        {
+          "group": "scaling_haiti",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_dehcd_s.xml"
     },
     {
       "id": "haiti_dehcd_m",
+      "canonical_id": "haiti_dehcd_m",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "m",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        },
+        {
+          "group": "scaling_haiti",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_dehcd_m.xml"
     },
     {
       "id": "haiti_dehcd_l",
+      "canonical_id": "haiti_dehcd_l",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "l",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion",
+        "scaling",
+        "data_statistics",
+        "ablation",
+        "features",
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "scaling_haiti",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "data_statistics",
+          "role": "data",
+          "paper_refs": [
+            "Table 1"
+          ],
+          "postprocess_only": true
+        },
+        {
+          "group": "ablation",
+          "role": "reference",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "reference",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "group": "features",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.12"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "sensitivity",
+          "role": "reference",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_bins",
+          "role": "default",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 6,
+          "reference": "haiti_dehcd_l"
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16",
+        "Table 1",
+        "Fig.17",
+        "Fig.12",
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_dehcd_l.xml"
     },
     {
       "id": "haiti_icif_net",
+      "canonical_id": "haiti_icif_net",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "icif_net",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_icif_net.xml"
     },
     {
-      "id": "haiti_icif_net_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_icif_net_original_bn.xml"
-    },
-    {
       "id": "haiti_dminet",
+      "canonical_id": "haiti_dminet",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "dminet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_dminet.xml"
     },
     {
-      "id": "haiti_dminet_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_dminet_original_bn.xml"
-    },
-    {
       "id": "haiti_hfa_panet",
+      "canonical_id": "haiti_hfa_panet",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "hfa_panet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_hfa_panet.xml"
     },
     {
-      "id": "haiti_hfa_panet_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_hfa_panet_original_bn.xml"
-    },
-    {
       "id": "haiti_wavehfg",
+      "canonical_id": "haiti_wavehfg",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "wavehfg",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_wavehfg.xml"
     },
     {
-      "id": "haiti_wavehfg_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_wavehfg_original_bn.xml"
-    },
-    {
       "id": "haiti_hrsicd",
+      "canonical_id": "haiti_hrsicd",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "hrsicd",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_hrsicd.xml"
     },
     {
-      "id": "haiti_hrsicd_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_hrsicd_original_bn.xml"
-    },
-    {
       "id": "haiti_haff",
+      "canonical_id": "haiti_haff",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "haff",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_haff.xml"
     },
     {
-      "id": "haiti_haff_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_haff_original_bn.xml"
-    },
-    {
       "id": "haiti_changeos",
+      "canonical_id": "haiti_changeos",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "changeos",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_changeos.xml"
     },
     {
-      "id": "haiti_changeos_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_changeos_original_bn.xml"
-    },
-    {
       "id": "haiti_damageformer",
+      "canonical_id": "haiti_damageformer",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "damageformer",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_damageformer.xml"
     },
     {
-      "id": "haiti_damageformer_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_damageformer_original_bn.xml"
-    },
-    {
       "id": "haiti_changemamba",
+      "canonical_id": "haiti_changemamba",
       "dataset": "haiti",
       "suite": "main",
+      "model_variant": "changemamba",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "confusion"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "main_haiti",
+          "role": "model",
+          "paper_refs": [
+            "Table 3"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "confusion",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.8–11"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 3",
+        "Figs.8–11",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "haiti_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/haiti_changemamba.xml"
     },
     {
-      "id": "haiti_changemamba_original_bn",
-      "dataset": "haiti",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/haiti_changemamba_original_bn.xml"
-    },
-    {
-      "id": "haiti_changeos_localization_aux",
-      "dataset": "haiti",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/haiti_changeos_localization_aux.xml"
-    },
-    {
-      "id": "haiti_damageformer_localization_aux",
-      "dataset": "haiti",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/haiti_damageformer_localization_aux.xml"
-    },
-    {
-      "id": "haiti_changemamba_localization_aux",
-      "dataset": "haiti",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/haiti_changemamba_localization_aux.xml"
-    },
-    {
-      "id": "cau_flood_dehcd_s",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_dehcd_s.xml"
-    },
-    {
-      "id": "cau_flood_dehcd_m",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_dehcd_m.xml"
-    },
-    {
-      "id": "cau_flood_dehcd_l",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_dehcd_l.xml"
-    },
-    {
-      "id": "cau_flood_icif_net",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_icif_net.xml"
-    },
-    {
-      "id": "cau_flood_icif_net_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_icif_net_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_dminet",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_dminet.xml"
-    },
-    {
-      "id": "cau_flood_dminet_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_dminet_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_hfa_panet",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_hfa_panet.xml"
-    },
-    {
-      "id": "cau_flood_hfa_panet_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_hfa_panet_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_wavehfg",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_wavehfg.xml"
-    },
-    {
-      "id": "cau_flood_wavehfg_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_wavehfg_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_hrsicd",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_hrsicd.xml"
-    },
-    {
-      "id": "cau_flood_hrsicd_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_hrsicd_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_haff",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_haff.xml"
-    },
-    {
-      "id": "cau_flood_haff_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_haff_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_changeos",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_changeos.xml"
-    },
-    {
-      "id": "cau_flood_changeos_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_changeos_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_damageformer",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_damageformer.xml"
-    },
-    {
-      "id": "cau_flood_damageformer_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_damageformer_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_changemamba",
-      "dataset": "cau_flood",
-      "suite": "main",
-      "config": "configs/experiments/main/cau_flood_changemamba.xml"
-    },
-    {
-      "id": "cau_flood_changemamba_original_bn",
-      "dataset": "cau_flood",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/cau_flood_changemamba_original_bn.xml"
-    },
-    {
-      "id": "cau_flood_changeos_localization_aux",
-      "dataset": "cau_flood",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/cau_flood_changeos_localization_aux.xml"
-    },
-    {
-      "id": "cau_flood_damageformer_localization_aux",
-      "dataset": "cau_flood",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/cau_flood_damageformer_localization_aux.xml"
-    },
-    {
-      "id": "cau_flood_changemamba_localization_aux",
-      "dataset": "cau_flood",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/cau_flood_changemamba_localization_aux.xml"
-    },
-    {
       "id": "xbd_dehcd_s",
+      "canonical_id": "xbd_dehcd_s",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "s",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        },
+        {
+          "group": "scaling_xbd",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_dehcd_s.xml"
     },
     {
       "id": "xbd_dehcd_m",
+      "canonical_id": "xbd_dehcd_m",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "m",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        },
+        {
+          "group": "scaling_xbd",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_dehcd_m.xml"
     },
     {
       "id": "xbd_dehcd_l",
+      "canonical_id": "xbd_dehcd_l",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "l",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling",
+        "data_statistics"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "scaling_xbd",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "data_statistics",
+          "role": "data",
+          "paper_refs": [
+            "Table 1"
+          ],
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16",
+        "Table 1"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_dehcd_l.xml"
     },
     {
       "id": "xbd_icif_net",
+      "canonical_id": "xbd_icif_net",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "icif_net",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_icif_net.xml"
     },
     {
-      "id": "xbd_icif_net_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_icif_net_original_bn.xml"
-    },
-    {
       "id": "xbd_dminet",
+      "canonical_id": "xbd_dminet",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "dminet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_dminet.xml"
     },
     {
-      "id": "xbd_dminet_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_dminet_original_bn.xml"
-    },
-    {
       "id": "xbd_hfa_panet",
+      "canonical_id": "xbd_hfa_panet",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "hfa_panet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_hfa_panet.xml"
     },
     {
-      "id": "xbd_hfa_panet_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_hfa_panet_original_bn.xml"
-    },
-    {
       "id": "xbd_wavehfg",
+      "canonical_id": "xbd_wavehfg",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "wavehfg",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_wavehfg.xml"
     },
     {
-      "id": "xbd_wavehfg_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_wavehfg_original_bn.xml"
-    },
-    {
       "id": "xbd_hrsicd",
+      "canonical_id": "xbd_hrsicd",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "hrsicd",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_hrsicd.xml"
     },
     {
-      "id": "xbd_hrsicd_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_hrsicd_original_bn.xml"
-    },
-    {
       "id": "xbd_haff",
+      "canonical_id": "xbd_haff",
       "dataset": "xbd",
       "suite": "main",
+      "model_variant": "haff",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "main_xbd",
+          "role": "model",
+          "paper_refs": [
+            "Table 5"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.14"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 5",
+        "Fig.14",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "xbd_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
       "config": "configs/experiments/main/xbd_haff.xml"
     },
     {
-      "id": "xbd_haff_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_haff_original_bn.xml"
-    },
-    {
-      "id": "xbd_changeos",
-      "dataset": "xbd",
+      "id": "cau_flood_dehcd_s",
+      "canonical_id": "cau_flood_dehcd_s",
+      "dataset": "cau_flood",
       "suite": "main",
-      "config": "configs/experiments/main/xbd_changeos.xml"
+      "model_variant": "s",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        },
+        {
+          "group": "scaling_cau_flood",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "s"
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_dehcd_s.xml"
     },
     {
-      "id": "xbd_changeos_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_changeos_original_bn.xml"
-    },
-    {
-      "id": "xbd_damageformer",
-      "dataset": "xbd",
+      "id": "cau_flood_dehcd_m",
+      "canonical_id": "cau_flood_dehcd_m",
+      "dataset": "cau_flood",
       "suite": "main",
-      "config": "configs/experiments/main/xbd_damageformer.xml"
+      "model_variant": "m",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        },
+        {
+          "group": "scaling_cau_flood",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "m"
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_dehcd_m.xml"
     },
     {
-      "id": "xbd_damageformer_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_damageformer_original_bn.xml"
-    },
-    {
-      "id": "xbd_changemamba",
-      "dataset": "xbd",
+      "id": "cau_flood_dehcd_l",
+      "canonical_id": "cau_flood_dehcd_l",
+      "dataset": "cau_flood",
       "suite": "main",
-      "config": "configs/experiments/main/xbd_changemamba.xml"
+      "model_variant": "l",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency",
+        "scaling",
+        "data_statistics"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "scaling",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "scaling_cau_flood",
+          "role": "size",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "x": "l"
+        },
+        {
+          "group": "data_statistics",
+          "role": "data",
+          "paper_refs": [
+            "Table 1"
+          ],
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16",
+        "Table 1"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_dehcd_l.xml"
     },
     {
-      "id": "xbd_changemamba_original_bn",
-      "dataset": "xbd",
-      "suite": "adapter",
-      "config": "configs/experiments/adapter/xbd_changemamba_original_bn.xml"
+      "id": "cau_flood_icif_net",
+      "canonical_id": "cau_flood_icif_net",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "icif_net",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_icif_net.xml"
     },
     {
-      "id": "xbd_changeos_localization_aux",
-      "dataset": "xbd",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/xbd_changeos_localization_aux.xml"
+      "id": "cau_flood_dminet",
+      "canonical_id": "cau_flood_dminet",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "dminet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_dminet.xml"
     },
     {
-      "id": "xbd_damageformer_localization_aux",
-      "dataset": "xbd",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/xbd_damageformer_localization_aux.xml"
+      "id": "cau_flood_hfa_panet",
+      "canonical_id": "cau_flood_hfa_panet",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "hfa_panet",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_hfa_panet.xml"
     },
     {
-      "id": "xbd_changemamba_localization_aux",
-      "dataset": "xbd",
-      "suite": "auxiliary",
-      "config": "configs/experiments/auxiliary/xbd_changemamba_localization_aux.xml"
+      "id": "cau_flood_wavehfg",
+      "canonical_id": "cau_flood_wavehfg",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "wavehfg",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_wavehfg.xml"
     },
     {
-      "id": "bright_changeos_head_recipe",
-      "dataset": "bright",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/bright_changeos_head_recipe.xml"
+      "id": "cau_flood_hrsicd",
+      "canonical_id": "cau_flood_hrsicd",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "hrsicd",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_hrsicd.xml"
     },
     {
-      "id": "bright_damageformer_head_recipe",
-      "dataset": "bright",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/bright_damageformer_head_recipe.xml"
-    },
-    {
-      "id": "bright_changemamba_head_recipe",
-      "dataset": "bright",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/bright_changemamba_head_recipe.xml"
-    },
-    {
-      "id": "xbd_changeos_head_recipe",
-      "dataset": "xbd",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/xbd_changeos_head_recipe.xml"
-    },
-    {
-      "id": "xbd_damageformer_head_recipe",
-      "dataset": "xbd",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/xbd_damageformer_head_recipe.xml"
-    },
-    {
-      "id": "xbd_changemamba_head_recipe",
-      "dataset": "xbd",
-      "suite": "head_recipe",
-      "config": "configs/experiments/head_recipe/xbd_changemamba_head_recipe.xml"
-    },
-    {
-      "id": "bright_damageformer_optimizer_recipe",
-      "dataset": "bright",
-      "suite": "optimizer_recipe",
-      "config": "configs/experiments/optimizer_recipe/bright_damageformer_optimizer_recipe.xml"
-    },
-    {
-      "id": "bright_changemamba_optimizer_recipe",
-      "dataset": "bright",
-      "suite": "optimizer_recipe",
-      "config": "configs/experiments/optimizer_recipe/bright_changemamba_optimizer_recipe.xml"
-    },
-    {
-      "id": "xbd_damageformer_optimizer_recipe",
-      "dataset": "xbd",
-      "suite": "optimizer_recipe",
-      "config": "configs/experiments/optimizer_recipe/xbd_damageformer_optimizer_recipe.xml"
-    },
-    {
-      "id": "xbd_changemamba_optimizer_recipe",
-      "dataset": "xbd",
-      "suite": "optimizer_recipe",
-      "config": "configs/experiments/optimizer_recipe/xbd_changemamba_optimizer_recipe.xml"
-    },
-    {
-      "id": "bright_no_hog",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_hog.xml"
-    },
-    {
-      "id": "bright_hog_intensity_matched",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_hog_intensity_matched.xml"
-    },
-    {
-      "id": "bright_bicsf_conv_matched",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_bicsf_conv_matched.xml"
-    },
-    {
-      "id": "bright_wasm_conv_matched",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_wasm_conv_matched.xml"
-    },
-    {
-      "id": "bright_gcb_conv_matched",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_gcb_conv_matched.xml"
-    },
-    {
-      "id": "bright_irb_feedforward_matched",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_irb_feedforward_matched.xml"
+      "id": "cau_flood_haff",
+      "canonical_id": "cau_flood_haff",
+      "dataset": "cau_flood",
+      "suite": "main",
+      "model_variant": "haff",
+      "roles": [
+        "main",
+        "qualitative",
+        "efficiency"
+      ],
+      "uses": [
+        {
+          "group": "main",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "main_cau_flood",
+          "role": "model",
+          "paper_refs": [
+            "Table 4"
+          ]
+        },
+        {
+          "group": "qualitative",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Fig.13"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        },
+        {
+          "group": "efficiency",
+          "role": "checkpoint",
+          "paper_refs": [
+            "Figs.15/16"
+          ],
+          "display_seed": 42,
+          "postprocess_only": true
+        }
+      ],
+      "paper_refs": [
+        "Table 4",
+        "Fig.13",
+        "Figs.15/16"
+      ],
+      "comparison": {
+        "kind": "architecture",
+        "reference": "cau_flood_dehcd_l",
+        "factor": "architecture",
+        "allowed_changes": [
+          "model"
+        ]
+      },
+      "config": "configs/experiments/main/cau_flood_haff.xml"
     },
     {
       "id": "bright_no_dpm",
+      "canonical_id": "bright_no_dpm",
       "dataset": "bright",
       "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            0,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.fusion_mode"
+        ]
+      },
       "config": "configs/experiments/ablation/bright_no_dpm.xml"
     },
     {
-      "id": "bright_dpm_conv_matched",
+      "id": "bright_no_bicsf",
+      "canonical_id": "bright_no_bicsf",
       "dataset": "bright",
       "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            0,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.global_context",
+          "model.cross_scale_fusion"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_no_bicsf.xml"
+    },
+    {
+      "id": "bright_no_irb",
+      "canonical_id": "bright_no_irb",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            1,
+            0
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_no_irb.xml"
+    },
+    {
+      "id": "bright_no_hog",
+      "canonical_id": "bright_no_hog",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_no_hog.xml"
+    },
+    {
+      "id": "bright_no_hog_no_dpm",
+      "canonical_id": "bright_no_hog_no_dpm",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_no_hog_no_dpm.xml"
+    },
+    {
+      "id": "bright_no_hog_no_dpm_no_bicsf",
+      "canonical_id": "bright_no_hog_no_dpm_no_bicsf",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode",
+          "model.global_context",
+          "model.cross_scale_fusion"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_no_hog_no_dpm_no_bicsf.xml"
+    },
+    {
+      "id": "bright_all_off",
+      "canonical_id": "bright_all_off",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_bright",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode",
+          "model.global_context",
+          "model.cross_scale_fusion",
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_all_off.xml"
+    },
+    {
+      "id": "haiti_no_dpm",
+      "canonical_id": "haiti_no_dpm",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            0,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.fusion_mode"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_dpm.xml"
+    },
+    {
+      "id": "haiti_no_bicsf",
+      "canonical_id": "haiti_no_bicsf",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            0,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.global_context",
+          "model.cross_scale_fusion"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_bicsf.xml"
+    },
+    {
+      "id": "haiti_no_irb",
+      "canonical_id": "haiti_no_irb",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            1,
+            1,
+            1,
+            0
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_irb.xml"
+    },
+    {
+      "id": "haiti_no_hog",
+      "canonical_id": "haiti_no_hog",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_hog.xml"
+    },
+    {
+      "id": "haiti_no_hog_no_dpm",
+      "canonical_id": "haiti_no_hog_no_dpm",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            1,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_hog_no_dpm.xml"
+    },
+    {
+      "id": "haiti_no_hog_no_dpm_no_bicsf",
+      "canonical_id": "haiti_no_hog_no_dpm_no_bicsf",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode",
+          "model.global_context",
+          "model.cross_scale_fusion"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_no_hog_no_dpm_no_bicsf.xml"
+    },
+    {
+      "id": "haiti_all_off",
+      "canonical_id": "haiti_all_off",
+      "dataset": "haiti",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "ablation"
+      ],
+      "uses": [
+        {
+          "group": "ablation",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ]
+        },
+        {
+          "group": "fig17_haiti",
+          "role": "control",
+          "paper_refs": [
+            "Fig.17"
+          ],
+          "modules": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Fig.17"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "components",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.fusion_mode",
+          "model.global_context",
+          "model.cross_scale_fusion",
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/ablation/haiti_all_off.xml"
+    },
+    {
+      "id": "bright_hog_intensity_matched",
+      "canonical_id": "bright_hog_intensity_matched",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "capacity"
+      ],
+      "uses": [
+        {
+          "group": "capacity",
+          "role": "control",
+          "paper_refs": [
+            "Additional capacity comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional capacity comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "hog_intensity_matched",
+        "allowed_changes": [
+          "model.use_hog",
+          "model.hog_prior"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_hog_intensity_matched.xml"
+    },
+    {
+      "id": "bright_dpm_conv_matched",
+      "canonical_id": "bright_dpm_conv_matched",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "capacity"
+      ],
+      "uses": [
+        {
+          "group": "capacity",
+          "role": "control",
+          "paper_refs": [
+            "Additional capacity comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional capacity comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "dpm_conv_matched",
+        "allowed_changes": [
+          "model.fusion_mode"
+        ]
+      },
       "config": "configs/experiments/ablation/bright_dpm_conv_matched.xml"
     },
     {
-      "id": "bright_no_flow",
+      "id": "bright_bicsf_conv_matched",
+      "canonical_id": "bright_bicsf_conv_matched",
       "dataset": "bright",
       "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "capacity"
+      ],
+      "uses": [
+        {
+          "group": "capacity",
+          "role": "control",
+          "paper_refs": [
+            "Additional capacity comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional capacity comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "bicsf_conv_matched",
+        "allowed_changes": [
+          "model.gcb_mode",
+          "model.bicsf_mode"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_bicsf_conv_matched.xml"
+    },
+    {
+      "id": "bright_irb_feedforward_matched",
+      "canonical_id": "bright_irb_feedforward_matched",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "capacity"
+      ],
+      "uses": [
+        {
+          "group": "capacity",
+          "role": "control",
+          "paper_refs": [
+            "Additional capacity comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional capacity comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "irb_feedforward_matched",
+        "allowed_changes": [
+          "model.irb_mode"
+        ]
+      },
+      "config": "configs/experiments/ablation/bright_irb_feedforward_matched.xml"
+    },
+    {
+      "id": "bright_no_flow",
+      "canonical_id": "bright_no_flow",
+      "dataset": "bright",
+      "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "dpm"
+      ],
+      "uses": [
+        {
+          "group": "dpm",
+          "role": "control",
+          "paper_refs": [
+            "Additional dpm comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional dpm comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "no_flow",
+        "allowed_changes": [
+          "model.align_fusion"
+        ]
+      },
       "config": "configs/experiments/ablation/bright_no_flow.xml"
     },
     {
       "id": "bright_no_difference_gate",
+      "canonical_id": "bright_no_difference_gate",
       "dataset": "bright",
       "suite": "ablation",
+      "model_variant": "l",
+      "roles": [
+        "dpm"
+      ],
+      "uses": [
+        {
+          "group": "dpm",
+          "role": "control",
+          "paper_refs": [
+            "Additional dpm comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional dpm comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "no_difference_gate",
+        "allowed_changes": [
+          "model.difference_gate"
+        ]
+      },
       "config": "configs/experiments/ablation/bright_no_difference_gate.xml"
     },
     {
-      "id": "bright_no_flow_no_gate",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_flow_no_gate.xml"
-    },
-    {
-      "id": "bright_no_modality_gate",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_modality_gate.xml"
-    },
-    {
-      "id": "bright_no_bicsf",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_bicsf.xml"
-    },
-    {
-      "id": "bright_no_wasm",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_wasm.xml"
-    },
-    {
-      "id": "bright_no_gcb",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_gcb.xml"
-    },
-    {
-      "id": "bright_no_irb",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_no_irb.xml"
-    },
-    {
-      "id": "bright_all_off",
-      "dataset": "bright",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/bright_all_off.xml"
-    },
-    {
-      "id": "bright_hog_bins_2",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_hog_bins_2.xml"
-    },
-    {
-      "id": "bright_hog_bins_4",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_hog_bins_4.xml"
-    },
-    {
-      "id": "bright_hog_bins_6",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_hog_bins_6.xml"
-    },
-    {
-      "id": "bright_hog_bins_8",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_hog_bins_8.xml"
-    },
-    {
-      "id": "bright_hog_bins_10",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_hog_bins_10.xml"
-    },
-    {
-      "id": "bright_irb_steps_0",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_irb_steps_0.xml"
-    },
-    {
-      "id": "bright_irb_steps_1",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_irb_steps_1.xml"
-    },
-    {
-      "id": "bright_irb_steps_2",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_irb_steps_2.xml"
-    },
-    {
-      "id": "bright_irb_steps_3",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_irb_steps_3.xml"
-    },
-    {
-      "id": "bright_irb_steps_4",
-      "dataset": "bright",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/bright_irb_steps_4.xml"
-    },
-    {
-      "id": "bright_basic_ce_dice",
-      "dataset": "bright",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/bright_basic_ce_dice.xml"
-    },
-    {
-      "id": "bright_full_recipe",
-      "dataset": "bright",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/bright_full_recipe.xml"
-    },
-    {
       "id": "bright_ce_dice_full_sampling",
+      "canonical_id": "bright_ce_dice_full_sampling",
       "dataset": "bright",
       "suite": "recipe",
+      "model_variant": "l",
+      "roles": [
+        "recipe"
+      ],
+      "uses": [
+        {
+          "group": "recipe",
+          "role": "control",
+          "paper_refs": [
+            "Additional recipe comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional recipe comparison"
+      ],
+      "comparison": {
+        "kind": "recipe_bundle",
+        "reference": "bright_dehcd_l",
+        "factor": "loss_recipe",
+        "allowed_changes": [
+          "training.loss",
+          "training.ce_weight",
+          "training.dice_weight",
+          "training.focal_weight",
+          "training.lovasz_weight",
+          "training.tversky_weight",
+          "training.foreground_dice_weight",
+          "training.label_smoothing",
+          "training.aux_loss_weight",
+          "training.feature_pair_loss_weight"
+        ]
+      },
       "config": "configs/experiments/recipe/bright_ce_dice_full_sampling.xml"
     },
     {
       "id": "bright_no_weighted_sampler",
+      "canonical_id": "bright_no_weighted_sampler",
       "dataset": "bright",
       "suite": "recipe",
+      "model_variant": "l",
+      "roles": [
+        "recipe"
+      ],
+      "uses": [
+        {
+          "group": "recipe",
+          "role": "control",
+          "paper_refs": [
+            "Additional recipe comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional recipe comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "weighted_sampler",
+        "allowed_changes": [
+          "training.class_balanced_sampler"
+        ]
+      },
       "config": "configs/experiments/recipe/bright_no_weighted_sampler.xml"
     },
     {
-      "id": "bright_no_targeted_crop",
-      "dataset": "bright",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/bright_no_targeted_crop.xml"
-    },
-    {
       "id": "bright_no_class_weights",
+      "canonical_id": "bright_no_class_weights",
       "dataset": "bright",
       "suite": "recipe",
+      "model_variant": "l",
+      "roles": [
+        "recipe"
+      ],
+      "uses": [
+        {
+          "group": "recipe",
+          "role": "control",
+          "paper_refs": [
+            "Additional recipe comparison"
+          ]
+        }
+      ],
+      "paper_refs": [
+        "Additional recipe comparison"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_l",
+        "factor": "class_weights",
+        "allowed_changes": [
+          "training.class_weights"
+        ]
+      },
       "config": "configs/experiments/recipe/bright_no_class_weights.xml"
     },
     {
-      "id": "haiti_no_hog",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_hog.xml"
-    },
-    {
-      "id": "haiti_hog_intensity_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_hog_intensity_matched.xml"
-    },
-    {
-      "id": "haiti_bicsf_conv_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_bicsf_conv_matched.xml"
-    },
-    {
-      "id": "haiti_wasm_conv_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_wasm_conv_matched.xml"
-    },
-    {
-      "id": "haiti_gcb_conv_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_gcb_conv_matched.xml"
-    },
-    {
-      "id": "haiti_irb_feedforward_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_irb_feedforward_matched.xml"
-    },
-    {
-      "id": "haiti_no_dpm",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_dpm.xml"
-    },
-    {
-      "id": "haiti_dpm_conv_matched",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_dpm_conv_matched.xml"
-    },
-    {
-      "id": "haiti_no_flow",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_flow.xml"
-    },
-    {
-      "id": "haiti_no_difference_gate",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_difference_gate.xml"
-    },
-    {
-      "id": "haiti_no_flow_no_gate",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_flow_no_gate.xml"
-    },
-    {
-      "id": "haiti_no_modality_gate",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_modality_gate.xml"
-    },
-    {
-      "id": "haiti_no_bicsf",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_bicsf.xml"
-    },
-    {
-      "id": "haiti_no_wasm",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_wasm.xml"
-    },
-    {
-      "id": "haiti_no_gcb",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_gcb.xml"
-    },
-    {
-      "id": "haiti_no_irb",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_no_irb.xml"
-    },
-    {
-      "id": "haiti_all_off",
-      "dataset": "haiti",
-      "suite": "ablation",
-      "config": "configs/experiments/ablation/haiti_all_off.xml"
-    },
-    {
       "id": "haiti_hog_bins_2",
+      "canonical_id": "haiti_hog_bins_2",
       "dataset": "haiti",
       "suite": "sensitivity",
+      "model_variant": "l",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_bins",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 2,
+          "reference": "haiti_dehcd_l"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "hog_bins",
+        "allowed_changes": [
+          "model.hog_bins"
+        ]
+      },
       "config": "configs/experiments/sensitivity/haiti_hog_bins_2.xml"
     },
     {
       "id": "haiti_hog_bins_4",
+      "canonical_id": "haiti_hog_bins_4",
       "dataset": "haiti",
       "suite": "sensitivity",
+      "model_variant": "l",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_bins",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 4,
+          "reference": "haiti_dehcd_l"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "hog_bins",
+        "allowed_changes": [
+          "model.hog_bins"
+        ]
+      },
       "config": "configs/experiments/sensitivity/haiti_hog_bins_4.xml"
     },
     {
-      "id": "haiti_hog_bins_6",
-      "dataset": "haiti",
-      "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_hog_bins_6.xml"
-    },
-    {
       "id": "haiti_hog_bins_8",
+      "canonical_id": "haiti_hog_bins_8",
       "dataset": "haiti",
       "suite": "sensitivity",
+      "model_variant": "l",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_bins",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 8,
+          "reference": "haiti_dehcd_l"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "hog_bins",
+        "allowed_changes": [
+          "model.hog_bins"
+        ]
+      },
       "config": "configs/experiments/sensitivity/haiti_hog_bins_8.xml"
     },
     {
       "id": "haiti_hog_bins_10",
+      "canonical_id": "haiti_hog_bins_10",
       "dataset": "haiti",
       "suite": "sensitivity",
+      "model_variant": "l",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_bins",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 10,
+          "reference": "haiti_dehcd_l"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "haiti_dehcd_l",
+        "factor": "hog_bins",
+        "allowed_changes": [
+          "model.hog_bins"
+        ]
+      },
       "config": "configs/experiments/sensitivity/haiti_hog_bins_10.xml"
     },
     {
-      "id": "haiti_irb_steps_0",
-      "dataset": "haiti",
+      "id": "bright_m_irb_steps_0",
+      "canonical_id": "bright_m_irb_steps_0",
+      "dataset": "bright",
       "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_irb_steps_0.xml"
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 0,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_0.xml"
     },
     {
-      "id": "haiti_irb_steps_1",
-      "dataset": "haiti",
+      "id": "bright_m_irb_steps_1",
+      "canonical_id": "bright_m_irb_steps_1",
+      "dataset": "bright",
       "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_irb_steps_1.xml"
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 1,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_1.xml"
     },
     {
-      "id": "haiti_irb_steps_2",
-      "dataset": "haiti",
+      "id": "bright_m_irb_steps_2",
+      "canonical_id": "bright_m_irb_steps_2",
+      "dataset": "bright",
       "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_irb_steps_2.xml"
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 2,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_2.xml"
     },
     {
-      "id": "haiti_irb_steps_3",
-      "dataset": "haiti",
+      "id": "bright_m_irb_steps_4",
+      "canonical_id": "bright_m_irb_steps_4",
+      "dataset": "bright",
       "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_irb_steps_3.xml"
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 4,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_4.xml"
     },
     {
-      "id": "haiti_irb_steps_4",
-      "dataset": "haiti",
+      "id": "bright_m_irb_steps_5",
+      "canonical_id": "bright_m_irb_steps_5",
+      "dataset": "bright",
       "suite": "sensitivity",
-      "config": "configs/experiments/sensitivity/haiti_irb_steps_4.xml"
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 5,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_5.xml"
     },
     {
-      "id": "haiti_basic_ce_dice",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_basic_ce_dice.xml"
+      "id": "bright_m_irb_steps_6",
+      "canonical_id": "bright_m_irb_steps_6",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 6,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_6.xml"
     },
     {
-      "id": "haiti_full_recipe",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_full_recipe.xml"
+      "id": "bright_m_irb_steps_7",
+      "canonical_id": "bright_m_irb_steps_7",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 7,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_7.xml"
     },
     {
-      "id": "haiti_ce_dice_full_sampling",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_ce_dice_full_sampling.xml"
+      "id": "bright_m_irb_steps_8",
+      "canonical_id": "bright_m_irb_steps_8",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ]
+        },
+        {
+          "group": "irb_steps",
+          "role": "point",
+          "paper_refs": [
+            "Fig.18"
+          ],
+          "x": 8,
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.18"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "diffusion_steps",
+        "allowed_changes": [
+          "model.diffusion_steps"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_irb_steps_8.xml"
     },
     {
-      "id": "haiti_no_weighted_sampler",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_no_weighted_sampler.xml"
+      "id": "bright_m_hog_levels_1",
+      "canonical_id": "bright_m_hog_levels_1",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_levels",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 1,
+          "levels": [
+            0
+          ],
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "hog_modulation_levels",
+        "allowed_changes": [
+          "model.hog_modulation_levels"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_hog_levels_1.xml"
     },
     {
-      "id": "haiti_no_targeted_crop",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_no_targeted_crop.xml"
+      "id": "bright_m_hog_levels_3",
+      "canonical_id": "bright_m_hog_levels_3",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_levels",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 3,
+          "levels": [
+            0,
+            1,
+            2
+          ],
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "hog_modulation_levels",
+        "allowed_changes": [
+          "model.hog_modulation_levels"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_hog_levels_3.xml"
     },
     {
-      "id": "haiti_no_class_weights",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_no_class_weights.xml"
-    },
-    {
-      "id": "haiti_legacy_pixel_mean",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_legacy_pixel_mean.xml"
-    },
-    {
-      "id": "haiti_pixel_mean_equal_weights",
-      "dataset": "haiti",
-      "suite": "recipe",
-      "config": "configs/experiments/recipe/haiti_pixel_mean_equal_weights.xml"
+      "id": "bright_m_hog_levels_4",
+      "canonical_id": "bright_m_hog_levels_4",
+      "dataset": "bright",
+      "suite": "sensitivity",
+      "model_variant": "m",
+      "roles": [
+        "sensitivity"
+      ],
+      "uses": [
+        {
+          "group": "sensitivity",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ]
+        },
+        {
+          "group": "hog_levels",
+          "role": "point",
+          "paper_refs": [
+            "Fig.19"
+          ],
+          "x": 4,
+          "levels": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "reference": "bright_dehcd_m"
+        }
+      ],
+      "paper_refs": [
+        "Fig.19"
+      ],
+      "comparison": {
+        "kind": "control",
+        "reference": "bright_dehcd_m",
+        "factor": "hog_modulation_levels",
+        "allowed_changes": [
+          "model.hog_modulation_levels"
+        ]
+      },
+      "config": "configs/experiments/sensitivity/bright_m_hog_levels_4.xml"
     }
   ]
 }

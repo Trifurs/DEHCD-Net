@@ -14,8 +14,9 @@ if str(PROJECT_ROOT) not in sys.path:
 from utils.config import XMLConfigParser
 from utils.checkpoint import load_model_state
 from utils.model_metadata import model_metadata
-from utils.damage_metrics import DamageHeadMeter
-from utils.prediction import predict_outputs, resolve_tta, decode_predictions, prediction_rule
+from utils.damage_metrics import DamageHeadMeter, localization_is_supervised
+from utils.prediction import (predict_outputs, resolve_tta, decode_predictions, prediction_rule,
+                              check_evaluation_tensors, validate_evaluation_labels, evaluation_coverage)
 from utils.protocol import verify_checkpoint_config, config_digest, file_digest, dataset_identity, atomic_json
 from utils.logger import setup_logger
 from utils.run_manager import create_run_dir, save_config_snapshot
@@ -88,7 +89,7 @@ def main() -> None:
         num_workers=int(config.get("training", {}).get("num_workers", 4)),
         pin_memory=device.type == "cuda",
     )
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)  # Trusted local run checkpoint.
     verify_checkpoint_config(checkpoint, config)
     model = build_model(
         config,
@@ -105,7 +106,8 @@ def main() -> None:
     num_classes = int(task_cfg.get("num_classes", 2))
     ignore_index = int(task_cfg.get("ignore_index", 255))
     meter = ConfusionMatrixMeter(num_classes=num_classes, ignore_index=ignore_index)
-    damage_head_meter = DamageHeadMeter(num_classes, ignore_index)
+    damage_head_meter = DamageHeadMeter(num_classes, ignore_index,
+        localization_supervised=localization_is_supervised(checkpoint.get("config", config)))
     total_loss = 0.0
 
     with torch.no_grad():
@@ -115,16 +117,16 @@ def main() -> None:
             optical = batch["optical"].to(device, non_blocking=True)
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
-            with torch.amp.autocast("cuda", enabled=amp):
-                model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=resolve_tta(config, args.tta))
-                loss = segmentation_loss(
-                    model_output,
-                    label,
-                    train_cfg,
-                    num_classes=num_classes,
-                    ignore_index=ignore_index,
-                )
-            logits = extract_logits(model_output)
+            validate_evaluation_labels(label, num_classes, ignore_index)
+            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=resolve_tta(config, args.tta))
+            loss = segmentation_loss(
+                model_output,
+                label,
+                train_cfg,
+                num_classes=num_classes,
+                ignore_index=ignore_index,
+            )
+            check_evaluation_tensors({"loss": loss})
             total_loss += float(loss.item())
             seen_batches += 1
             seen_samples += int(label.shape[0])
@@ -133,7 +135,10 @@ def main() -> None:
             if args.max_batches > 0 and step >= args.max_batches:
                 break
 
+    coverage = evaluation_coverage(seen_samples, len(dataset), limit=args.max_batches)
     metrics = meter.compute()
+    if metrics["valid_pixels"] <= 0:
+        raise ValueError("Evaluation contains no valid labelled pixels")
     best_name = primary_metric_name(num_classes, config.get("training", {}).get("best_metric", "auto"))
     loss_value = total_loss / max(seen_batches, 1)
     logger.info(
@@ -145,13 +150,13 @@ def main() -> None:
         float(metrics.get(best_name, metrics.get("primary_score", 0.0))),
     )
     with (run_dir / "metrics.json").open("w", encoding="utf-8") as file:
-        json.dump({"schema_version": 1, "evaluated_samples": seen_samples, "split": args.split, "loss": loss_value, "best_metric": best_name, "metrics": metrics,
+        json.dump({"schema_version": 2, **coverage, "split": args.split, "loss": loss_value, "best_metric": best_name, "metrics": metrics,
                    "confusion_matrix": meter.matrix.long().tolist(), "checkpoint": str(Path(checkpoint_path).resolve()),
                    "checkpoint_sha256": file_digest(checkpoint_path), "config_sha256": config_digest(checkpoint.get("config", config)),
                    "dataset_identity": dataset_identity(dataset), "seed": config.get("training", {}).get("seed"),
                    "damage_head_metrics": damage_head_meter.compute(), "implementation": model_metadata(model, device),
                    "runtime": {"execution": execution, "test_time_augmentation": resolve_tta(config, args.tta), "max_batches": args.max_batches, "prediction_rule": prediction_rule(config)},
-                   "experiment": config.get("experiment", {})}, file, indent=2)
+                   "experiment": config.get("experiment", {})}, file, indent=2, allow_nan=False)
     print(format_metrics(metrics, num_classes))
 
 

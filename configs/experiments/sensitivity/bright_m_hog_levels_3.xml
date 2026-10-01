@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../main/bright_dehcd_m.xml</base_param>
+  <experiment>
+    <id type="str">bright_m_hog_levels_3</id>
+    <canonical_id type="str">bright_m_hog_levels_3</canonical_id>
+    <dataset type="str">bright</dataset>
+    <suite type="str">sensitivity</suite>
+    <model_variant type="str">m</model_variant>
+    <roles type="list">['sensitivity']</roles>
+    <uses type="list">[{'group': 'sensitivity', 'role': 'point', 'paper_refs': ['Fig.19']}, {'group': 'hog_levels', 'role': 'point', 'paper_refs': ['Fig.19'], 'x': 3, 'levels': [0, 1, 2], 'reference': 'bright_dehcd_m'}]</uses>
+    <paper_refs type="list">['Fig.19']</paper_refs>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">bright_dehcd_m</reference>
+      <factor type="str">hog_modulation_levels</factor>
+      <allowed_changes type="list">['model.hog_modulation_levels']</allowed_changes>
+    </comparison>
+  </experiment>
+  <logging>
+    <run_name type="str">bright_m_hog_levels_3</run_name>
+  </logging>
+  <model>
+    <hog_modulation_levels type="int">3</hog_modulation_levels>
+  </model>
+</project>

@@ -54,6 +54,23 @@ class RunProgress:
         self.train_batches = self.val_batches = 0
         self.write(force=True)
 
+    def training_health(self, epoch, best_name, best_metric, best_epoch, tracker, monitor, patience):
+        """Observe checkpoint selection and protections without changing their state."""
+        def protection(count, limit, warmup):
+            enabled = limit > 0
+            status = ('disabled' if not enabled else 'warmup' if epoch < warmup else
+                      'triggered' if count >= limit else 'warning' if count else 'healthy')
+            return {'enabled': enabled, 'count': int(count), 'patience': int(limit),
+                    'warmup_epochs': int(warmup), 'status': status}
+        self.state.update(
+            best_metric_name=best_name, best_metric=float(best_metric) if best_epoch > 0 else None,
+            best_epoch=int(best_epoch), epochs_since_best=max(0, epoch - best_epoch) if best_epoch > 0 else None,
+            early_stopping={'enabled': patience > 0, 'stale_validation_checks': int(tracker.stale),
+                            'patience': int(patience), 'remaining_checks': max(patience - tracker.stale, 0) if patience > 0 else None},
+            protection={'collapse': protection(monitor.count, monitor.patience, monitor.warmup),
+                        'foreground_stall': protection(monitor.stall_count, monitor.stall_patience, monitor.stall_warmup)})
+        self.write(force=True)
+
     def start_epoch(self, epoch, train_batches, val_batches):
         self.epoch_started = time.monotonic()
         self.train_batches, self.val_batches = train_batches, val_batches
@@ -108,6 +125,25 @@ class RunProgress:
         if state["status"] == "complete":
             state.update(fraction=1.0, eta_seconds=0.0, phase_eta_seconds=0.0)
         if self.path: write_status(self.path, state)
+
+
+def training_health_text(state):
+    """One display format shared by terminal bars, plain logs and progress.txt."""
+    best = state.get('best_metric')
+    name = state.get('best_metric_name', 'foreground_miou')
+    best_text = 'pending' if best is None else f"{float(best):.6f}"
+    since = state.get('epochs_since_best')
+    early = state.get('early_stopping', {})
+    early_text = (f"{early.get('stale_validation_checks', 0)}/{early['patience']} checks"
+                  if early.get('enabled') else 'disabled (fixed budget)')
+    parts = [f"Best val {name}={best_text} @epoch {state.get('best_epoch', 0)}",
+             f"since best={since if since is not None else '-'} epochs", f"early stop={early_text}"]
+    for name, label in (('collapse', 'collapse'), ('foreground_stall', 'foreground stall')):
+        guard = state.get('protection', {}).get(name, {})
+        if guard:
+            counter = f" {guard.get('count', 0)}/{guard.get('patience', 0)} checks" if guard.get('enabled') else ''
+            parts.append(f"{label}={guard['status']}{counter}")
+    return ' | '.join(parts)
 
 
 _current = None

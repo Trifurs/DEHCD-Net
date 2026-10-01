@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../main/bright_dehcd_l.xml</base_param>
+  <experiment>
+    <id type="str">bright_no_hog_no_dpm_no_bicsf</id>
+    <canonical_id type="str">bright_no_hog_no_dpm_no_bicsf</canonical_id>
+    <dataset type="str">bright</dataset>
+    <suite type="str">ablation</suite>
+    <model_variant type="str">l</model_variant>
+    <roles type="list">['ablation']</roles>
+    <uses type="list">[{'group': 'ablation', 'role': 'control', 'paper_refs': ['Fig.17']}, {'group': 'fig17_bright', 'role': 'control', 'paper_refs': ['Fig.17'], 'modules': [0, 0, 0, 1]}]</uses>
+    <paper_refs type="list">['Fig.17']</paper_refs>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">bright_dehcd_l</reference>
+      <factor type="str">components</factor>
+      <allowed_changes type="list">['model.use_hog', 'model.fusion_mode', 'model.global_context', 'model.cross_scale_fusion']</allowed_changes>
+    </comparison>
+  </experiment>
+  <logging>
+    <run_name type="str">bright_no_hog_no_dpm_no_bicsf</run_name>
+  </logging>
+  <model>
+    <use_hog type="bool">false</use_hog>
+    <fusion_mode type="str">plain</fusion_mode>
+    <global_context type="bool">false</global_context>
+    <cross_scale_fusion type="bool">false</cross_scale_fusion>
+  </model>
+</project>

@@ -14,6 +14,7 @@ import warnings
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT))
 from utils.config import XMLConfigParser
 from utils.protocol import atomic_json, config_digest, source_identity, dataset_identity, assert_disjoint, digest
@@ -27,12 +28,12 @@ from utils.campaign_progress import CampaignProgress
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--catalog", default=str(ROOT / "configs/experiments/catalog.json"))
-    p.add_argument("--suite", nargs="+", default=["main"], choices=["main", "ablation", "recipe", "sensitivity", "adapter", "auxiliary", "head_recipe", "optimizer_recipe", "cross_event", "all"])
-    p.add_argument("--datasets", nargs="+", default=["bright", "haiti", "cau_flood", "xbd"])
+    p.add_argument("--suite", "--groups", dest="suite", nargs="+", default=["all"], help="Analysis groups; their canonical-id union is trained once")
+    p.add_argument("--datasets", nargs="+", default=["bright", "haiti", "xbd", "cau_flood"])
     p.add_argument("--experiments", nargs="+", help="Exact experiment ids; selects across suites")
-    p.add_argument("--config", help="One custom XML/JSON config, e.g. an event-holdout configuration")
-    p.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060, 3069, 4078])
-    p.add_argument("--output", required=True, help="New campaign directory; never use a historical run directory")
+    p.add_argument("--config", help="One explicitly isolated custom XML/JSON configuration for smoke checks")
+    p.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060])
+    p.add_argument("--output", required=True, help="Campaign directory; existing compatible evidence is audited and reused")
     p.add_argument("--data-root", action="append", default=[], metavar="DATASET=PATH")
     p.add_argument("--encoder-checkpoint", action="append", default=[], metavar="MODEL=PATH",
                    help="Explicit local encoder-only weights for a new damage baseline; all seeds share its SHA256")
@@ -54,6 +55,7 @@ def parse_args():
     p.add_argument("--preflight-only", action="store_true", help="Validate data/splits and seal the protocol, without training")
     p.add_argument("--resume", action="store_true", help="Continue the same sealed protocol from last.pth")
     p.add_argument("--aggregate-only", action="store_true")
+    p.add_argument("--audit-only", action="store_true", help="Read-only audit; print all task-state counts without writing results")
     return p.parse_args()
 
 
@@ -71,14 +73,19 @@ def make_plan(args):
     if len(args.seeds) != len(set(args.seeds)) or any(s < 0 or s >= 2**32 for s in args.seeds):
         raise ValueError("Seeds must be distinct integers in [0, 2**32)")
     catalog = json.loads(Path(args.catalog).read_text())["experiments"]
+    if not args.config and sorted(args.seeds) != [42, 1051, 2060]:
+        raise ValueError("Formal configurations require exactly seeds [42, 1051, 2060]")
+    if not args.config and args.epochs is not None:
+        raise ValueError("Formal configurations preserve their fixed epoch budgets; use isolated --config smoke runs")
     if args.config:
         config_path = Path(args.config).resolve()
         config = XMLConfigParser(config_path).parse().as_dict()
         selected = [{"id": config_path.stem, "config": str(config_path), "suite": "custom",
                      "dataset": config.get("experiment", {}).get("dataset", config.get("dataset", {}).get("type", "custom"))}]
     else:
-        selected = [e for e in catalog if e["id"] in args.experiments] if args.experiments else [
-            e for e in catalog if e["dataset"] in args.datasets and ("all" in args.suite or e["suite"] in args.suite)]
+        from utils.experiment_catalog import select_experiments
+        selected = ([e for e in catalog if e["id"] in args.experiments] if args.experiments else
+                    select_experiments(catalog, args.suite, args.datasets))
         if args.experiments and set(args.experiments) != {e["id"] for e in selected}:
             raise ValueError("Unknown experiment id in --experiments")
     if not selected:
@@ -128,7 +135,7 @@ def make_plan(args):
         return {"id": name, "experiment": exp["id"], "dataset": ds, "seed": seed,
                 "config": config, "config_sha256": config_digest(config)}
     jobs = [materialize(exp, seed) for exp in selected for seed in args.seeds]
-    dataset_order = list(dict.fromkeys(job["dataset"] for job in jobs))
+    dataset_order = ["bright", "haiti", "xbd", "cau_flood"] + list(dict.fromkeys(job["dataset"] for job in jobs))
     jobs.sort(key=lambda job: dataset_order.index(job["dataset"]))
     if set(weights) - used_weights:
         raise ValueError("--encoder-checkpoint contains a model absent from the selected experiments")
@@ -147,7 +154,7 @@ def make_plan(args):
             registry[ref] = materialize(by_id[ref], args.seeds[0])["config"]
             references[ref] = registry[ref]
             pending.append(ref)
-    plan = {"schema_version": 2, "layout_version": 2,
+    plan = {"schema_version": 3, "layout_version": 2,
             "checkpoint_retention": "best_and_last",
             "seeds": args.seeds, "source": source_identity(ROOT),
             "fingerprint_mode": args.fingerprint, "jobs": jobs, "comparison_references": references}
@@ -177,6 +184,12 @@ def seal_datasets(plan):
             print(f"Data checked: {job['dataset']} " + "/".join(str(splits[s]["samples"]) for s in ("train", "val", "test")), flush=True)
         job["data_key"] = key
     plan["data"] = identities
+    qualitative = {}
+    for job in plan["jobs"]:
+        qualitative.setdefault(job["dataset"], sorted(r["id"] for r in identities[job["data_key"]]["splits"]["test"]["records"])[:16])
+    plan["analysis_policy"] = {"display_seed": 42, "sample_selection": "lexicographically first 16 test IDs, fixed before inspecting scores",
+        "qualitative_samples": qualitative, "statistics_seeds": [42, 1051, 2060], "expected_n": 3,
+        "efficiency": "same device, external shape, physical batch, precision and backend; parameter counts once per architecture"}
     plan["comparison_design"] = audit_plan(plan)
     return prepared_sources
 
@@ -244,13 +257,44 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
             groups.setdefault(job["experiment"], []).append(row)
             continue
         completion = json.loads(summary.read_text())
-        if completion.get("status") != "complete" or completion["config_sha256"] != job["config_sha256"]:
-            raise ValueError(f"Invalid training completion: {job['id']}")
+        if (completion.get("status") != "complete" or completion.get("config_sha256") != job["config_sha256"] or
+            completion.get("completed_epoch") != int(job["config"]["training"]["epochs"]) or
+            completion.get("stop_reason") != "epochs_completed" or completion.get("seed") != job["seed"]):
+            raise ValueError(f"Invalid fixed-budget training completion: {job['id']}")
+        run = summary.parent
+        snapshot = json.loads((run / "config_snapshot.json").read_text())
+        protocol = json.loads((run / "protocol.json").read_text())
+        if config_digest(snapshot) != job["config_sha256"] or protocol.get("config_sha256") != job["config_sha256"]:
+            raise ValueError(f"Snapshot/protocol mismatch: {job['id']}")
+        from utils.campaign_reuse import verify_source_import
+        verify_source_import(run, protocol["source"], plan["source"])
+        for split in ("train", "val"):
+            expected = plan["data"][job["data_key"]]["splits"][split]
+            if protocol["datasets"][split]["sha256"] != expected.get("stat_sha256", expected["sha256"]):
+                raise ValueError(f"Training data mismatch: {job['id']}/{split}")
+        history = [json.loads(line) for line in (run / "history.jsonl").read_text().splitlines() if line.strip()]
+        from utils.campaign_reuse import _finite
+        if not _finite(history) or [r["epoch"] for r in history] != list(range(1, completion["completed_epoch"] + 1)):
+            raise ValueError("History is non-finite or does not cover the full fixed budget")
+        selected = max((r for r in history if r.get("val")), key=lambda r: r["val"]["foreground_miou"])
+        if completion["best_epoch"] != selected["epoch"] or completion["best_metric"] != selected["val"]["foreground_miou"]:
+            raise ValueError("Best checkpoint selection differs from validation history")
         result = json.loads(path.read_text())
+        if (result.get("checkpoint_selector") != "best" or
+            Path(result["checkpoint"]).resolve() != (run / "checkpoints/best.pth").resolve() or
+            result.get("checkpoint_epoch") != completion["best_epoch"]):
+            raise ValueError("Result must evaluate this run's selected best checkpoint")
         test_identity = plan["data"][job["data_key"]]["splits"]["test"]
         # Evaluator uses stat fingerprint; SHA256 campaign also retains a stat fingerprint below.
         metrics = validate_result(result, job["config_sha256"], test_identity.get("stat_sha256", test_identity["sha256"]), verify_checkpoints)
         from utils.prediction import resolve_tta, prediction_rule
+        runtime = result["runtime"]
+        if (runtime.get("amp") != job["config"]["training"].get("amp", True) or
+            runtime.get("batch_size") != job["config"]["training"]["batch_size"]):
+            raise ValueError("Test precision/physical batch mismatch")
+        for key in ("matmul_allow_tf32", "cudnn_allow_tf32", "cudnn_benchmark", "cudnn_deterministic", "deterministic_algorithms"):
+            if runtime.get("execution", {}).get(key) != protocol["execution"].get(key):
+                raise ValueError("Test execution backend mismatch")
         if result["runtime"]["test_time_augmentation"] != resolve_tta(job["config"]):
             raise ValueError(f"TTA protocol mismatch: {path}")
         if result["runtime"].get("prediction_rule", "damage_argmax") != prediction_rule(job["config"]):
@@ -262,22 +306,25 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
         if cache is not None: cache[job["id"]] = (stamp, row)
         rows.append(row)
         groups.setdefault(job["experiment"], []).append(row)
-    if rows:
-        with summary_path(output, plan, "per_seed.csv").open("w", newline="", encoding="utf-8") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(dict.fromkeys(k for row in rows for k in row))); writer.writeheader(); writer.writerows(rows)
+    with summary_path(output, plan, "per_seed.csv").open("w", newline="", encoding="utf-8") as stream:
+        fields = list(dict.fromkeys(k for row in rows for k in row)) or ["experiment", "dataset", "seed"]
+        writer = csv.DictWriter(stream, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
     aggregates = []
-    for name, items in groups.items():
-        expected = sum(j["experiment"] == name for j in plan["jobs"])
-        entry = {"experiment": name, "n": len(items), "expected_n": expected, "complete": len(items) == expected,
-                 "seeds": [r["seed"] for r in items], "metrics": {}}
-        for key in items[0]:
+    for name in dict.fromkeys(j["experiment"] for j in plan["jobs"]):
+        items = groups.get(name, [])
+        expected_seeds = [42, 1051, 2060]
+        entry = {"experiment": name, "n": len(items), "expected_n": 3,
+                 "complete": sorted(r["seed"] for r in items) == sorted(expected_seeds),
+                 "seeds": [r["seed"] for r in items], "expected_seeds": expected_seeds, "metrics": {},
+                 "sources": [{"seed": r["seed"], "checkpoint": r["checkpoint"], "config_sha256": r["config_sha256"]} for r in items]}
+        for key in items[0] if items else []:
             if key in {"experiment", "dataset", "seed", "split", "config_sha256", "checkpoint"}:
                 continue
             values = [r[key] for r in items]
             entry["metrics"][key] = {"mean": statistics.mean(values),
                 "sample_std": statistics.stdev(values) if len(values) > 1 else None}
         aggregates.append(entry)
-    report = {"status": "complete" if not missing else "incomplete", "missing": missing,
+    report = {"status": "complete" if not missing and all(g["complete"] for g in aggregates) else "incomplete", "missing": missing,
               "unit": "independent training seed on one fixed split; SD uses ddof=1", "experiments": aggregates}
     atomic_json(summary_path(output, plan, "aggregate.json"), report)
     return report
@@ -327,72 +374,105 @@ def main():
         os.environ["PYTHONWARNINGS"] = "ignore"
         import logging
         logging.getLogger().setLevel(logging.ERROR)
-    if args.prepare_workers < 0:
-        raise ValueError("--prepare-workers must be non-negative")
-    # Verify source data afresh once per invocation, never a inherited cache view.
+    if args.prepare_workers < 0: raise ValueError("--prepare-workers must be non-negative")
     os.environ.pop("DEHCD_PREPARED_INDEX", None)
+    from utils.campaign_reuse import audit_campaign, install_imports, dispatch_order
     output = Path(args.output).expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=True)
+    # A read-only audit never creates even a lock file.
+    if not args.audit_only: output.mkdir(parents=True, exist_ok=True)
     import fcntl
-    lock = (output / ".campaign.lock").open("a")
-    try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError as exc:
-        raise RuntimeError("Another process is running this campaign") from exc
+    lock_path = output / ".campaign.lock"
+    lock = lock_path.open("r" if args.audit_only else "a") if lock_path.exists() or not args.audit_only else None
+    if lock:
+        try: fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc: raise RuntimeError("Another process is writing this campaign; wait for a safe stop") from exc
     plan = make_plan(args)
     if args.dry_run:
         atomic_json(output / "plan.json", plan)
-        print(f"Planned {len(plan['jobs'])} jobs; no training started: {output / 'plan.json'}")
+        print(f"Planned {len(plan['jobs'])} unique jobs; no training started: {output / 'plan.json'}")
         return
     sources = seal_datasets(plan)
+    audit_path = output / "audit_report.json"
+    previous_audit = json.loads(audit_path.read_text()) if audit_path.exists() else {}
+    manifest = audit_campaign(plan, output, reviews=previous_audit.get("source_reviews", []))
+    for state, count in manifest["counts"].items(): print(f"{state} = {count}")
+    print(f"total = {manifest['target_tasks']}")
+    if args.audit_only:
+        for row in manifest["tasks"]:
+            if row["state"] != "train_new": print(f"{row['id']}: {row['state']} | {row['reason']}")
+        return
+    plan_view = copy.deepcopy(plan)
+    plan_view["data"] = {key: {**value, "splits": {split: {k: v for k, v in identity.items() if k != "records"}
+        for split, identity in value["splits"].items()}} for key, value in plan["data"].items()}
+    plan_view["full_evidence"] = "protocol.json"
+    atomic_json(output / "plan.json", plan_view)
+    atomic_json(output / "reuse_manifest.json", manifest)
+    audit = dict(previous_audit, counts=manifest["counts"], total=manifest["target_tasks"],
+                 source_reviews=manifest["source_reviews"], environment=manifest["environment"],
+                 last_audit_time=time.strftime("%Y-%m-%d %H:%M:%S"))
+    from utils.data_preflight import audit_prepared_inputs
+    audit["data_preflight"] = audit_prepared_inputs(plan, output)
+    atomic_json(audit_path, audit)
+    unresolved = [r for r in manifest["tasks"] if r["state"] in {"blocked_review", "retrain_required"}]
+    if unresolved:
+        detail = "\n".join(f"{r['id']}: {r['reason']}" for r in unresolved)
+        raise ValueError("Unresolved evidence; no training or asset deletion performed:\n" + detail)
+    install_imports(plan, manifest, output)
     protocol_path = output / "protocol.json"
     if protocol_path.exists():
-        if json.loads(protocol_path.read_text()) != plan:
-            raise ValueError("Campaign source/config/seeds/data changed; choose a NEW output directory")
-        if not (args.resume or args.preflight_only or args.prepare_only or args.aggregate_only):
-            raise FileExistsError("Campaign exists; use --resume to continue the same protocol")
-    else:
-        if args.aggregate_only: raise FileNotFoundError("No sealed campaign protocol")
-        atomic_json(protocol_path, plan)
+        old = json.loads(protocol_path.read_text())
+        if old != plan:
+            # Preserve the real origins without retaining a second runnable
+            # campaign or duplicating every source-file record in a backup.
+            origin = output / "provenance/origin.json"
+            if not origin.exists():
+                from utils.protocol import file_digest
+                atomic_json(origin, {"protocol_sha256": file_digest(protocol_path), "source": old["source"],
+                    "seeds": old["seeds"], "jobs": [{k: j.get(k) for k in ("id", "experiment", "seed", "config_sha256", "data_key")} for j in old["jobs"]],
+                    "data": {k: {s: {field: v for field, v in data.items() if field != "records"} for s, data in value["splits"].items()} for k, value in old.get("data", {}).items()},
+                    "note": "Original config snapshots, checkpoints and per-run protocols remain at their recorded paths."})
+    atomic_json(protocol_path, plan)
     if args.preflight_only:
+        aggregate(plan, output)
+        monitor = CampaignProgress(plan, output)
+        monitor.refresh(status="ready", force=True)
+        monitor.write_index(); monitor.close()
         print(f"Preflight passed for {len(plan['jobs'])} jobs; no training started")
         return
     result_cache = {}
     if not args.aggregate_only:
         index = prepare_inputs(plan, sources, output, args.prepare_workers) if args.cache == "normalized" else None
+        if index and audit["data_preflight"].get("status") != "verified":
+            audit["data_preflight"] = audit_prepared_inputs(plan, output)
+            atomic_json(audit_path, audit)
         if args.prepare_only:
             print(f"Prepared {len(plan['jobs'])} jobs; no training started. Output: {output}")
             return
         del sources
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", CUBLAS_WORKSPACE_CONFIG=":4096:8", PYTHONUNBUFFERED="1")
         if index: env["DEHCD_PREPARED_INDEX"] = str(index)
-        # Validate existing results once. Subsequent aggregation caches validated
-        # metric rows, not large repeated per-image identities or model weights.
         aggregate(plan, output, cache=result_cache, audit=False)
         monitor = CampaignProgress(plan, output)
+        states = {r["id"]: r["state"] for r in manifest["tasks"]}
         try:
-            for job in plan["jobs"]:
-                if job["id"] in monitor.completed:
-                    continue
+            for job in dispatch_order(plan, manifest):
+                state = states[job["id"]]
+                if state == "reuse_complete": continue
                 if source_identity(ROOT)["sha256"] != plan["source"]["sha256"]:
                     raise ValueError("Source code changed during the campaign")
                 run = run_path(output, job, plan)
                 cfg_path = output / "campaign/configs" / f"{job['id']}.json"
                 atomic_json(cfg_path, job["config"])
-                if not (run / "training_summary.json").exists() or (run / "failure.json").exists():
+                if state in {"train_new", "resume_training"}:
                     command = [sys.executable, str(ROOT / "tools/train.py"), "--config", str(cfg_path), "--run-dir", str(run)]
-                    if args.resume and (run / "checkpoints/last.pth").exists():
-                        command += ["--resume", str(run / "checkpoints/last.pth")]
-                    elif args.resume and (run / "config_snapshot.json").exists():
-                        command += ["--restart-incomplete"]
+                    if state == "resume_training": command += ["--resume", str(run / "checkpoints/last.pth")]
                     run_child(command, env, run, job, monitor, "train")
                 result = result_path(output, job, plan)
-                if not result.exists() or (run / "test/failure.json").exists():
-                    command = [sys.executable, str(ROOT / "tools/test.py"), "--train-root", str(output / "runs"),
-                        "--runs", str(run), "--output-root", str(result.parent), "--result-file", str(result),
-                        "--split", "test", "--checkpoint", "best", "--save-sample-metrics", "--no-confusion-plot"]
-                    if not job["config"].get("inference", {}).get("profile_model", True): command += ["--no-profile"]
-                    run_child(command, env, run, job, monitor, "test")
+                command = [sys.executable, str(ROOT / "tools/test.py"), "--train-root", str(output / "runs"),
+                    "--runs", str(run), "--output-root", str(result.parent), "--result-file", str(result),
+                    "--split", "test", "--checkpoint", "best", "--save-sample-metrics", "--no-confusion-plot"]
+                if not job["config"].get("inference", {}).get("profile_model", True): command += ["--no-profile"]
+                run_child(command, env, run, job, monitor, "test")
                 aggregate(plan, output, verify_checkpoints=False, audit=False, cache=result_cache)
                 monitor.finish_job(job)
             report = aggregate(plan, output)

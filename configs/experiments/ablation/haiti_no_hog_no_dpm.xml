@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project>
+  <base_param type="str">../main/haiti_dehcd_l.xml</base_param>
+  <experiment>
+    <id type="str">haiti_no_hog_no_dpm</id>
+    <canonical_id type="str">haiti_no_hog_no_dpm</canonical_id>
+    <dataset type="str">haiti</dataset>
+    <suite type="str">ablation</suite>
+    <model_variant type="str">l</model_variant>
+    <roles type="list">['ablation']</roles>
+    <uses type="list">[{'group': 'ablation', 'role': 'control', 'paper_refs': ['Fig.17']}, {'group': 'fig17_haiti', 'role': 'control', 'paper_refs': ['Fig.17'], 'modules': [0, 0, 1, 1]}]</uses>
+    <paper_refs type="list">['Fig.17']</paper_refs>
+    <protocol type="str">controlled_comparison_v1</protocol>
+    <status type="str">configured</status>
+    <comparison>
+      <kind type="str">control</kind>
+      <reference type="str">haiti_dehcd_l</reference>
+      <factor type="str">components</factor>
+      <allowed_changes type="list">['model.use_hog', 'model.fusion_mode']</allowed_changes>
+    </comparison>
+  </experiment>
+  <logging>
+    <run_name type="str">haiti_no_hog_no_dpm</run_name>
+  </logging>
+  <model>
+    <use_hog type="bool">false</use_hog>
+    <fusion_mode type="str">plain</fusion_mode>
+  </model>
+</project>

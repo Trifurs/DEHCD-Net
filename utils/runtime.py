@@ -36,7 +36,7 @@ def configure_runtime(training, device):
             raise ValueError("The selected GPU does not support the requested TF32 profile")
         torch.backends.cuda.matmul.allow_tf32 = enabled
         torch.backends.cudnn.allow_tf32 = enabled
-    if training.get("runtime_profile"):
+    if training.get("runtime_profile") or "deterministic" in training:
         deterministic = bool(training.get("deterministic", True))
         torch.backends.cudnn.benchmark = not deterministic
         torch.backends.cudnn.deterministic = deterministic

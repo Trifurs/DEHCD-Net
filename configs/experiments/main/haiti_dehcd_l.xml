@@ -24,8 +24,13 @@
   </inference>
   <experiment>
     <id type="str">haiti_dehcd_l</id>
+    <canonical_id type="str">haiti_dehcd_l</canonical_id>
     <dataset type="str">haiti</dataset>
     <suite type="str">main</suite>
+    <model_variant type="str">l</model_variant>
+    <roles type="list">['main', 'qualitative', 'efficiency', 'confusion', 'scaling', 'data_statistics', 'ablation', 'features', 'sensitivity']</roles>
+    <uses type="list">[{'group': 'main', 'role': 'model', 'paper_refs': ['Table 3']}, {'group': 'main_haiti', 'role': 'model', 'paper_refs': ['Table 3']}, {'group': 'qualitative', 'role': 'checkpoint', 'paper_refs': ['Figs.8–11'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'efficiency', 'role': 'checkpoint', 'paper_refs': ['Figs.15/16'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'confusion', 'role': 'checkpoint', 'paper_refs': ['Figs.8–11'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'scaling', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'l'}, {'group': 'scaling_haiti', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'l'}, {'group': 'data_statistics', 'role': 'data', 'paper_refs': ['Table 1'], 'postprocess_only': True}, {'group': 'ablation', 'role': 'reference', 'paper_refs': ['Fig.17']}, {'group': 'fig17_haiti', 'role': 'reference', 'paper_refs': ['Fig.17'], 'modules': [1, 1, 1, 1]}, {'group': 'features', 'role': 'checkpoint', 'paper_refs': ['Fig.12'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'sensitivity', 'role': 'reference', 'paper_refs': ['Fig.19']}, {'group': 'hog_bins', 'role': 'default', 'paper_refs': ['Fig.19'], 'x': 6, 'reference': 'haiti_dehcd_l'}]</uses>
+    <paper_refs type="list">['Table 3', 'Figs.8–11', 'Figs.15/16', 'Table 1', 'Fig.17', 'Fig.12', 'Fig.19']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

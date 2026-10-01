@@ -30,8 +30,13 @@
   </inference>
   <experiment>
     <id type="str">cau_flood_icif_net</id>
+    <canonical_id type="str">cau_flood_icif_net</canonical_id>
     <dataset type="str">cau_flood</dataset>
     <suite type="str">main</suite>
+    <model_variant type="str">icif_net</model_variant>
+    <roles type="list">['main', 'qualitative', 'efficiency']</roles>
+    <uses type="list">[{'group': 'main', 'role': 'model', 'paper_refs': ['Table 4']}, {'group': 'main_cau_flood', 'role': 'model', 'paper_refs': ['Table 4']}, {'group': 'qualitative', 'role': 'checkpoint', 'paper_refs': ['Fig.13'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'efficiency', 'role': 'checkpoint', 'paper_refs': ['Figs.15/16'], 'display_seed': 42, 'postprocess_only': True}]</uses>
+    <paper_refs type="list">['Table 4', 'Fig.13', 'Figs.15/16']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

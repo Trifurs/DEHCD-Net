@@ -251,8 +251,7 @@ def segmentation_loss(model_output, target, config, num_classes, ignore_index=25
     with torch.autocast(device_type=logits.device.type, enabled=False):
         if not torch.any(target != ignore_index):
             zero = logits.float().sum() * 0.0
-            supervise_localization = (str(config.get("loss", "ce_dice")).lower() in {"damage_ce_lovasz", "changeos_native"}
-                                      or float(config.get("localization_loss_weight", 1.0)) > 0)
+            supervise_localization = float(config.get("localization_loss_weight", 1.0)) > 0
             if supervise_localization and isinstance(model_output, dict) and "localization_logits" in model_output:
                 zero = zero + model_output["localization_logits"].float().sum() * 0.0
             return zero
@@ -267,16 +266,11 @@ def _segmentation_loss_impl(
     ignore_index: int = 255,
 ) -> torch.Tensor:
     logits = extract_logits(model_output)
-    loss_name = str(config.get("loss", "ce_dice")).lower()
     loc = model_output.get("localization_logits") if isinstance(model_output, dict) else None
-    if loss_name in {"damage_ce_lovasz", "changeos_native"}:
-        if loc is None:
-            raise ValueError(f"{loss_name} requires a model with localization_logits")
-        return dual_head_native_loss(logits, loc, target, loss_name, ignore_index)
     loss = _segmentation_loss_tensor(logits, target, config, num_classes, ignore_index)
     if loc is not None:
-        # The common main table disables this auxiliary objective explicitly.
-        # Independent controls retain it without changing the primary loss.
+        # The formal common protocol disables localization supervision.
+        # Keep the generic auxiliary API for checkpoint-compatible model heads.
         weight = float(config.get("localization_loss_weight", 1.0))
         if weight < 0:
             raise ValueError("localization_loss_weight must be nonnegative")
@@ -338,36 +332,6 @@ def _segmentation_loss_tensor(
 
 def localization_target(target, ignore_index=255):
     return torch.where(target == ignore_index, ignore_index, (target > 0).long())
-
-
-def dual_head_native_loss(damage, loc, target, recipe, ignore_index=255):
-    """Explicit official head recipes, evaluated in FP32 by segmentation_loss.
-
-    DamageFormer/BRIGHT-Mamba: CE_loc + CE_dam + .5 Lovasz_loc + .75 Lovasz_dam.
-    ChangeOS: BCE_loc + Tversky_loc(alpha_FN=.9) + CE_dam + all-class Dice_dam.
-    Whole-batch Lovasz and smooth=1 Dice match the cited sources. Ignore labels
-    are masked for both heads, including localization on all-background batches.
-    """
-    loc_target = localization_target(target, ignore_index)
-    ce = F.cross_entropy(damage, target, ignore_index=ignore_index)
-    if recipe == "damage_ce_lovasz":
-        loc_ce = F.cross_entropy(loc, loc_target, ignore_index=ignore_index)
-        dp, dt = flatten_probs(damage.softmax(1), target, ignore_index)
-        lp, lt = flatten_probs(loc.softmax(1), loc_target, ignore_index)
-        return ce + loc_ce + .75 * lovasz_softmax_flat(dp, dt) + .5 * lovasz_softmax_flat(lp, lt)
-    valid = target != ignore_index
-    # ChangeOS's original 1-channel logit is represented as [0, z].
-    z = (loc[:, 1] - loc[:, 0])[valid]
-    y = (loc_target[valid] > 0).float()
-    bce = F.binary_cross_entropy_with_logits(z, y)
-    p = z.sigmoid()
-    tp = (p * y).sum()
-    fn, fp = y.sum() - tp, p.sum() - tp
-    loc_tversky = 1 - (tp + 1.) / (tp + .9 * fn + .1 * fp + 1.)
-    dp, dt = flatten_probs(damage.softmax(1), target, ignore_index)
-    one_hot = F.one_hot(dt, damage.shape[1]).float()
-    damage_dice = 1 - ((2 * (dp * one_hot).sum(0) + 1.) / (dp.sum(0) + one_hot.sum(0) + 1.)).mean()
-    return ce + bce + loc_tversky + damage_dice
 
 
 def _standard_segmentation_loss_tensor(

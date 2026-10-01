@@ -1,7 +1,7 @@
 """Check declared experimental factors before training and before paired reports.
 
 A common recipe controls optimization/data, not model capacity or each model's
-best possible hyperparameters. Native-recipe results are explicit controls.
+best possible hyperparameters. Factor controls name one canonical reference.
 """
 from __future__ import annotations
 
@@ -73,10 +73,10 @@ def validate_config(config):
     if spec["kind"] == "architecture":
         if spec["allowed_changes"] != ["model"]:
             raise ValueError("Architecture comparisons may change model settings only")
-        if float(t.get("localization_loss_weight", 1)) or t.get("loss") in {"changeos_native", "damage_ce_lovasz"}:
+        if float(t.get("localization_loss_weight", 1)) or t.get("loss") not in {"compound", "ce_dice", "hierarchical_change"}:
             raise ValueError("Main architecture comparison uses the same primary task loss with localization supervision disabled")
         if m.get("compare_model") and not m.get("compare_adapt_batchnorm", True):
-            raise ValueError("Original BatchNorm belongs in the declared adapter control, not the main table")
+            raise ValueError("Main comparisons require the declared shared normalization adaptation")
     else:
         for path in spec["allowed_changes"]:
             if not isinstance(path, str) or "." not in path or path.split(".")[0] not in {"model", "training", "dataset"}:

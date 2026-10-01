@@ -29,7 +29,7 @@ torch.set_num_threads(2)
 class ExperimentTests(unittest.TestCase):
     def test_catalog_and_ablation_semantics(self):
         catalog = json.loads((ROOT / "configs/experiments/catalog.json").read_text())["experiments"]
-        self.assertEqual(48, sum(r["suite"] == "main" for r in catalog))
+        self.assertEqual(42, sum(r["suite"] == "main" for r in catalog))
         self.assertEqual(len(catalog), len({r["id"] for r in catalog}))
         for row in catalog:
             cfg = XMLConfigParser(ROOT / row["config"]).parse().as_dict()
@@ -39,9 +39,6 @@ class ExperimentTests(unittest.TestCase):
         base = XMLConfigParser(ROOT / "configs/dehcd/haiti_s.xml").parse().as_dict()
         self.assertEqual("class_mean", base["training"]["hier_binary_reduction"])
         self.assertEqual([1., 1.], base["training"]["hier_binary_class_weights"])
-        legacy = XMLConfigParser(ROOT / "configs/experiments/recipe/haiti_legacy_pixel_mean.xml").parse().as_dict()
-        self.assertEqual("pixel_mean", legacy["training"]["hier_binary_reduction"])
-        self.assertEqual([1., 2.8], legacy["training"]["hier_binary_class_weights"])
         for switches, flow, gate in (({}, True, True), ({"align_fusion": False}, False, True),
                                     ({"difference_gate": False}, True, False)):
             cfg = copy.deepcopy(base); cfg["model"].update(switches)

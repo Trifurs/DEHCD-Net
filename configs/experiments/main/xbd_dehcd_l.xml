@@ -24,8 +24,13 @@
   </inference>
   <experiment>
     <id type="str">xbd_dehcd_l</id>
+    <canonical_id type="str">xbd_dehcd_l</canonical_id>
     <dataset type="str">xbd</dataset>
     <suite type="str">main</suite>
+    <model_variant type="str">l</model_variant>
+    <roles type="list">['main', 'qualitative', 'efficiency', 'scaling', 'data_statistics']</roles>
+    <uses type="list">[{'group': 'main', 'role': 'model', 'paper_refs': ['Table 5']}, {'group': 'main_xbd', 'role': 'model', 'paper_refs': ['Table 5']}, {'group': 'qualitative', 'role': 'checkpoint', 'paper_refs': ['Fig.14'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'efficiency', 'role': 'checkpoint', 'paper_refs': ['Figs.15/16'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'scaling', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'l'}, {'group': 'scaling_xbd', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'l'}, {'group': 'data_statistics', 'role': 'data', 'paper_refs': ['Table 1'], 'postprocess_only': True}]</uses>
+    <paper_refs type="list">['Table 5', 'Fig.14', 'Figs.15/16', 'Table 1']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

@@ -24,8 +24,13 @@
   </inference>
   <experiment>
     <id type="str">bright_dehcd_m</id>
+    <canonical_id type="str">bright_dehcd_m</canonical_id>
     <dataset type="str">bright</dataset>
     <suite type="str">main</suite>
+    <model_variant type="str">m</model_variant>
+    <roles type="list">['main', 'qualitative', 'efficiency', 'confusion', 'scaling', 'sensitivity']</roles>
+    <uses type="list">[{'group': 'main', 'role': 'model', 'paper_refs': ['Table 2']}, {'group': 'main_bright', 'role': 'model', 'paper_refs': ['Table 2']}, {'group': 'qualitative', 'role': 'checkpoint', 'paper_refs': ['Figs.8–11'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'efficiency', 'role': 'checkpoint', 'paper_refs': ['Figs.15/16'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'confusion', 'role': 'checkpoint', 'paper_refs': ['Figs.8–11'], 'display_seed': 42, 'postprocess_only': True}, {'group': 'scaling', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'm'}, {'group': 'scaling_bright', 'role': 'size', 'paper_refs': ['Figs.15/16'], 'x': 'm'}, {'group': 'sensitivity', 'role': 'reference', 'paper_refs': ['Figs.18/19']}, {'group': 'irb_steps', 'role': 'default', 'paper_refs': ['Fig.18'], 'x': 3, 'reference': 'bright_dehcd_m'}, {'group': 'hog_levels', 'role': 'default', 'paper_refs': ['Fig.19'], 'x': 2, 'levels': [0, 1], 'reference': 'bright_dehcd_m'}]</uses>
+    <paper_refs type="list">['Table 2', 'Figs.8–11', 'Figs.15/16', 'Figs.18/19', 'Fig.18', 'Fig.19']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

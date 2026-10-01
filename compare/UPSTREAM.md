@@ -10,7 +10,7 @@ These are trainable ports of the authors' public architectures with explicitly d
 
 ChangeOS's separate `Z-Zheng/ChangeOS` package supplies released TorchScript inference models rather than the trainable core. This port uses the author's maintained TorChange training implementation. The registry's ChangeOS variant is **R50 with deep heads**, not every ChangeOS variant.
 
-ChangeMamba uses **MMBDA** (two encoders and the BRIGHT concatenation decoder) for optical/SAR, and **BDA** (shared encoder, concatenated/interleaved/sequential temporal fusion) for xBD. DamageFormer uses two encoders for heterogeneous inputs and a shared encoder for xBD. These choices are explicit in XML. Do not pool their parameter counts as one universal architecture.
+The formal BRIGHT/Haiti configurations use ChangeMamba **MMBDA** (two encoders and the BRIGHT concatenation decoder) and two-encoder DamageFormer. The retained implementation can construct BDA/shared-encoder variants, but these are not additional formal tasks. Parameter counts refer to the declared variant, input and class count.
 
 The CUDA reverse-scan header replaces removed CCCL 3 `cub::LaneId`/`cub::CTA_SYNC` calls with the equivalent linear-thread warp-lane index and native `__syncthreads`; the recurrence and scan algebra are unchanged.
 
@@ -18,35 +18,15 @@ Original files and their SHA256 values are listed in `upstream_manifest.json`; m
 
 ## Interface and supervision
 
-`forward(optical, second_modality)` returns `{"logits": damage_logits, "localization_logits": two_class_localization_logits}` in both train and eval modes. ChangeOS's one-channel localization logit `z` becomes `[0,z]`, preserving its sigmoid probability. Learned 3-channel input stems handle 1/3/4-channel sensors. The decoder input is padded to a multiple of 32 and the outputs are cropped back, without changing normal 256×256 images.
+`forward(optical, second_modality)` returns primary damage logits and two-class localization logits in both train and eval modes. ChangeOS converts its one-channel localization logit z to [0,z], preserving the sigmoid probability. Learned three-channel input stems support the project sensors; padding to multiples of 32 is cropped back to the original extent.
 
-Unused ImageNet classifiers/final unused Swin normalization were removed from DamageFormer. Real core parameters remain trainable; the tests check their backward gradients. VMamba imports are package-local; optional FLOP profilers/Triton cross-scan imports are not required for the published v3 path. The backbone no longer silently ignores a failed or incomplete pretrained checkpoint.
+The formal main comparison trains from scratch with the same primary-task loss, data, sampling, budget and optimizer/schedule as DEHCD-Net on each dataset. Core BN is adapted to GN. Localization, deep-supervision and feature-pair auxiliary weights are **zero**, preserving dual-head structure/checkpoint compatibility without adding supervision. Localization targets used for diagnostics are label>0 with ignore=255; this is not a separate pre-event building-mask benchmark. Formal localization_f1 is null when localization_supervised=false; any diagnostic score is excluded from localization ranking.
 
-| Suite | Primary/head loss | Normalization and sampling |
-|---|---|---|
-| `main` | Same configured damage-task loss as DEHCD-Net; localization CE+Dice, weight 1 | Shared project data/epoch budget, FP32 for every model, learned input stems, core BN→GN; new runs initialized from scratch by default |
-| `adapter` | Same shared loss | Original core BN; learned input stems still contain GN |
-| `head_recipe` | ChangeOS: BCE + Tversky for localization, CE + all-class Dice for damage. DamageFormer/Mamba: CE for both heads + 0.5 localization Lovasz + 0.75 damage Lovasz | Original core BN, uniform sampling/cropping, same project split/normalization/epoch budget |
-| `optimizer_recipe` | DamageFormer/Mamba head recipe | Additionally AdamW lr=1e-4, weight_decay=5e-3, constant lr, best validation mean_iou, following the pinned scripts; project split, crop size and epoch budget remain different |
+The retained heads remain part of the original architecture. Unused classification layers were removed from DamageFormer, while required model heads remain. Core gradients and selective-scan behavior are tested. Package-local VMamba imports do not require optional profilers or Triton for the retained v3 path.
 
-The local labels provide one damage/change raster. Localization supervision is therefore **`label > 0`, ignoring 255**, including on xBD. If reproducing a benchmark with a separate pre-event building mask, that native mask needs a separate data protocol. Binary CAU and Haiti landslide localization are adapted auxiliary tasks, not native building-localization experiments. Optional DEHCD deep supervision is distinct from these necessary dual heads.
+Shared losses run in FP32 and handle ignored/all-ignore labels. Full-test primary-logit argmax with no TTA is the formal prediction rule in test/evaluate/infer. Conditional damage harmonic F1, foreground mIoU and full-map mIoU have different denominators and must not be interchanged. No postprocessing rule is selected after inspecting test scores.
 
-FP32 losses mask ignored pixels for both heads. Lovasz uses the whole valid batch as upstream; ChangeOS Dice/Tversky use smooth=1. All-ignore batches return graph-connected zero loss. TTA averages both heads after inverse spatial transforms. Raw damage argmax is the default primary prediction, including BRIGHT's full-map mIoU. Test/evaluate additionally report localization F1 and damage harmonic F1 restricted to labeled foreground, with raw confusion matrices. **Conditional damage F1, foreground mIoU and full-map mIoU are different endpoints.**
-
-`inference.prediction_rule` can explicitly select `localization_gated` or `changeos_object`. Object voting uses eight-connected components; original xBD weights [8,38,25,11] apply only to five-class xBD. Other taxonomies require an explicit weight per foreground class. Decode rules are recorded and cannot be mixed during campaign aggregation/comparison. Do not introduce postprocessing only after observing test scores.
-
-## Pretraining
-
-All released experiment XMLs start from scratch, so external weights cannot silently benefit one model. To run a separately labeled pretrained comparison:
-
-```bash
-python tools/run_multiseed.py --experiments bright_damageformer_optimizer_recipe \
-  --encoder-checkpoint damageformer=/absolute/path/to/torchvision_swin_t_state_dict.pth \
-  --data-root bright=/absolute/path/to/BRIGHT1 \
-  --output runs/experiments/damageformer_pretrained --preflight-only
-```
-
-Use torchvision ResNet-50 encoder weights for ChangeOS, torchvision Swin-T weights for DamageFormer, and **the matching VMamba Tiny [2,2,4,2]/v3noz encoder** for ChangeMamba. See the linked upstream repositories for weight provenance. Full task checkpoints belong in `--checkpoint`/`--resume`, not `--encoder-checkpoint`. Missing, mismatched or partially loaded encoders fail. SHA256, initialization, classes, core normalization and scan backend are recorded. Test/inference load the full trained checkpoint and do not require the original encoder file to still exist.
+All formal configurations reject encoder pretraining; test/inference use a full trained task checkpoint with its saved configuration. Source hashes, initialization, classes, normalization and scan backend are recorded. Published upstream recipes remain source context, not runnable extra comparison suites in this collection.
 
 ## ChangeMamba CUDA scan
 

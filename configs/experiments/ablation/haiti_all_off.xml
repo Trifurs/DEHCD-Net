@@ -1,44 +1,32 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project>
-  <base_param type="str">../../dehcd/haiti_l.xml</base_param>
-  <model>
-    <dropout type="float">0.15</dropout>
-    <pretrained_backbone type="bool">false</pretrained_backbone>
-    <encoder_checkpoint type="str" />
-    <deep_supervision type="bool">false</deep_supervision>
-    <use_hog type="bool">false</use_hog>
-    <fusion_mode type="str">plain</fusion_mode>
-    <cross_scale_fusion type="bool">false</cross_scale_fusion>
-    <global_context type="bool">false</global_context>
-    <diffusion_steps type="int">0</diffusion_steps>
-  </model>
-  <training>
-    <early_stop_patience type="int">0</early_stop_patience>
-    <deterministic type="bool">true</deterministic>
-    <amp type="bool">false</amp>
-    <localization_loss_weight type="float">0.0</localization_loss_weight>
-    <aux_loss_weight type="float">0.0</aux_loss_weight>
-    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
-    <best_metric type="str">foreground_miou</best_metric>
-  </training>
-  <inference>
-    <test_time_augmentation type="str">none</test_time_augmentation>
-    <prediction_rule type="str">damage_argmax</prediction_rule>
-  </inference>
+  <base_param type="str">../main/haiti_dehcd_l.xml</base_param>
   <experiment>
     <id type="str">haiti_all_off</id>
+    <canonical_id type="str">haiti_all_off</canonical_id>
     <dataset type="str">haiti</dataset>
     <suite type="str">ablation</suite>
+    <model_variant type="str">l</model_variant>
+    <roles type="list">['ablation']</roles>
+    <uses type="list">[{'group': 'ablation', 'role': 'control', 'paper_refs': ['Fig.17']}, {'group': 'fig17_haiti', 'role': 'control', 'paper_refs': ['Fig.17'], 'modules': [0, 0, 0, 0]}]</uses>
+    <paper_refs type="list">['Fig.17']</paper_refs>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>
       <kind type="str">control</kind>
       <reference type="str">haiti_dehcd_l</reference>
-      <factor type="str">all_off</factor>
-      <allowed_changes type="list">['model.use_hog', 'model.fusion_mode', 'model.cross_scale_fusion', 'model.global_context', 'model.diffusion_steps']</allowed_changes>
+      <factor type="str">components</factor>
+      <allowed_changes type="list">['model.use_hog', 'model.fusion_mode', 'model.global_context', 'model.cross_scale_fusion', 'model.diffusion_steps']</allowed_changes>
     </comparison>
   </experiment>
   <logging>
     <run_name type="str">haiti_all_off</run_name>
   </logging>
+  <model>
+    <use_hog type="bool">false</use_hog>
+    <fusion_mode type="str">plain</fusion_mode>
+    <global_context type="bool">false</global_context>
+    <cross_scale_fusion type="bool">false</cross_scale_fusion>
+    <diffusion_steps type="int">0</diffusion_steps>
+  </model>
 </project>

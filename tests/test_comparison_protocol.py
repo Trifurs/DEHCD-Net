@@ -1,9 +1,5 @@
 import copy
 import json
-import csv
-import subprocess
-import sys
-import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -37,35 +33,35 @@ class ComparisonProtocolTests(unittest.TestCase):
 
     def test_every_declared_control_holds_other_settings_fixed(self):
         evidence = validate_design(self.configs)
-        self.assertEqual(170, len(evidence))  # four dataset roots have no parent
-        bn = next(e for e in evidence if e['candidate'] == 'xbd_changemamba_original_bn')
-        self.assertEqual(['model.compare_adapt_batchnorm'], list(bn['actual_changes']))
-        head = next(e for e in evidence if e['candidate'] == 'bright_changeos_head_recipe')
-        self.assertEqual({'training.loss', 'training.localization_loss_weight'}, set(head['actual_changes']))
-        opt = next(e for e in evidence if e['candidate'] == 'bright_damageformer_optimizer_recipe')
-        self.assertEqual({'training.learning_rate', 'training.weight_decay', 'training.scheduler'}, set(opt['actual_changes']))
-        legacy = next(e for e in evidence if e['candidate'] == 'haiti_legacy_pixel_mean')
-        self.assertEqual(['training.hier_binary_class_weights'], list(legacy['actual_changes']))
+        self.assertEqual(76, len(evidence))  # four dataset roots have no parent
+        edges = {row['candidate']: row for row in evidence}
+        self.assertEqual(['model.diffusion_steps'], list(edges['bright_m_irb_steps_0']['actual_changes']))
+        self.assertEqual('bright_dehcd_m', edges['bright_m_irb_steps_0']['reference'])
+        self.assertEqual(['model.hog_modulation_levels'], list(edges['bright_m_hog_levels_4']['actual_changes']))
+        self.assertEqual({'model.use_hog', 'model.fusion_mode'}, set(edges['haiti_no_hog_no_dpm']['actual_changes']))
+        self.assertEqual({'model.gcb_mode', 'model.bicsf_mode'}, set(edges['bright_bicsf_conv_matched']['actual_changes']))
+        self.assertEqual(['training.class_balanced_sampler'], list(edges['bright_no_weighted_sampler']['actual_changes']))
+        self.assertEqual(['training.class_weights'], list(edges['bright_no_class_weights']['actual_changes']))
 
-    def test_bicsf_and_wasm_are_distinct_real_operations(self):
+    def test_complete_bicsf_ablation_and_capacity_control(self):
         for ds, channels in (('bright', (3, 1)), ('haiti', (3, 4))):
-            for suffix, gcb, wasm in (('no_bicsf', False, False), ('no_wasm', True, False), ('no_gcb', False, True)):
+            for suffix in ('no_bicsf', 'no_hog_no_dpm_no_bicsf', 'all_off'):
                 with self.subTest(dataset=ds, ablation=suffix):
                     model = build_model(self.configs[f'{ds}_{suffix}'], *channels)
-                    self.assertEqual(gcb, not isinstance(model.global_context, torch.nn.Identity))
-                    self.assertEqual(wasm, not isinstance(model.cross_scale_fusion, torch.nn.Identity))
+                    self.assertIsInstance(model.global_context, torch.nn.Identity)
+                    self.assertIsInstance(model.cross_scale_fusion, torch.nn.Identity)
                     out = model(torch.randn(2, channels[0], 32, 32), torch.randn(2, channels[1], 32, 32))
                     self.assertEqual((2, 4, 32, 32), tuple(out.shape))
-            model = build_model(self.configs[f'{ds}_bicsf_conv_matched'], *channels)
-            self.assertEqual('IndependentScaleConvControl', type(model.global_context).__name__)
-            self.assertEqual('IndependentScaleConvControl', type(model.cross_scale_fusion).__name__)
-            model(torch.randn(2, channels[0], 32, 32), torch.randn(2, channels[1], 32, 32)).square().mean().backward()
-            for module in (model.global_context, model.cross_scale_fusion):
-                self.assertLess(abs(module.relative_parameter_error), .05)
-                self.assertTrue(all(p.grad is not None and torch.isfinite(p.grad).all() for p in module.parameters()))
-                self.assertTrue(all(p.grad.abs().sum() > 0 for p in module.parameters()))
+        model = build_model(self.configs['bright_bicsf_conv_matched'], 3, 1)
+        self.assertEqual('IndependentScaleConvControl', type(model.global_context).__name__)
+        self.assertEqual('IndependentScaleConvControl', type(model.cross_scale_fusion).__name__)
+        model(torch.randn(2, 3, 32, 32), torch.randn(2, 1, 32, 32)).square().mean().backward()
+        for module in (model.global_context, model.cross_scale_fusion):
+            self.assertLess(abs(module.relative_parameter_error), .05)
+            self.assertTrue(all(p.grad is not None and torch.isfinite(p.grad).all() for p in module.parameters()))
+            self.assertTrue(all(p.grad.abs().sum() > 0 for p in module.parameters()))
 
-    def test_identical_primary_supervision_for_all_48_main_models(self):
+    def test_identical_primary_supervision_for_all_42_main_models(self):
         for ds in ('bright', 'haiti', 'cau_flood', 'xbd'):
             reference = self.configs[f'{ds}_dehcd_l']
             classes = reference['task']['num_classes']
@@ -90,17 +86,18 @@ class ComparisonProtocolTests(unittest.TestCase):
             empty = segmentation_loss({'logits': logits, 'localization_logits': loc}, torch.full_like(labels, 255), reference['training'], classes)
             self.assertEqual(0, empty.item())
 
-    def test_localization_auxiliary_is_a_real_independent_factor(self):
-        cfg = self.configs['bright_changeos_localization_aux']
-        logits = torch.randn(2, 4, 8, 8, requires_grad=True)
-        loc = torch.randn(2, 2, 8, 8, requires_grad=True)
-        labels = torch.randint(4, (2, 8, 8))
-        loss = segmentation_loss({'logits': logits, 'localization_logits': loc}, labels, cfg['training'], 4)
-        loss.backward()
-        self.assertGreater(loc.grad.abs().sum(), 0)
-        plan = self.plan('bright_changeos', 'bright_changeos_localization_aux')
-        result = comparability(plan, plan['jobs'])
-        self.assertEqual(['training.localization_loss_weight'], list(result['comparisons'][0]['actual_changes']))
+    def test_m_scans_cannot_be_relabelled_l_controls(self):
+        for name in ('bright_m_irb_steps_0', 'bright_m_hog_levels_4'):
+            cfg = self.configs[name]
+            self.assertEqual('dehcd_m', cfg['model']['backbone'])
+            self.assertEqual(24, cfg['model']['base_channels'])
+            self.assertEqual('bright_dehcd_m', cfg['experiment']['comparison']['reference'])
+            plan = self.plan('bright_dehcd_m', name)
+            comparability(plan, plan['jobs'])
+            wrong = self.plan('bright_dehcd_l', name)
+            with self.assertRaisesRegex(ValueError, 'declared direct control'):
+                comparability(wrong, wrong['jobs'])
+        self.assertEqual('dehcd_l', self.configs['bright_no_irb']['model']['backbone'])
 
     def test_main_architectures_are_comparable_but_undeclared_recipe_drift_is_not(self):
         plan = self.plan('bright_dehcd_l', 'bright_changeos', 'bright_damageformer', 'bright_changemamba')
@@ -128,15 +125,15 @@ class ComparisonProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'seed sets'):
             comparability(plan, plan['jobs'][:-1])
 
-    def test_native_recipes_cannot_be_mixed_into_main_architecture_comparison(self):
-        for suffix in ('original_bn', 'head_recipe', 'optimizer_recipe'):
-            plan = self.plan('bright_dehcd_l', f'bright_damageformer_{suffix}')
-            with self.subTest(control=suffix), self.assertRaisesRegex(ValueError, 'declared direct control'):
-                comparability(plan, plan['jobs'])
-        for parent, child in (('bright_damageformer', 'bright_damageformer_original_bn'),
-                ('bright_damageformer_original_bn', 'bright_damageformer_head_recipe'),
-                ('bright_damageformer_head_recipe', 'bright_damageformer_optimizer_recipe')):
-            plan = self.plan(parent, child)
+    def test_recipe_controls_require_their_declared_full_reference(self):
+        for name in ('bright_ce_dice_full_sampling', 'bright_no_weighted_sampler', 'bright_no_class_weights'):
+            plan = self.plan('bright_dehcd_l', name)
+            comparability(plan, plan['jobs'])
+            wrong = self.plan('bright_dehcd_m', name)
+            with self.assertRaisesRegex(ValueError, 'declared direct control'):
+                comparability(wrong, wrong['jobs'])
+        plan = self.plan('bright_ce_dice_full_sampling', 'bright_no_weighted_sampler')
+        with self.assertRaisesRegex(ValueError, 'declared direct control'):
             comparability(plan, plan['jobs'])
 
     def test_preflight_and_single_training_reject_unfair_main_settings(self):
@@ -161,30 +158,20 @@ class ComparisonProtocolTests(unittest.TestCase):
         info = model_metadata(module, 'cpu')
         self.assertEqual([64, 64], info['adapter_spatial_transform']['core_input_size'])
 
-    def test_event_fold_reference_names_and_dry_plan(self):
+    def test_multiple_analysis_views_make_unique_seed_tasks(self):
         from tools.run_multiseed import make_plan
-        with tempfile.TemporaryDirectory() as tmp:
-            directory = Path(tmp)
-            metadata = directory / 'events.csv'
-            with metadata.open('w') as stream:
-                writer = csv.DictWriter(stream, fieldnames=['id', 'source_split', 'split', 'group', 'event'])
-                writer.writeheader()
-                for i in range(6):
-                    writer.writerow({'id': str(i), 'source_split': 'train', 'split': 'train', 'group': str(i), 'event': str(i//2)})
-            out = directory / 'folds'
-            subprocess.run([sys.executable, str(ROOT / 'tools/build_event_cv.py'), '--metadata', str(metadata),
-                '--configs', str(ROOT / 'configs/experiments/main/bright_dehcd_l.xml'),
-                str(ROOT / 'configs/experiments/ablation/bright_no_bicsf.xml'), '--dataset', 'bright', '--output', str(out)],
-                cwd=ROOT, check=True, capture_output=True, text=True)
-            args = SimpleNamespace(catalog=str(out/'catalog.json'), config=None, experiments=None,
-                seeds=[42, 1051], datasets=['bright'], suite=['cross_event'], data_root=[], manifest=[],
-                encoder_checkpoint=[], device='cpu', num_workers=0, epochs=None, batch_size=None,
-                gradient_accumulation_steps=None, fingerprint='stat')
-            plan = make_plan(args)
-            self.assertEqual(12, len(plan['jobs']))
-            self.assertEqual(3, len(plan['comparison_design']))
-            for edge in plan['comparison_design']:
-                self.assertEqual(edge['candidate'].split('__event_')[1], edge['reference'].split('__event_')[1])
+        args = SimpleNamespace(catalog=str(ROOT / 'configs/experiments/catalog.json'), config=None, experiments=None,
+            seeds=[42, 1051, 2060], datasets=['bright', 'haiti', 'cau_flood', 'xbd'],
+            suite=['main', 'ablation', 'sensitivity', 'scaling'], data_root=[], manifest=[],
+            encoder_checkpoint=[], device='cpu', num_workers=0, epochs=None, batch_size=None,
+            gradient_accumulation_steps=None, fingerprint='stat')
+        plan = make_plan(args)
+        self.assertEqual(213, len(plan['jobs']))
+        keys = {(job['experiment'], job['seed']) for job in plan['jobs']}
+        self.assertEqual(len(plan['jobs']), len(keys))
+        self.assertEqual(3, sum(job['experiment'] == 'bright_dehcd_m' for job in plan['jobs']))
+        self.assertEqual(3, sum(job['experiment'] == 'haiti_dehcd_l' for job in plan['jobs']))
+        self.assertEqual(['bright', 'haiti', 'xbd', 'cau_flood'], list(dict.fromkeys(job['dataset'] for job in plan['jobs'])))
 
 
 if __name__ == '__main__':

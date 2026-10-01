@@ -13,14 +13,14 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.config import XMLConfigParser
-from utils.checkpoint import load_model_state, CheckpointWriter, _write_payload, _link_checkpoint
+from utils.checkpoint import load_model_state, CheckpointWriter, _write_payload, _link_checkpoint, validate_training_checkpoint
 from utils.logger import ExperimentWriters, setup_logger
 from utils.metrics import format_metrics, primary_metric_name
 from utils.run_manager import create_run_dir, save_config_snapshot
 from utils.reproducibility import set_seed, seed_worker, seed_epoch, capture_rng_state, restore_rng_state, BestTracker
 from utils.protocol import atomic_json, config_digest, dataset_identity, source_identity, environment, assert_disjoint
 from utils.training_health import check_finite, check_finite_many, CollapseMonitor, gradient_statistics
-from utils.progress import RunProgress, get_reporter, set_reporter, duration
+from utils.progress import RunProgress, get_reporter, set_reporter, duration, training_health_text
 
 
 def parse_args() -> argparse.Namespace:
@@ -683,8 +683,16 @@ def main() -> None:
     old_protocol = run_dir / "protocol.json"
     if (args.resume or train_cfg.get("resume")) and old_protocol.exists():
         old = json.loads(old_protocol.read_text())
-        if old["source"]["sha256"] != protocol["source"]["sha256"] or old["datasets"] != identities:
-            raise ValueError("Code or data changed since this run; start a new run")
+        from utils.campaign_reuse import verify_source_import
+        verify_source_import(run_dir, old["source"], protocol["source"])
+        if old["datasets"] != identities:
+            raise ValueError("Data changed since this run; start a new run")
+        lineage = list(old.get("source_lineage", []))
+        if old["source"]["sha256"] != protocol["source"]["sha256"] and not any(
+                item.get("sha256") == old["source"]["sha256"] for item in lineage):
+            lineage.append(old["source"])
+        if lineage:
+            protocol["source_lineage"] = lineage
     atomic_json(old_protocol, protocol)
     model = build_model(
         config,
@@ -714,7 +722,8 @@ def main() -> None:
     resume_path = args.resume or train_cfg.get("resume")
     previous_seconds = 0.0
     if resume_path:
-        checkpoint = torch.load(resume_path, map_location="cpu")
+        checkpoint = torch.load(resume_path, map_location="cpu", weights_only=False)  # Trusted local full training state, including RNG.
+        validate_training_checkpoint(checkpoint)
         if checkpoint.get("checkpoint_kind") == "inference":
             raise ValueError("This best checkpoint contains inference weights only; resume from checkpoints/last.pth")
         if checkpoint.get("config") and config_digest(checkpoint["config"]) != config_digest(config):
@@ -727,7 +736,7 @@ def main() -> None:
         # A hard stop can land between publishing last.pth and best.pth.
         best_path = checkpoint_dir / "best.pth"
         if int(checkpoint.get("best_epoch", 0)) == int(checkpoint.get("epoch", -1)):
-            best = torch.load(best_path, map_location="cpu") if best_path.exists() else {}
+            best = torch.load(best_path, map_location="cpu", weights_only=False) if best_path.exists() else {}
             if best.get("epoch") != checkpoint["epoch"]:
                 if log_cfg.get("compact_checkpoints", False):
                     best = {k: v for k, v in checkpoint.items() if k not in {"optimizer", "scheduler", "scaler", "rng_state"}}
@@ -793,6 +802,7 @@ def main() -> None:
     globals()["ACTIVE_CHECKPOINT_WRITER"] = checkpoint_writer
     reporter = RunProgress(run_dir / "progress.json", epochs=epochs, completed=start_epoch - 1)
     set_reporter(reporter)
+    reporter.training_health(completed_epoch, best_name, best_metric, best_epoch, tracker, monitor, early_stop_patience)
     for epoch in range(start_epoch, epochs + 1):
         reporter.start_epoch(epoch,
             min(len(train_loader), int(train_cfg.get("max_train_batches", 0) or len(train_loader))),
@@ -851,7 +861,10 @@ def main() -> None:
             best_metric = tracker.best
             if improved:
                 best_epoch = epoch
-            monitor.update(epoch, best_metric, current, val_metrics)
+            try:
+                monitor.update(epoch, best_metric, current, val_metrics)
+            finally:
+                reporter.training_health(epoch, best_name, best_metric, best_epoch, tracker, monitor, early_stop_patience)
 
         reporter.phase("checkpoint")
         check_finite_many(((f"parameter {name}", parameter) for name, parameter in model.named_parameters()), epoch, -1, [])
@@ -868,11 +881,13 @@ def main() -> None:
                                  archive=save_interval > 0 and epoch % save_interval == 0)
         if improved:
             logger.info("New best checkpoint: %s=%.6f", best_name, best_metric)
+        reporter.training_health(epoch, best_name, best_metric, best_epoch, tracker, monitor, early_stop_patience)
         reporter.epoch_done(epoch, train_loss=train_loss, val_loss=val_loss if val_metrics else None,
-                            best_metric=best_metric, best_epoch=best_epoch, learning_rate=current_lr)
+                            learning_rate=current_lr)
         logger.info("Progress %s/%s (%.1f%%) | elapsed %s | ETA ~%s | best epoch %s", epoch, epochs,
                     100 * epoch / epochs, duration(reporter.state["elapsed_seconds"]),
                     duration(reporter.state["eta_seconds"]), best_epoch)
+        logger.info("%s", training_health_text(reporter.state))
         with (run_dir / "history.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(json.dumps({"epoch": epoch, "lr": current_lr, "train_loss": train_loss,
                 "train": train_metrics, "val": val_metrics, "best_metric": best_metric,

@@ -1,236 +1,85 @@
 # DEHCD-Net
 
-Implementation for **Selective Difference Learning for Multi-Class Disaster Mapping
-from Pre-Disaster Optical and Post-Disaster SAR Imagery**.
+Implementation for **Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery**.
 
-The experiment protocol is documented in [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md).
-Configurations declare the data, optimization, precision and comparison factors used by each experiment.
+The formal collection contains **80 unique configurations**, each with seeds **42, 1051, 2060**, for **240 target tasks**. Compatible existing results count toward this total; only missing or incompatible work is scheduled. The [generated catalog and figure coverage](docs/EXPERIMENT_CATALOG.md) derive from configuration metadata, including shared references and default sensitivity points.
 
+## Run the local campaign
 
-DEHCD-Net targets rapid disaster mapping from asymmetric observations, especially
-pre-disaster optical imagery and post-disaster SAR imagery. The network is built
-around explicit difference enhancement: modality-induced pseudo-differences are
-suppressed, while disaster-induced structural and semantic changes are preserved
-for binary and multi-class prediction.
-
-## Highlights
-
-- Optical-SAR heterogeneous change detection for disaster response.
-- Unified support for binary affected-area detection and multi-class disaster mapping.
-- HOG structural-prior modulation for stable cross-modal geometric cues.
-- Difference Perception Module (DPM) for alignment and difference-aware fusion.
-- Bidirectional Cross-Scale Fusion (BiCSF) for multi-scale feature interaction.
-- Iterative Refinement Block (IRB) for semantic correction at the bottleneck.
-- Compact S/M/L variants using the same training, evaluation, and inference tools.
-
-## Method Overview
-
-Given a pre-event image and a post-event image, DEHCD-Net predicts a pixel-level
-change or damage map. The implementation contains:
-
-- dual modality encoders for hierarchical optical and post-event feature extraction;
-- shallow HOG feature modulation to introduce structural priors;
-- difference-aware fusion with bounded alignment and gated change evidence;
-- global-context guided cross-scale fusion;
-- iterative residual refinement before decoding;
-- a task-specific decoder and segmentation head.
-
-The provided model variants are:
-
-| Variant | Backbone name | Typical use |
-| --- | --- | --- |
-| DEHCD-Net-S | `dehcd_s` | Fast debugging and ablation |
-| DEHCD-Net-M | `dehcd_m` | Balanced experiments |
-| DEHCD-Net-L | `dehcd_l` | Main reported setting |
-
-## Datasets
-
-The code supports the main optical-SAR multi-class experiments and auxiliary
-generalization experiments used by the project.
-
-| Dataset | Setting | Task | Modalities | Classes | Patch size |
-| --- | --- | --- | --- | --- | --- |
-| BRIGHT | Primary | Building damage mapping | Optical + SAR | 4 | 256 |
-| Haiti | Primary | Landslide mapping | Optical + SAR | 4 | 128 |
-| CAU-Flood | Auxiliary | Flood extraction | Optical + SAR | 2 | 256 |
-| xBD | Auxiliary | Building damage mapping | Optical + Optical | 5 | 256 |
-
-Dataset roots in the XML files are relative placeholders such as `data/BRIGHT`.
-Edit the corresponding file under `configs/datasets/` to match your prepared data.
-
-## Repository Structure
-
-```text
-configs/
-  base.xml              Shared model, optimization, logging, and inference defaults
-  config.xml            Default experiment reference
-  datasets/             Dataset-specific task and preprocessing settings
-  dehcd/                S/M/L DEHCD-Net experiment configs
-datasets/               Dataset loaders
-models/                 DEHCD-Net, backbones, encoders, and fusion modules
-compare/                Comparison-model wrappers
-tools/                  Training, testing, inference, and dataset utilities
-utils/                  Config parsing, losses, metrics, logging, and raster I/O
-```
-
-## Installation
-
-Create an environment with Python 3.10 or later, then install dependencies:
+Use the existing training Python environment. On the configured workstation:
 
 ```bash
-python -m pip install -r requirements.txt
-```
-
-For machines with a different CUDA or CPU-only setup, install the matching PyTorch
-build first, then install the remaining dependencies.
-
-## Configuration
-
-The XML configuration tree is intentionally compact:
-
-- `configs/base.xml` stores shared defaults.
-- `configs/datasets/*.xml` stores dataset, task, normalization, loss, and sampling settings.
-- `configs/dehcd/*.xml` stores only the dataset reference, model size, and run name.
-
-Example experiment files:
-
-```text
-configs/dehcd/bright_l.xml
-configs/dehcd/haiti_l.xml
-configs/dehcd/cau_flood_l.xml
-configs/dehcd/xbd_m.xml
-```
-
-`configs/config.xml` points to the default experiment.
-
-## Training
-
-Train with the default config:
-
-```bash
-python tools/train.py
-```
-
-Train a specific experiment:
-
-```bash
-python tools/train.py --config configs/dehcd/bright_l.xml
-python tools/train.py --config configs/dehcd/haiti_l.xml
-python tools/train.py --config configs/dehcd/cau_flood_l.xml
-python tools/train.py --config configs/dehcd/xbd_m.xml
-```
-
-Run a short debugging job:
-
-```bash
-python tools/train.py --config configs/dehcd/bright_s.xml --epochs 1 --max-train-batches 20 --max-val-batches 5
-```
-
-## Evaluation and Inference
-
-Evaluate a checkpoint:
-
-```bash
-python tools/evaluate.py --config configs/dehcd/bright_l.xml --checkpoint <checkpoint.pth> --split test
-```
-
-Run testing and export predictions:
-
-```bash
-python tools/test.py --train-root runs/train --runs <run_name> --checkpoint best --split test --save-predictions
-```
-
-Run inference on a split:
-
-```bash
-python tools/infer.py --config configs/dehcd/bright_l.xml --checkpoint <checkpoint.pth> --split test
-```
-
-## Dataset Utilities
-
-Inspect a configured dataset:
-
-```bash
-python tools/explore_data.py --config configs/dehcd/bright_l.xml --max-samples 12
-```
-
-Audit label values:
-
-```bash
-python tools/audit_dataset_labels.py --configs configs/dehcd/bright_l.xml --splits train
-```
-
-Prepare supported dataset layouts:
-
-```bash
-python tools/dataset_tools/bright_split.py --src-root data/raw/BRIGHT --dst-root data/BRIGHT
-python tools/dataset_tools/bright_crop_1024_to_256.py --root data/BRIGHT
-python tools/dataset_tools/cau_split.py --src-root data/raw/CAU-Flood --dst-root data/CAU-Flood
-python tools/dataset_tools/xbd_split_crop_1024_to_256.py --src-root data/raw/xBD --dst-root data/xBD
-```
-
-## Metrics
-
-The project reports:
-
-- `OA`: overall accuracy.
-- `P`: foreground precision.
-- `R`: foreground recall.
-- `F1`: foreground F1 score.
-- `mIoU`: mean IoU over all classes.
-- `FmIoU`: foreground mean IoU over non-background classes.
-
-For binary change detection, `FmIoU` is the IoU of the foreground change class.
-For multi-class disaster mapping, it is the mean IoU over foreground disaster classes.
-
-## Citation
-
-If this repository is useful for your research, please cite:
-
-```bibtex
-@misc{liu2026dehcdnet,
-  title  = {Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery},
-  author = {Liu, Bo and Li, Deren and Xiao, Xiongwu and Shao, Zhenfeng and Li, Yingbing and Duan, Yueming and Luo, Zheng},
-  year   = {2026}
-}
-```
-
-## License
-
-Please check the project license and the licenses of included comparison-model
-implementations before redistribution or commercial use.
-
-
-## Controlled experiments
-
-For model comparisons use `configs/experiments/` with `tools/run_multiseed.py`;
-the single-run examples above are ordinary presets, not the controlled
-comparison. See [the controlled-factor specification](docs/FAIR_COMPARISONS.md).
-
-The registry now includes ChangeOS-R50, DamageFormer and ChangeMamba (MMBDA/BDA),
-with dual-head structures, explicit auxiliary-supervision controls and pinned upstream source records. See
-[baseline setup and adaptations](compare/UPSTREAM.md),
-[experiment protocol](docs/EXPERIMENT_PROTOCOL.md), and
-[experiment capabilities](docs/EXPERIMENT_STATUS.md).
-`configs/experiments/catalog.json` contains 174 configurations; generating or dry-running
-a plan does not launch training. Use a separate campaign directory for each fixed execution protocol.
-
-For RTX 5090 training, pass `--runtime-profile rtx5090` to the multiseed runner.
-See [hardware settings and batch sizes](docs/RUNTIME_PROFILE.md).
-
-## One-command local campaign
-
-In the configured Python environment:
-
-```bash
+python -W ignore tools/run_all.py --audit-only
+python -W ignore tools/run_all.py --preflight-only
 python -W ignore tools/run_all.py
 ```
 
-This launcher runs all 174 configurations with seeds 42, 1051 and 2060 (522 runs),
-using the RTX 5090 profile. It reads `~/桌面/myData/Hete_CD/{BRIGHT1,Haiti1,CAU1,xBD1}`
-and writes everything under `~/桌面/myResult/DEHCD-Net`. Override `--data-base` or
-`--output` when needed. Repeating the command resumes the same campaign.
+The first command only inspects. The second validates and records the plan/data/reuse evidence without training. The third completes the outstanding work; repeat it after interruption to continue. It first reuses completed results, then performs necessary reevaluation, compatible continuation and new training. Dataset order is **BRIGHT → Haiti → xBD → CAU-Flood** within each action priority.
 
-The console shows overall, epoch and batch progress with provisional remaining
-wall time. Warnings are hidden; failures remain visible. Full best/last training
-checkpoints are retained. See [progress, shared preparation and result layout](docs/RUN_WORKFLOW.md).
+Defaults are `~/桌面/myData/Hete_CD/{BRIGHT1,Haiti1,xBD1,CAU1}` for data and `~/桌面/myResult/DEHCD-Net` for all results, with `cuda:0` and the RTX5090 profile. `--data-base` and `--output` override paths. Console progress includes total/current progress, provisional ETA, best validation foreground mIoU and epoch, early-stop status and foreground-protection counters. Ordinary early stopping is disabled in formal experiments. Python warnings are hidden; errors remain visible.
+
+```bash
+python -W ignore tools/run_all.py --groups main ablation sensitivity scaling --dry-run
+python -W ignore tools/compare_results.py --campaign "$HOME/桌面/myResult/DEHCD-Net" --groups main ablation sensitivity scaling --output "$HOME/桌面/myResult/DEHCD-Net/summary/analysis"
+```
+
+Selecting overlapping groups does not duplicate a canonical ID/seed task. Reports keep incomplete groups explicitly incomplete. See [commands, resume and output layout](docs/RUN_WORKFLOW.md), [protocol](docs/EXPERIMENT_PROTOCOL.md), [comparison factors](docs/FAIR_COMPARISONS.md), and [hardware settings](docs/RUNTIME_PROFILE.md).
+
+## Network
+
+The custom four-level convolutional backbone uses depthwise local/dilated branches, channel expansion, GRN and context gates; it is not an unnamed external pretrained backbone. The two modality stems and levels 0–1 are independent. Levels 2–3 and their downsampling modules share parameter objects. Both binary and multiclass tasks use the same three-stage decoder structure; only the output class count changes.
+
+| Variant | Channels | Stage depths | Expansion |
+| --- | --- | --- | ---: |
+| S | 16,32,64,96 | 1,1,2,1 | 2 |
+| M | 24,48,96,144 | 1,2,3,2 | 2 |
+| L | 32,64,128,192 | 2,2,4,2 | 3 |
+
+HOG means Histogram of Oriented Gradients. Its affine modulation guides the first two levels by default with six bins. DPM combines bounded flow alignment, modality weighting and difference gating. BiCSF contains both Global Context Bridge Modulation (GCBM) and bidirectional Weighted Adjacent-Scale Merge (WASM); WASM gates the **absolute** difference of neighboring features. IRB reuses one denoiser for three iterations by default. `tanh` bounds its residual, while learned step scalars remain unconstrained; it does not bound the full update independently of those scalars.
+
+The architecture aims to select useful heterogeneous evidence. Feature heatmaps or non-additive ablation scores alone do not prove physical separation of sensor effects and true changes or causal synergy.
+
+## Data and experiments
+
+| Dataset | Inputs | Classes | Patch | Unique configurations |
+| --- | --- | ---: | ---: | ---: |
+| BRIGHT | Optical/SAR | 4 | 256 | 39 |
+| Haiti | Optical/SAR | 4 | 128 | 23 |
+| xBD | Optical/Optical | 5 | 256 | 9 |
+| CAU-Flood | Optical/SAR | 2 | 256 | 9 |
+
+All four datasets retain S/M/L and ICIF-Net, DMINet, HFA-PANet, WaveHFG, HRSICD and HAFF; BRIGHT/Haiti also include ChangeOS-R50, DamageFormer and ChangeMamba. These are adapted architectures under the shared scratch-training strategy, not claimed reproductions of official best benchmark scores. See [baseline adaptations and licenses](compare/README.md) and [pinned sources/CUDA scan](compare/UPSTREAM.md).
+
+Formal comparisons use primary supervision only, fixed dataset-specific budgets, strict best validation `foreground_miou`, full-test primary argmax and no TTA. RTX5090 uses FP32 tensors/losses with TF32 math enabled. Physical batch and accumulation are identical within a dataset; no per-model hidden fallback is allowed. The protocol discloses the BRIGHT compound loss/class weights/sampling and Haiti hierarchical loss. Only BRIGHT receives the additional capacity, DPM-part and recipe controls.
+
+Shared templates live in configs/base.xml, configs/datasets/ and configs/dehcd/. The executable formal definitions live once each in configs/experiments/. Templates are not extra experiment tasks; resolved per-seed snapshots are necessary evidence. `python tools/build_experiment_configs.py` regenerates the formal catalog, groups and usage documentation.
+
+## Results and postprocessing
+
+Each seed retains its snapshot, protocol, history, full best/last checkpoint and complete test evidence. Summaries report raw per-seed metrics, mean, sample SD (ddof=1), n, expected_n=3 and completeness. A shared reference appearing in several figures still has only three independent training repeats. Missing seeds are never filled with zero. Three-seed exact two-sided sign-flip tests cannot produce p<0.05 (minimum 0.25).
+
+OA is overall accuracy. Foreground P/R/F1 are classwise foreground aggregates; mean_iou includes background and foreground_miou excludes it, using classes with a valid union. Raw confusion counts and per-class denominators support confusion analysis. Row-normalized diagonal values are class recall, not OA. Unsupervised localization heads have formal localization_f1=null and are excluded from localization rankings.
+
+Prediction panels, feature responses, confusion matrices, parameter counts and efficiency measurements reuse checkpoints. Display seed and samples are fixed before comparing scores. Partial hook operation counts are not complete FLOPs; efficiency reports use matched-device latency/throughput settings. In-domain results do not establish unseen-event generalization.
+
+## Environment and verification
+
+The existing hlcd environment includes PyTorch and the selective-scan CUDA extension; do not rebuild it for ordinary runs. For a new environment, install a suitable PyTorch build then dependencies from requirements.txt and follow the CUDA build instructions in compare/UPSTREAM.md.
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Tests and bounded smoke checks validate execution and evidence handling, not completed scientific results or convergence. See [validation](docs/VALIDATION.md).
+
+## Citation
+
+```bibtex
+@misc{liu2026dehcdnet,
+  title = {Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery},
+  author = {Liu, Bo and Li, Deren and Xiao, Xiongwu and Shao, Zhenfeng and Li, Yingbing and Duan, Yueming and Luo, Zheng},
+  year = {2026}
+}
+```
+
+Check the project license and the retained licenses of included baseline implementations before redistribution or commercial use.

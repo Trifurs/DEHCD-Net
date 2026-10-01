@@ -19,8 +19,29 @@ def validate_result(result, expected_config=None, expected_dataset=None, verify_
         raise ValueError("Publication summary requires split=test; validation scores cannot be relabelled")
     if result.get("runtime", {}).get("max_batches", 0):
         raise ValueError("Truncated test evaluation is not a complete result")
-    if result.get("schema_version") != 1:
+    schema = result.get("schema_version")
+    if schema not in {1, 2}:
         raise ValueError("Legacy result has no verifiable provenance; re-evaluate the saved checkpoint")
+    if schema == 2:
+        if result.get("complete") is not True or result.get("status") != "complete":
+            raise ValueError("Partial or failed evaluation is not a complete result")
+        expected = result.get("dataset_identity", {}).get("samples")
+        if not isinstance(expected, int) or expected <= 0 or result.get("expected_samples") != expected:
+            raise ValueError("Complete evaluation requires the expected split sample count")
+        runtime = result.get("runtime", {})
+        if runtime.get("prediction_rule") != "damage_argmax" or runtime.get("test_time_augmentation") != "none":
+            raise ValueError("Formal results require common main-logits argmax and no TTA")
+    heads = result.get("damage_head_metrics")
+    if heads is not None:
+        if not isinstance(heads.get("localization_supervised"), bool):
+            raise ValueError("Localization supervision is not recorded; re-evaluate this dual-head checkpoint")
+        if not heads["localization_supervised"] and heads.get("localization_f1") is not None:
+            raise ValueError("Unsupervised localization_f1 must be null; use diagnostic_localization_f1")
+        for key in ("localization_f1", "diagnostic_localization_f1", "conditional_damage_hmean_f1"):
+            if heads.get(key) is not None and not math.isfinite(float(heads[key])):
+                raise ValueError(f"Non-finite damage head metric: {key}")
+    if result.get("loss") is not None and not math.isfinite(float(result["loss"])):
+        raise ValueError("Non-finite evaluation loss")
     if "dataset_identity" in result and result.get("evaluated_samples") != result["dataset_identity"]["samples"]:
         raise ValueError("Evaluated sample count does not match the complete test split")
     cm = torch.as_tensor(result["confusion_matrix"], dtype=torch.float64)

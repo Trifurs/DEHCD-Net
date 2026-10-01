@@ -13,6 +13,7 @@ def predict_outputs(model, optical, sar, amp: bool, tta_mode: str):
         heads = {'logits': extract_logits(out)}
         if isinstance(out, dict) and 'localization_logits' in out:
             heads['localization_logits'] = out['localization_logits']
+        check_evaluation_tensors(heads)
         return heads
 
     if tta_mode == 'none':
@@ -31,7 +32,42 @@ def predict_outputs(model, optical, sar, amp: bool, tta_mode: str):
         raise ValueError(f'Unsupported test-time augmentation: {tta_mode}')
     outputs = [ {key: inverse(value).float() for key, value in forward_once(forward(optical), forward(sar)).items()}
                 for forward, inverse in transforms ]
-    return {key: torch.stack([out[key] for out in outputs]).mean(0) for key in outputs[0]}
+    result = {key: torch.stack([out[key] for out in outputs]).mean(0) for key in outputs[0]}
+    check_evaluation_tensors(result)
+    return result
+
+
+def check_evaluation_tensors(tensors):
+    """Fail before argmax can silently turn NaN/Inf into a class prediction."""
+    import torch
+    tensors = list(tensors.items())
+    flags = torch.stack([torch.isfinite(value).all() for _, value in tensors]).cpu()
+    if not bool(flags.all()):
+        names = [name for (name, _), finite in zip(tensors, flags) if not bool(finite)]
+        raise FloatingPointError('Non-finite evaluation values: ' + ', '.join(names))
+
+
+def validate_evaluation_labels(labels, num_classes, ignore_index=255):
+    """All evaluation entry points accept the same class IDs and ignore label."""
+    import torch
+    valid = (labels >= 0) & (labels < num_classes)
+    if ignore_index is not None:
+        valid = valid | (labels == ignore_index)
+    if labels.is_floating_point():
+        valid = valid & torch.isfinite(labels) & (labels == labels.round())
+    if not bool(valid.all()):
+        raise ValueError('Evaluation labels must be integer class IDs or the configured ignore_index')
+
+
+def evaluation_coverage(seen_samples, expected_samples, *, limit=0):
+    """Partial smoke evaluation is explicit and cannot be a complete test result."""
+    if expected_samples <= 0 or seen_samples <= 0:
+        raise ValueError('Evaluation requires a nonempty dataset and evaluated samples')
+    if seen_samples > expected_samples:
+        raise ValueError('Evaluation processed more samples than the declared split')
+    complete = seen_samples == expected_samples and int(limit) == 0
+    return {'complete': complete, 'status': 'complete' if complete else 'partial',
+            'evaluated_samples': int(seen_samples), 'expected_samples': int(expected_samples)}
 
 
 def predict_logits(model, optical, sar, amp: bool, tta_mode: str):

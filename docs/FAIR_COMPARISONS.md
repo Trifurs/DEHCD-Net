@@ -1,132 +1,45 @@
-# Controlled comparison protocol
+# Controlled comparisons
 
-This protocol applies to `configs/experiments/`, identified by
-`experiment.protocol=controlled_comparison_v1`. Use a separate campaign directory
-for each fixed combination of code, data, seeds and execution settings.
+The 80 canonical configurations use controlled_comparison_v1 and seeds `[42,1051,2060]`. A reference serves several analyses without creating another training job. Resolved model/data/training/execution settings define compatibility; presentation metadata does not.
 
-## BiCSF components
+There are 42 main configurations: S/M/L and six original baselines on every dataset, plus ChangeOS-R50, DamageFormer and ChangeMamba on BRIGHT/Haiti. Splits, bands, masks, normalization, augmentation, sampling, crops, physical batch, accumulation, optimizer/schedule, budget, precision and evaluation rules are common within a dataset. S/M/L external dropout is 0.15. Baseline-internal layers/stochastic depth remain architectural properties.
 
-BiCSF includes GCBM and bidirectional WASM. The configuration names
-now have the following exact meanings on both BRIGHT and Haiti:
+All main models train from scratch with primary supervision only. Auxiliary localization, deep-supervision and feature-pair weights are zero. Ordinary early stopping is disabled; strict maximum validation foreground mIoU selects best. Complete testing uses primary argmax and no TTA. Numerical/foreground failures do not count as completion. FP32 tensors with TF32 arithmetic are recorded explicitly.
 
-| Control | GCBM | WASM / bidirectional cross-scale path |
-|---|---|---|
-| `no_bicsf` | removed | removed |
-| `no_wasm` | retained | removed |
-| `no_gcb` | removed | retained |
-| `bicsf_conv_matched` | independent-scale conv control | independent-scale conv control |
-| `wasm_conv_matched` | retained | independent-scale conv control |
-| `gcb_conv_matched` | independent-scale conv control | retained |
+This is a common-recipe adapted-architecture comparison, not each baseline's best published benchmark. HRSICD resizes the common external input to its 64×64 core and restores output logits; internal resolutions therefore differ by architecture.
 
-The existing internal key `bicsf_mode` controls the WASM path; a complete
-`bicsf_conv_matched` experiment therefore sets both `bicsf_mode` and `gcb_mode`.
-Actual reference/control parameter counts and matching errors are recorded.
-These controls do not promise identical FLOPs or receptive fields.
+## Exact module semantics
 
-## Common main comparison
+BiCSF includes GCBM and bidirectional WASM. BRIGHT/Haiti L use:
 
-All 48 main configurations (S/M/L plus nine baselines, on four datasets) use:
+| Suffix | HOG | DPM | GCBM + WASM | IRB |
+| --- | ---: | ---: | ---: | ---: |
+| dehcd_l | 1 | 1 | 1 | 1 |
+| no_dpm | 1 | 0 | 1 | 1 |
+| no_bicsf | 1 | 1 | 0 | 1 |
+| no_irb | 1 | 1 | 1 | 0 |
+| no_hog | 0 | 1 | 1 | 1 |
+| no_hog_no_dpm | 0 | 0 | 1 | 1 |
+| no_hog_no_dpm_no_bicsf | 0 | 0 | 0 | 1 |
+| all_off | 0 | 0 | 0 | 0 |
 
-- The same train/validation/test files within each dataset, bands, normalization,
-  label/quality masks, ignore policy, cropping, augmentation and sampler settings.
-- The same planned seeds, physical batch size, accumulation, epoch budget,
-  optimizer, LR schedule, clipping and numerical-failure rules within a dataset.
-  Full train/validation splits are required; no per-model batch-size fallback.
-- Scratch initialization, FP32 forward/loss, no ordinary early stopping,
-  validation foreground mIoU checkpoint selection, no TTA and primary-logit argmax.
-  Failure/collapse protection remains enabled and failed seeds are not discarded.
-- The same primary task objective. Localization, deep-supervision and feature-pair
-  auxiliary loss weights are zero in the main comparison.
-- A common DEHCD dropout of 0.15 across S/M/L so model size is not coupled to a
-  different external dropout setting. Published baseline-internal stochastic
-  depth/dropout and layer types remain part of their architecture.
+DPM removal uses plain concatenation/convolution fusion. Full BiCSF removal disables both global_context and cross_scale_fusion. The internal bicsf_mode key controls WASM; complete capacity matching also sets gcb_mode=conv_matched.
 
-Dual-head structures are retained. Their localization classifiers are not trained
-by an auxiliary objective in the primary-only main table, and their localization
-scores must not be presented as trained native-head benchmark results. The
-`auxiliary` suite enables that objective in an otherwise identical experiment.
-The full native-head objective has its own explicit control below.
+| Analysis | Reference | Factor |
+| --- | --- | --- |
+| Main/scaling | same-dataset dehcd_l | declared architecture |
+| Component/combination | same-dataset dehcd_l | declared switches/combination |
+| BRIGHT capacity | bright_dehcd_l | HOG prior, DPM, whole BiCSF or IRB replacement |
+| BRIGHT DPM parts | bright_dehcd_l | flow or difference gate |
+| BRIGHT recipe | bright_dehcd_l | loss scheme, sampler or class weights |
+| Haiti bins | haiti_dehcd_l | 2/4/6/8/10 |
+| BRIGHT-M IRB | bright_dehcd_m | 0/1/2/3/4/5/6/7/8 |
+| BRIGHT-M levels | bright_dehcd_m | first 1/2/3/4 levels, both modalities |
 
-This is a **common-recipe adapted-architecture comparison**, not proof that every
-method has reached its best possible tuned performance. Input stems, GN
-conversion and each method's architectural constraints must be disclosed.
-In particular, the existing HRSICD adapter resizes to its native 64×64 core before
-restoring the output size; the runtime metadata now records that transformation.
-Do not describe its internal input resolution as identical to a 256×256 model.
-This update does not redesign that baseline or the supplied datasets.
+Default points reuse main configurations. No Cartesian product is formed. BRIGHT-M T=0 is different from BRIGHT-L no_irb. Parameter controls export actual reference/control counts and errors; all retained parameters participate. Counts do not match receptive field/FLOPs/inductive bias. Intensity control retains HOG modulators with intensity-bin input. Feedforward IRB control uses one denoiser and separate channel groups for the retained step scalars.
 
-## Named references and controlled factors
+CE+Dice changes a loss bundle including smoothing, not a single causal factor. Sampling with replacement is not fixed sample duplication. Crop effects require measured spatial freedom and valid targets. No additional crop control or enlarged input is part of this plan.
 
-Each configuration records `experiment.comparison.reference`, `kind`, `factor`
-and exact `allowed_changes`. Preflight records the actual differing fields.
+Configurations declare comparison.reference/factor/allowed_changes; preflight checks actual differences and three data splits. Historical aliases require full evidence, not renaming, shape matching or equal parameter count. Report per seed and mean±sample SD, n and expected_n=3. Incomplete results stay incomplete. Pair matching seeds to the declared reference. Repeated reference appearances do not increase n. Non-additive scores and feature maps alone do not prove causal synergy or physical separation of sensor/disaster effects. In-domain splits do not establish unseen-event generalization.
 
-| Experiment | Required reference | Permitted change |
-|---|---|---|
-| Main S/M/L or baseline | same-dataset DEHCD-L | architecture, with the shared recipe fixed |
-| Module/capacity/sensitivity control | same-dataset DEHCD-L | declared model switches only |
-| `*_original_bn` (all nine baselines, four datasets) | that baseline's main configuration | BN-to-GN adaptation only |
-| `*_localization_aux` (three dual-head models, four datasets) | that baseline's main configuration | localization loss weight 0 → 1 |
-| `*_head_recipe` | that baseline's `*_original_bn` | native dual-head objective only; keep sampling and selection fixed |
-| `*_optimizer_recipe` | that baseline's `*_head_recipe` | specified LR/weight decay/scheduler recipe; same selection metric |
-| `haiti_pixel_mean_equal_weights` | `haiti_dehcd_l` | foreground/background CE reduction only |
-| `haiti_legacy_pixel_mean` | `haiti_pixel_mean_equal_weights` | binary class weights only |
-
-The basic CE+Dice recipe changes several declared settings together; it is labeled
-`recipe_bundle`, not a single-parameter causal attribution. Likewise, removing
-all architecture modules or swapping an optimizer recipe is a declared bundle.
-Native-loss/optimizer controls still use the project data and budget; they do
-not constitute full official-benchmark reproductions.
-
-Other pre-existing audited limitations (including the effective range of online
-cropping on pre-cropped tiles) are not changed by this update. A declared factor
-does not prove it has a nonzero effect on a particular dataset.
-
-## Running and reporting
-
-The catalog contains 174 configurations, including 48 main experiments. Selecting
-all suites with five seeds plans 870 jobs; generation and preflight do not train.
-
-```bash
-python tools/run_multiseed.py --suite main --datasets bright \
-  --data-root bright=/path/to/BRIGHT1 \
-  --output runs/controlled/bright_main --preflight-only
-```
-
-Inspect `protocol.json`: it includes the actual control differences, reference
-configurations and all three split identities. To start, use the same arguments
-and output, replacing `--preflight-only` with `--resume`. If batch size or
-accumulation needs changing, apply a uniform override to the entire comparison
-and use a new output. Comparisons on different event folds remain separate.
-
-```bash
-python tools/run_multiseed.py \
-  --experiments bright_dehcd_l bright_no_bicsf bright_no_wasm bright_no_gcb \
-                bright_bicsf_conv_matched bright_wasm_conv_matched bright_gcb_conv_matched \
-  --data-root bright=/path/to/BRIGHT1 \
-  --output runs/controlled/bright_bicsf --preflight-only
-
-python tools/compare_results.py --campaign runs/controlled/bright_main \
-  --reference bright_dehcd_l \
-  --comparators bright_changeos bright_damageformer bright_changemamba \
-  --output runs/controlled/bright_main/statistics
-```
-
-For auxiliary/BN/native-head/optimizer effects, include both configurations in
-the campaign and compare the named reference pair. A native-head recipe cannot
-be silently mixed with DEHCD-L in an architecture-only paired test. Explicit
-invalid pairs fail; automatic selection records excluded non-comparable pairs.
-Descriptive tables remain available for every completed experiment.
-Legacy configurations without comparison declarations can still be summarized,
-but cannot silently enter a controlled paired architecture comparison.
-
-Checks run before training and during aggregation/statistical reporting. They
-include the complete data transformations, training settings and all three
-split identities, not just the test files. Within an experiment, settings must
-be unchanged across seeds. Epoch, batch, optimizer, loss, augmentation, masks,
-resolution, sampler, initialization, TTA and checkpoint-selection differences
-cannot pass as an undeclared architecture gain.
-
-For event catalogs generated by `tools/build_event_cv.py`, include each control's
-reference in `--configs`; reference names are remapped to the same event fold.
-Nothing in these guards establishes geographical independence without verified
-source-scene/event metadata or replaces the need for formal experiments.
+See [protocol](EXPERIMENT_PROTOCOL.md) and [commands](RUN_WORKFLOW.md).
