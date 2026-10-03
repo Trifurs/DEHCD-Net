@@ -338,6 +338,11 @@ def dispatch_order(plan, manifest):
     states = {r["id"]: r["state"] for r in manifest["tasks"]}
     priority = {"reuse_complete": 0, "reevaluate_only": 1, "resume_training": 2, "train_new": 3, "retrain_required": 4, "blocked_review": 5}
     datasets = {name: i for i, name in enumerate(("bright", "haiti", "xbd", "cau_flood"))}
-    # Keep the requested dataset boundary, with reevaluation and continuation
-    # first inside each dataset. Completed assets never enter the train queue.
-    return sorted(plan["jobs"], key=lambda j: (datasets.get(j["dataset"], 99), priority[states[j["id"]]], plan["jobs"].index(j)))
+    seeds = {seed: index for index, seed in enumerate(plan["seeds"])}
+    positions = {job["id"]: index for index, job in enumerate(plan["jobs"])}
+    # Finish one seed before entering the next; xBD and CAU-Flood stay last
+    # within each seed. Action priority applies only within that seed/dataset.
+    # Completed assets remain reusable and never enter the train queue.
+    return sorted(plan["jobs"], key=lambda job: (
+        seeds[job["seed"]], datasets.get(job["dataset"], 99),
+        priority[states[job["id"]]], positions[job["id"]]))

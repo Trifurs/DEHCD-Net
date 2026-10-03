@@ -134,9 +134,10 @@ def make_plan(args):
         name = f"{exp['id']}__seed_{seed}"
         return {"id": name, "experiment": exp["id"], "dataset": ds, "seed": seed,
                 "config": config, "config_sha256": config_digest(config)}
-    jobs = [materialize(exp, seed) for exp in selected for seed in args.seeds]
+    jobs = [materialize(exp, seed) for seed in args.seeds for exp in selected]
     dataset_order = ["bright", "haiti", "xbd", "cau_flood"] + list(dict.fromkeys(job["dataset"] for job in jobs))
-    jobs.sort(key=lambda job: dataset_order.index(job["dataset"]))
+    seed_order = {seed: index for index, seed in enumerate(args.seeds)}
+    jobs.sort(key=lambda job: (seed_order[job["seed"]], dataset_order.index(job["dataset"])))
     if set(weights) - used_weights:
         raise ValueError("--encoder-checkpoint contains a model absent from the selected experiments")
     # References are checked even when scheduled in a different invocation;

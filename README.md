@@ -14,7 +14,7 @@ python -W ignore tools/run_all.py --preflight-only
 python -W ignore tools/run_all.py
 ```
 
-The first command only inspects. The second validates and records the plan/data/reuse evidence without training. The third completes the outstanding work; repeat it after interruption to continue. It first reuses completed results, then performs necessary reevaluation, compatible continuation and new training. Dataset order is **BRIGHT → Haiti → xBD → CAU-Flood** within each action priority.
+The first command only inspects. The second validates and records the plan/data/reuse evidence without training. The third completes the outstanding work; repeat it after interruption to continue. The default schedule finishes all configurations for **seed 42**, then **1051**, then **2060**. Within each seed, dataset order is **BRIGHT → Haiti → xBD → CAU-Flood**. Completed results are skipped; necessary reevaluation and compatible continuation precede new training only within the same seed and dataset. An explicit `--seeds` list sets the seed order.
 
 Defaults are `~/桌面/myData/Hete_CD/{BRIGHT1,Haiti1,xBD1,CAU1}` for data and `~/桌面/myResult/DEHCD-Net` for all results, with `cuda:0` and the RTX5090 profile. `--data-base` and `--output` override paths. Console progress includes total/current progress, provisional ETA, best validation foreground mIoU and epoch, early-stop status and foreground-protection counters. Ordinary early stopping is disabled in formal experiments. Python warnings are hidden; errors remain visible.
 
