@@ -139,7 +139,7 @@ class ComparisonProtocolTests(unittest.TestCase):
     def test_preflight_and_single_training_reject_unfair_main_settings(self):
         for section, key, value in (('model', 'encoder_checkpoint', '/tmp/weights.pth'),
                 ('model', 'pretrained_backbone', True), ('training', 'amp', True),
-                ('training', 'localization_loss_weight', 1.), ('training', 'early_stop_patience', 30),
+                ('training', 'localization_loss_weight', 1.), ('training', 'early_stop_patience', 31),
                 ('training', 'best_metric', 'oa'), ('inference', 'test_time_augmentation', 'flips')):
             cfg = copy.deepcopy(self.configs['bright_changeos']); cfg[section][key] = value
             with self.subTest(field=key), self.assertRaises(ValueError): validate_config(cfg)

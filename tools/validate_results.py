@@ -54,8 +54,12 @@ def validate_result(result, expected_config=None, expected_dataset=None, verify_
     for key, value in recomputed.items():
         if key not in result["metrics"] or not math.isclose(float(result["metrics"][key]), value, rel_tol=1e-7, abs_tol=1e-9):
             raise ValueError(f"Metric does not match raw confusion matrix: {key}")
-    if expected_config and result["config_sha256"] != expected_config:
-        raise ValueError("Result/config hash mismatch")
+    if expected_config:
+        from utils.protocol import compatible_config_digests
+        expected_hashes = ({expected_config} if isinstance(expected_config, str)
+                           else compatible_config_digests(expected_config))
+        if result["config_sha256"] not in expected_hashes:
+            raise ValueError("Result/config hash mismatch")
     if expected_dataset and result["dataset_identity"]["sha256"] != expected_dataset:
         raise ValueError("Test split/data fingerprint mismatch")
     if verify_files and file_digest(result["checkpoint"]) != result["checkpoint_sha256"]:

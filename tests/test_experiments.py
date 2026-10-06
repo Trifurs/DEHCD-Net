@@ -34,7 +34,8 @@ class ExperimentTests(unittest.TestCase):
         for row in catalog:
             cfg = XMLConfigParser(ROOT / row["config"]).parse().as_dict()
             self.assertEqual(row["id"], cfg["experiment"]["id"])
-            self.assertEqual(0, cfg["training"]["early_stop_patience"])
+            expected_patience = 100 if cfg["experiment"]["dataset"] == "haiti" else 30
+            self.assertEqual(expected_patience, cfg["training"]["early_stop_patience"])
             self.assertFalse(cfg["training"]["amp"], "All experiment models must share FP32 precision")
         base = XMLConfigParser(ROOT / "configs/dehcd/haiti_s.xml").parse().as_dict()
         self.assertEqual("class_mean", base["training"]["hier_binary_reduction"])

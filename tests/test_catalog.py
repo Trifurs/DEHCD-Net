@@ -99,7 +99,8 @@ class CatalogTests(unittest.TestCase):
         evidence = validate_design(self.configs)
         self.assertEqual(76, len(evidence))
         for cfg in self.configs.values():
-            self.assertEqual(0, cfg["training"]["early_stop_patience"])
+            expected_patience = 100 if cfg["experiment"]["dataset"] == "haiti" else 30
+            self.assertEqual(expected_patience, cfg["training"]["early_stop_patience"])
             self.assertEqual(0, cfg["training"]["localization_loss_weight"])
             self.assertEqual("foreground_miou", cfg["training"]["best_metric"])
 

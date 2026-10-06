@@ -76,7 +76,8 @@ def generate(root=ROOT):
             config.update({
                 "model": {"dropout": .15, "pretrained_backbone": False,
                           "encoder_checkpoint": "", "deep_supervision": False},
-                "training": {"early_stop_patience": 0, "deterministic": True, "amp": False,
+                "training": {"early_stop_patience": 100 if ds == "haiti" else 30,
+                             "early_stop_min_delta": 0.001, "deterministic": True, "amp": False,
                              "localization_loss_weight": 0.0, "aux_loss_weight": 0.0,
                              "feature_pair_loss_weight": 0.0, "best_metric": "foreground_miou"},
                 "inference": {"test_time_augmentation": "none", "prediction_rule": "damage_argmax"},

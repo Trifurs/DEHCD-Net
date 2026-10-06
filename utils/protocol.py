@@ -39,20 +39,39 @@ def atomic_json(path, value) -> None:
             os.unlink(temporary)
 
 
-def scientific_config(config: dict) -> dict:
+def _scientific_config(config: dict, *, drop_termination_policy: bool = True) -> dict:
     cfg = copy.deepcopy(config)
     for section in ("logging", "evaluation", "experiment"):
         cfg.pop(section, None)
     for key in ("resume", "checkpoint_dir", "output_dir", "best_metric_resolved", "device",
                 "num_workers", "persistent_workers"):
         cfg.get("training", {}).pop(key, None)
+    if drop_termination_policy:
+        # Early stopping is a termination policy. It must be recorded in each
+        # snapshot, but changing it must not invalidate an already verified
+        # model checkpoint or its test result.
+        for key in ("early_stop_patience", "early_stop_min_delta"):
+            cfg.get("training", {}).pop(key, None)
     for key in ("checkpoint", "save_dir", "save_visualization", "split"):
         cfg.get("inference", {}).pop(key, None)
     return cfg
 
 
+def scientific_config(config: dict) -> dict:
+    return _scientific_config(config, drop_termination_policy=True)
+
+
 def config_digest(config: dict) -> str:
     return digest(scientific_config(config))
+
+
+def legacy_config_digest(config: dict) -> str:
+    """Hash used by snapshots written before early stopping became active."""
+    return digest(_scientific_config(config, drop_termination_policy=False))
+
+
+def compatible_config_digests(config: dict) -> set[str]:
+    return {config_digest(config), legacy_config_digest(config)}
 
 
 def source_identity(root) -> dict:

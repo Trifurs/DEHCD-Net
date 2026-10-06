@@ -258,14 +258,20 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
             groups.setdefault(job["experiment"], []).append(row)
             continue
         completion = json.loads(summary.read_text())
-        if (completion.get("status") != "complete" or completion.get("config_sha256") != job["config_sha256"] or
-            completion.get("completed_epoch") != int(job["config"]["training"]["epochs"]) or
-            completion.get("stop_reason") != "epochs_completed" or completion.get("seed") != job["seed"]):
-            raise ValueError(f"Invalid fixed-budget training completion: {job['id']}")
         run = summary.parent
         snapshot = json.loads((run / "config_snapshot.json").read_text())
+        from utils.protocol import compatible_config_digests
+        completed_epoch = int(completion.get("completed_epoch", -1))
+        budget = int(job["config"]["training"]["epochs"])
+        patience = int(job["config"]["training"].get("early_stop_patience", 0) or 0)
+        early_complete = completion.get("stop_reason") == "early_stopping" and 0 < completed_epoch < budget and patience > 0
+        fixed_complete = completion.get("stop_reason") == "epochs_completed" and completed_epoch == budget
+        if (completion.get("status") != "complete" or completion.get("config_sha256") not in compatible_config_digests(snapshot) or
+            not (early_complete or fixed_complete) or completion.get("seed") != job["seed"]):
+            raise ValueError(f"Invalid fixed-budget training completion: {job['id']}")
         protocol = json.loads((run / "protocol.json").read_text())
-        if config_digest(snapshot) != job["config_sha256"] or protocol.get("config_sha256") != job["config_sha256"]:
+        from utils.protocol import compatible_config_digests
+        if config_digest(snapshot) != job["config_sha256"] or protocol.get("config_sha256") not in compatible_config_digests(snapshot):
             raise ValueError(f"Snapshot/protocol mismatch: {job['id']}")
         from utils.campaign_reuse import verify_source_import
         verify_source_import(run, protocol["source"], plan["source"])
@@ -275,7 +281,7 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
                 raise ValueError(f"Training data mismatch: {job['id']}/{split}")
         history = [json.loads(line) for line in (run / "history.jsonl").read_text().splitlines() if line.strip()]
         from utils.campaign_reuse import _finite
-        if not _finite(history) or [r["epoch"] for r in history] != list(range(1, completion["completed_epoch"] + 1)):
+        if not _finite(history) or [r["epoch"] for r in history] != list(range(1, completed_epoch + 1)):
             raise ValueError("History is non-finite or does not cover the full fixed budget")
         selected = max((r for r in history if r.get("val")), key=lambda r: r["val"]["foreground_miou"])
         if completion["best_epoch"] != selected["epoch"] or completion["best_metric"] != selected["val"]["foreground_miou"]:
@@ -287,7 +293,7 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
             raise ValueError("Result must evaluate this run's selected best checkpoint")
         test_identity = plan["data"][job["data_key"]]["splits"]["test"]
         # Evaluator uses stat fingerprint; SHA256 campaign also retains a stat fingerprint below.
-        metrics = validate_result(result, job["config_sha256"], test_identity.get("stat_sha256", test_identity["sha256"]), verify_checkpoints)
+        metrics = validate_result(result, snapshot, test_identity.get("stat_sha256", test_identity["sha256"]), verify_checkpoints)
         from utils.prediction import resolve_tta, prediction_rule
         runtime = result["runtime"]
         if (runtime.get("amp") != job["config"]["training"].get("amp", True) or

@@ -10,7 +10,8 @@
     <base_channels type="int">24</base_channels>
   </model>
   <training>
-    <early_stop_patience type="int">0</early_stop_patience>
+    <early_stop_patience type="int">30</early_stop_patience>
+    <early_stop_min_delta type="float">0.001</early_stop_min_delta>
     <deterministic type="bool">true</deterministic>
     <amp type="bool">false</amp>
     <localization_loss_weight type="float">0.0</localization_loss_weight>

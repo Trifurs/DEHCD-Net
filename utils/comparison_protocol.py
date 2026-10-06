@@ -60,8 +60,11 @@ def validate_config(config):
     m, t = config.get("model", {}), config.get("training", {})
     if m.get("pretrained_backbone") or m.get("encoder_checkpoint") not in (None, "", "none"):
         raise ValueError("controlled_comparison_v1 is a scratch comparison; pretrained weights require a separate declared protocol")
-    if t.get("amp", True) or t.get("early_stop_patience", 0) or not t.get("deterministic", False):
-        raise ValueError("Controlled comparisons require FP32, deterministic seeding and no ordinary early stopping")
+    dataset = config.get("experiment", {}).get("dataset")
+    patience = int(t.get("early_stop_patience", 0) or 0)
+    expected_patience = 100 if dataset == "haiti" else 30
+    if t.get("amp", True) or patience != expected_patience or not t.get("deterministic", False):
+        raise ValueError(f"Controlled comparisons require FP32, deterministic seeding and patience={expected_patience}")
     if float(t.get("aux_loss_weight", 0)) or float(t.get("feature_pair_loss_weight", 0)):
         raise ValueError("Undeclared deep/alignment auxiliary supervision in controlled protocol")
     if m.get("deep_supervision", False) or (m.get("compare_model") and m.get("compare_deep_supervision", True)):

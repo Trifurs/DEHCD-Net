@@ -1,3 +1,4 @@
+import math
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -85,6 +86,17 @@ class Dynamic_conv2d(nn.Module):
             self.bias = nn.Parameter(torch.Tensor(K, out_planes))
         else:
             self.bias = None
+        # The upstream implementation leaves these tensors uninitialized.
+        # On modern PyTorch this can produce finite-looking but enormous
+        # values, which overflow during the first AdamW update. Initialize
+        # each expert as an ordinary convolution kernel and use its fan-in
+        # for the corresponding bias bound.
+        nn.init.kaiming_uniform_(self.weight.view(K * out_planes, in_planes // groups,
+                                                  kernel_size, kernel_size), a=math.sqrt(5))
+        if self.bias is not None:
+            fan_in = (in_planes // groups) * kernel_size * kernel_size
+            bound = 1 / math.sqrt(fan_in)
+            nn.init.uniform_(self.bias, -bound, bound)
 
     def forward(self, x):  # 将batch视作维度变量，进行组卷积，因为组卷积的权重是不同的，动态卷积的权重也是不同的
         softmax_attention = self.attention(x)

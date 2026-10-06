@@ -12,7 +12,7 @@ import os
 from collections import Counter
 from pathlib import Path
 
-from utils.protocol import atomic_json, config_digest, digest, file_digest, scientific_config
+from utils.protocol import atomic_json, compatible_config_digests, config_digest, digest, file_digest, scientific_config
 from utils.campaign_layout import run_path, result_path
 from utils.comparison_protocol import differences
 
@@ -130,7 +130,7 @@ def inspect_run(run, job, plan, output, reviews, env):
         return {"state": "retrain_required", "reason": "Effective configuration differs",
                 "differences": {**delta, **{f"execution.{k}": v for k, v in extra.items()}}}
     protocol = _json(run / "protocol.json")
-    if protocol.get("config_sha256") != config_digest(snapshot):
+    if protocol.get("config_sha256") not in compatible_config_digests(snapshot):
         raise ValueError("Snapshot/protocol configuration digest mismatch")
     review = source_review_for(protocol["source"], plan["source"], reviews)
     expected = plan["data"][job["data_key"]]["splits"]
@@ -143,7 +143,7 @@ def inspect_run(run, job, plan, output, reviews, env):
     last, last_sha = _checkpoint(run / "checkpoints/last.pth", output)
     best, best_sha = _checkpoint(run / "checkpoints/best.pth", output)
     for checkpoint in (last, best):
-        if config_digest(checkpoint.get("config", {})) != job["config_sha256"] or checkpoint.get("config_sha256") != job["config_sha256"]:
+        if config_digest(checkpoint.get("config", {})) != job["config_sha256"] or checkpoint.get("config_sha256") not in compatible_config_digests(snapshot):
             raise ValueError("Checkpoint configuration is inconsistent with the task")
     from utils.checkpoint import validate_training_checkpoint
     validate_training_checkpoint(last)
@@ -183,6 +183,7 @@ def inspect_run(run, job, plan, output, reviews, env):
         "data_verification": "stat_verified" if protocol["datasets"]["train"].get("mode") == "stat" else "sha256_verified",
         "data_limitation": "Present SHA256 cannot prove content at an earlier stat-only observation.",
         "evidence_sha256": {name: file_digest(run / name) for name in ("config_snapshot.json", "protocol.json", "history.jsonl")}}
+    stale_epochs = int(last["epochs_without_improvement"])
     del last, best
     budget = int(cfg["training"]["epochs"])
     if epoch > budget: return {"state": "retrain_required", "reason": "Training exceeded target budget", "evidence": evidence}
@@ -191,15 +192,26 @@ def inspect_run(run, job, plan, output, reviews, env):
     failure = _json(run / "failure.json") if (run / "failure.json").exists() else {}
     if failure and "KeyboardInterrupt" not in failure.get("traceback", ""):
         raise ValueError("Numerical or unclassified training failure requires inspection")
-    if epoch < budget:
-        if summary.get("status") == "complete":
-            return {"state": "retrain_required", "reason": "Early completion is not a fixed-budget experiment", "evidence": evidence}
+    if epoch < budget and summary.get("status") != "complete":
         return {"state": "resume_training", "reason": "Complete compatible last state; continue at next epoch", "evidence": evidence}
+    if epoch < budget and summary.get("status") == "complete":
+        summary_patience = int(cfg["training"].get("early_stop_patience", 0) or 0)
+        if (summary.get("stop_reason") != "early_stopping" or summary_patience <= 0 or
+            not {"completed_epoch", "config_sha256", "seed", "best_epoch", "best_metric"}.issubset(summary)):
+            return {"state": "retrain_required", "reason": "Early completion is not supported without a valid early-stopping record", "evidence": evidence}
+    if summary.get("status") == "complete" and not {"completed_epoch", "config_sha256", "seed", "best_epoch", "best_metric", "stop_reason"}.issubset(summary):
+        return {"state": "retrain_required", "reason": "Training completion summary is incomplete", "evidence": evidence}
     if not summary:
         return {"state": "resume_training", "reason": "Final checkpoint exists; finalize completion record without new epochs", "evidence": evidence}
-    if (summary.get("status") != "complete" or summary.get("stop_reason") != "epochs_completed" or
-        summary.get("completed_epoch") != budget or summary.get("config_sha256") != job["config_sha256"] or
-        summary.get("seed") != job["seed"] or summary.get("best_epoch") != evidence["best_epoch"]):
+    stop_reason = summary.get("stop_reason")
+    completed = int(summary.get("completed_epoch", -1))
+    early_complete = (stop_reason == "early_stopping" and 0 < completed < budget and
+                      int(cfg["training"].get("early_stop_patience", 0) or 0) > 0 and
+                      stale_epochs >= int(cfg["training"]["early_stop_patience"]))
+    fixed_complete = (stop_reason == "epochs_completed" and completed == budget)
+    if (summary.get("status") != "complete" or not (early_complete or fixed_complete) or
+        summary.get("config_sha256") not in compatible_config_digests(snapshot) or summary.get("seed") != job["seed"] or
+        summary.get("best_epoch") != evidence["best_epoch"]):
         raise ValueError("Training completion summary disagrees with durable evidence")
     result_file = run / "test/result.json"
     if not result_file.exists() or (run / "test/failure.json").exists():
@@ -209,7 +221,7 @@ def inspect_run(run, job, plan, output, reviews, env):
         from utils.prediction import prediction_rule, resolve_tta
         result = _json(result_file)
         test = expected["test"]
-        validate_result(result, job["config_sha256"], test.get("stat_sha256", test["sha256"]), True)
+        validate_result(result, snapshot, test.get("stat_sha256", test["sha256"]), True)
         if result.get("seed") != job["seed"] or result.get("experiment", {}).get("id") not in {job["experiment"], snapshot.get("experiment", {}).get("id")}:
             raise ValueError("Test result identity is unrelated to the verified run")
         if result.get("checkpoint_sha256") != evidence["best_sha256"] or result.get("checkpoint_selector") != "best":
