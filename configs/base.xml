@@ -119,7 +119,7 @@
         <checkpoint_dir type="path">auto</checkpoint_dir>
         <early_stop_patience type="int">30</early_stop_patience>
         <early_stop_min_delta type="float">0.001</early_stop_min_delta>
-    </training>我先暂停了这一轮运行，我希望你修改一下运行顺序。先训练一个随机种子的全部批次实验；然后依次其他随机种子。每个随机种子的训练过程中，把xBD和CAU-Flood放在最后。另外，已完成训练的结果依然复用。
+    </training>
     <logging>
         <root_dir type="path">runs</root_dir>
         <log_dir type="path">auto</log_dir>
