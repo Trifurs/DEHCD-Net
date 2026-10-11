@@ -439,7 +439,8 @@ def train_one_epoch(model, loader, optimizer, scaler, device, config, epoch: int
         check_finite_many([("optical input", optical), ("SAR input", sar)], epoch, step, ids)
         is_accumulation_boundary = step % accumulation_steps == 0
         is_last_step = step == len(loader) or (max_batches > 0 and step >= max_batches)
-        with torch.amp.autocast("cuda", enabled=amp):
+        from utils.runtime import autocast_dtype
+        with torch.amp.autocast("cuda", enabled=amp, dtype=autocast_dtype(train_cfg)):
             model_output = model(optical, sar)
             raw_loss = segmentation_loss(
                 model_output,
@@ -547,7 +548,8 @@ def validate(model, loader, device, config) -> Tuple[float, Dict[str, float]]:
             optical = batch["optical"].to(device, non_blocking=True)
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
-            with torch.amp.autocast("cuda", enabled=amp):
+            from utils.runtime import autocast_dtype
+            with torch.amp.autocast("cuda", enabled=amp, dtype=autocast_dtype(train_cfg)):
                 model_output = model(optical, sar)
                 loss = segmentation_loss(
                     model_output,
@@ -597,7 +599,8 @@ def log_validation_images(model, loader, device, config, writers: ExperimentWrit
         optical = batch["optical"].to(device, non_blocking=True)
         sar = batch["sar"].to(device, non_blocking=True)
         label = batch["label"].to(device, non_blocking=True)
-        with torch.amp.autocast("cuda", enabled=amp):
+        from utils.runtime import autocast_dtype
+        with torch.amp.autocast("cuda", enabled=amp, dtype=autocast_dtype(train_cfg)):
             logits = extract_logits(model(optical, sar))
 
     grid = make_validation_grid(
@@ -763,7 +766,9 @@ def main() -> None:
     atomic_json(run_dir / "protocol.json", protocol)
     epochs = int(train_cfg.get("epochs", 100))
     scheduler = build_scheduler(optimizer, train_cfg, epochs)
-    scaler = torch.amp.GradScaler("cuda", enabled=bool(train_cfg.get("amp", True)) and device.type == "cuda")
+    from utils.runtime import autocast_dtype
+    scaler = torch.amp.GradScaler("cuda", enabled=bool(train_cfg.get("amp", True)) and device.type == "cuda"
+                                 and autocast_dtype(train_cfg) == torch.float16)
     optimizer.zero_grad(set_to_none=True)
     early_stop_patience = int(train_cfg.get("early_stop_patience", 0) or 0)
     early_stop_min_delta = float(train_cfg.get("early_stop_min_delta", 0.0) or 0.0)

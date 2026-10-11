@@ -223,7 +223,9 @@ class BaseHeterogeneousDisasterDataset(Dataset):
 
     def __getitem__(self, index: int) -> Dict[str, Any]:
         prepared = getattr(self, "_prepared_split", None)
-        item = prepared.get(index) if prepared is not None else self._load_base_sample(index)
+        prepared_index = getattr(self, "_prepared_sample_indices", None)
+        source_index = prepared_index[index] if prepared_index is not None else index
+        item = prepared.get(source_index) if prepared is not None else self._load_base_sample(index)
         optical, sar, label = item["optical"], item["sar"], item["label"]
 
         if self.patch_size > 0 and (self.training or not self.eval_full_image):

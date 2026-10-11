@@ -5,6 +5,14 @@ import json
 from pathlib import Path
 
 
+def autocast_dtype(training):
+    import torch
+    name = str(training.get("amp_dtype", "float16"))
+    if name not in {"float16", "bfloat16"}:
+        raise ValueError(f"Unsupported amp_dtype: {name}")
+    return {"float16": torch.float16, "bfloat16": torch.bfloat16}[name]
+
+
 def apply_runtime_profile(config, name, root=None):
     if not name or name == "none":
         return
@@ -25,6 +33,11 @@ def apply_runtime_profile(config, name, root=None):
 def configure_runtime(training, device):
     """No precision fallback: explicitly requested TF32 is recorded in snapshots."""
     import torch
+    dtype = autocast_dtype(training)
+    if training.get("amp") and dtype == torch.bfloat16 and device.type == "cuda":
+        with torch.cuda.device(device):
+            if not torch.cuda.is_bf16_supported():
+                raise ValueError("Requested BF16 training requires a BF16-capable GPU")
     threads = training.get("cpu_threads")
     if threads is not None:
         if int(threads) < 1:

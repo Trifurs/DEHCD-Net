@@ -118,7 +118,8 @@ def main() -> None:
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
             validate_evaluation_labels(label, num_classes, ignore_index)
-            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=resolve_tta(config, args.tta))
+            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=resolve_tta(config, args.tta),
+                                          amp_dtype=train_cfg.get("amp_dtype", "float16"))
             loss = segmentation_loss(
                 model_output,
                 label,

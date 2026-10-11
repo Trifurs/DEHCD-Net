@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <base_param type="path">base.xml</base_param>
+  <task>
+    <name type="str">earthquake_damage_transfer</name>
+    <type type="str">multiclass_damage_change_detection</type>
+    <num_classes type="int">4</num_classes>
+    <class_names type="list">["background", "intact", "damaged", "destroyed"]</class_names>
+  </task>
+  <dataset>
+    <type type="str">event_transfer</type>
+    <name type="str">EventTransferEarthquake</name>
+    <root type="path">/media/whu/0d7bb559-7b14-4875-843f-08befb3ca56b/myData/event_transfer_earthquake</root>
+    <candidate_roots type="list">["/media/whu/0d7bb559-7b14-4875-843f-08befb3ca56b/myData/event_transfer_earthquake"]</candidate_roots>
+    <optical_dir type="str">pre-event</optical_dir>
+    <sar_dirs type="list">["post-event"]</sar_dirs>
+    <label_dir type="str">target</label_dir>
+    <optical_suffix type="str">_pre_disaster.tif</optical_suffix>
+    <sar_suffixes type="list">["_post_disaster.tif"]</sar_suffixes>
+    <label_suffix type="str">_building_damage.tif</label_suffix>
+    <image_extensions type="list">[".tif", ".tiff"]</image_extensions>
+    <source_label_mode type="str">damage_levels</source_label_mode>
+    <label_mode type="str">multiclass_damage</label_mode>
+    <rare_crop_classes type="list">[2, 3]</rare_crop_classes>
+  </dataset>
+  <model>
+    <name type="str">DEHCD-Net</name>
+    <backbone type="str">dehcd_l</backbone>
+    <base_channels type="int">32</base_channels>
+    <dropout type="float">0.15</dropout>
+    <pretrained_backbone type="bool">false</pretrained_backbone>
+    <deep_supervision type="bool">false</deep_supervision>
+  </model>
+  <training>
+    <seed type="int">42</seed>
+    <deterministic type="bool">false</deterministic>
+    <device type="str">cuda:0</device>
+    <epochs type="int">100</epochs>
+    <batch_size type="int">8</batch_size>
+    <num_workers type="int">8</num_workers>
+    <persistent_workers type="bool">true</persistent_workers>
+    <augmentation_seed_mode type="str">sample_draw</augmentation_seed_mode>
+    <prefetch_factor type="int">3</prefetch_factor>
+    <cpu_threads type="int">8</cpu_threads>
+    <allow_tf32 type="bool">true</allow_tf32>
+    <optimizer_fused type="bool">true</optimizer_fused>
+    <foreach_gradient_clip type="bool">true</foreach_gradient_clip>
+    <progress_interval type="int">20</progress_interval>
+    <gradient_accumulation_steps type="int">1</gradient_accumulation_steps>
+    <learning_rate type="float">1e-3</learning_rate>
+    <weight_decay type="float">1e-4</weight_decay>
+    <optimizer type="str">adamw</optimizer>
+    <scheduler type="str">cosine_warmup</scheduler>
+    <warmup_epochs type="int">5</warmup_epochs>
+    <min_lr_ratio type="float">0.01</min_lr_ratio>
+    <loss type="str">compound</loss>
+    <ce_weight type="float">1.0</ce_weight>
+    <dice_weight type="float">1.0</dice_weight>
+    <dice_present_only type="bool">true</dice_present_only>
+    <dice_exclude_background type="bool">true</dice_exclude_background>
+    <focal_weight type="float">0.5</focal_weight>
+    <focal_gamma type="float">2.0</focal_gamma>
+    <lovasz_weight type="float">0.2</lovasz_weight>
+    <lovasz_exclude_background type="bool">true</lovasz_exclude_background>
+    <tversky_weight type="float">0.3</tversky_weight>
+    <tversky_alpha type="float">0.3</tversky_alpha>
+    <tversky_beta type="float">0.7</tversky_beta>
+    <tversky_present_only type="bool">true</tversky_present_only>
+    <tversky_exclude_background type="bool">true</tversky_exclude_background>
+    <label_smoothing type="float">0.01</label_smoothing>
+    <class_weights type="list">[0.5, 2.0, 18.0, 14.0]</class_weights>
+    <class_balanced_sampler type="bool">true</class_balanced_sampler>
+    <sampler_target_classes type="list">[2, 3]</sampler_target_classes>
+    <sampler_rare_class_threshold type="float">0.03</sampler_rare_class_threshold>
+    <sampler_power type="float">1.0</sampler_power>
+    <sampler_max_weight type="float">8.0</sampler_max_weight>
+    <sampler_min_pixels type="int">16</sampler_min_pixels>
+    <localization_loss_weight type="float">0.0</localization_loss_weight>
+    <aux_loss_weight type="float">0.0</aux_loss_weight>
+    <feature_pair_loss_weight type="float">0.0</feature_pair_loss_weight>
+    <amp type="bool">true</amp>
+    <amp_dtype type="str">bfloat16</amp_dtype>
+    <grad_clip_norm type="float">1.0</grad_clip_norm>
+    <resume type="path" />
+    <save_interval type="int">0</save_interval>
+    <val_interval type="int">1</val_interval>
+    <best_metric type="str">foreground_miou</best_metric>
+    <checkpoint_dir type="path">auto</checkpoint_dir>
+    <early_stop_patience type="int">20</early_stop_patience>
+    <early_stop_min_delta type="float">0.0002</early_stop_min_delta>
+  </training>
+  <inference>
+    <test_time_augmentation type="str">none</test_time_augmentation>
+    <prediction_rule type="str">damage_argmax</prediction_rule>
+    <profile_model type="bool">false</profile_model>
+  </inference>
+  <experiment>
+    <id type="str">event_transfer_earthquake</id>
+    <canonical_id type="str">event_transfer_earthquake</canonical_id>
+    <dataset type="str">event_transfer</dataset>
+    <suite type="str">event_transfer</suite>
+    <model_variant type="str">dehcd_l</model_variant>
+    <protocol type="str">event_transfer_fast_v2</protocol>
+    <status type="str">configured</status>
+    <roles type="list">["event_transfer", "held_out_event_test"]</roles>
+    <paper_refs type="list">["cross-event generalization analysis"]</paper_refs>
+  </experiment>
+  <logging>
+    <root_dir type="path">runs</root_dir>
+    <log_dir type="str">auto</log_dir>
+    <run_name type="str">event_transfer_earthquake</run_name>
+    <tensorboard type="bool">true</tensorboard>
+    <validation_images type="int">0</validation_images>
+    <wandb type="bool">false</wandb>
+  </logging>
+</project>

@@ -140,7 +140,8 @@ def main() -> None:
         for step, batch in enumerate(tqdm(loader, desc=f"Infer {split}"), start=1):
             optical = batch["optical"].to(device)
             sar = batch["sar"].to(device)
-            model_output = predict_outputs(model, optical, sar, amp=bool(config.get("training", {}).get("amp", True)) and device.type == "cuda", tta_mode=resolve_tta(config, args.tta))
+            model_output = predict_outputs(model, optical, sar, amp=bool(config.get("training", {}).get("amp", True)) and device.type == "cuda", tta_mode=resolve_tta(config, args.tta),
+                                          amp_dtype=config.get("training", {}).get("amp_dtype", "float16"))
             logits = model_output["logits"]
             if "label" in batch:
                 validate_evaluation_labels(batch["label"], num_classes, int(config.get("task", {}).get("ignore_index", 255)))

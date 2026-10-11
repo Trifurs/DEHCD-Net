@@ -33,6 +33,7 @@ def parse_args() -> argparse.Namespace:
         help="Checkpoint selector: best, last/latest, a checkpoint filename under checkpoints/, or a .pth path.",
     )
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
+    parser.add_argument("--event", default=None, help="Evaluate only one event in an event-aware test split.")
     parser.add_argument("--batch-size", type=int, default=None, help="Override evaluation batch size.")
     parser.add_argument("--num-workers", type=int, default=None, help="Override DataLoader workers.")
     parser.add_argument("--device", default=None, help="Override training.device from the run snapshot.")
@@ -230,6 +231,14 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
     amp = bool(train_cfg.get("amp", True)) and device.type == "cuda"
     tta_mode = resolve_tta(config, args.tta)
 
+    event = getattr(args, "event", None)
+    if event and args.split != "test":
+        raise ValueError("--event requires --split test")
+    if event:
+        if config.get("dataset", {}).get("type") != "event_transfer":
+            raise ValueError("--event requires an event_transfer dataset")
+        config = copy.deepcopy(config)
+        config.setdefault("dataset", {})["event_filter"] = event
     dataset = build_dataset(config, split=args.split, training=False)
     loader = DataLoader(
         dataset,
@@ -297,7 +306,8 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             sar = batch["sar"].to(device, non_blocking=True)
             label = batch["label"].to(device, non_blocking=True)
             validate_evaluation_labels(label, num_classes, ignore_index)
-            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=tta_mode)
+            model_output = predict_outputs(model, optical, sar, amp=amp, tta_mode=tta_mode,
+                                          amp_dtype=train_cfg.get("amp_dtype", "float16"))
             logits = model_output["logits"]
             loss = segmentation_loss(
                 model_output,
@@ -385,6 +395,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         "artifact_dir": str(artifact_dir),
         "checkpoint": str(checkpoint_path.resolve()),
         "checkpoint_selector": args.checkpoint,
+        "evaluation_event": event,
         "checkpoint_epoch": int(checkpoint.get("epoch", -1)),
         "checkpoint_best_metric_name": checkpoint.get("best_metric_name"),
         "checkpoint_best_metric": float(checkpoint.get("best_metric", 0.0)),
@@ -411,6 +422,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             "batch_size": batch_size,
             "num_workers": num_workers,
             "amp": amp,
+            "amp_dtype": train_cfg.get("amp_dtype", "float16") if amp else "float32",
             "test_time_augmentation": tta_mode,
             "prediction_rule": prediction_rule(config),
             "max_batches": int(args.max_batches),
@@ -1201,10 +1213,23 @@ def main() -> None:
             existing = json.loads(output_path.read_text())
             effective = apply_runtime_overrides(load_config_snapshot(run_dir), args)
             try:
-                validate_result(existing, expected_config=config_digest(effective), verify_files=True)
+                from datasets import build_dataset
+                selected_config = copy.deepcopy(effective)
+                if args.event:
+                    if args.split != "test" or selected_config.get("dataset", {}).get("type") != "event_transfer":
+                        raise ValueError("--event requires an event_transfer test split")
+                    selected_config["dataset"]["event_filter"] = args.event
+                expected_data = dataset_identity(build_dataset(selected_config, split=args.split, training=False))
+                validate_result(existing, expected_config=config_digest(effective),
+                                expected_dataset=expected_data["sha256"], verify_files=True)
                 runtime = existing.get("runtime", {})
+                active_amp = bool(effective.get("training", {}).get("amp", True)) and get_device(effective, args.device).type == "cuda"
+                expected_dtype = effective.get("training", {}).get("amp_dtype", "float16") if active_amp else "float32"
                 if (runtime.get("test_time_augmentation") != resolve_tta(effective, args.tta)
                         or runtime.get("prediction_rule") != prediction_rule(effective)
+                        or existing.get("evaluation_event") != args.event
+                        or runtime.get("amp") != active_amp
+                        or (active_amp and runtime.get("amp_dtype", "float16") != expected_dtype)
                         or existing.get("checkpoint_sha256") != file_digest(resolve_checkpoint(run_dir, args.checkpoint))):
                     raise ValueError("Existing result uses a different checkpoint or decoding rule")
             except (KeyError, ValueError, OSError) as exc:

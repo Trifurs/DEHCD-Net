@@ -13,3 +13,5 @@ checkpoints/
 
 .tensorboard-info/
 wandb/
+
+docs/

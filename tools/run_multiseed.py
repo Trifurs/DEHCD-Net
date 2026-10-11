@@ -49,12 +49,15 @@ def parse_args():
     p.add_argument("--cache", choices=["normalized", "none"], default="normalized",
                    help="Prepare lossless pre-augmentation tensors and label counts once for the campaign")
     p.add_argument("--prepare-workers", type=int, default=8)
+    p.add_argument("--cache-root", help="Shared content-addressed tensor cache for isolated campaigns")
     p.add_argument("--prepare-only", action="store_true", help="Seal data and build shared caches, without training")
     p.add_argument("--quiet-warnings", action="store_true", help="Suppress Python/logging warnings in parent and child consoles; errors remain visible")
     p.add_argument("--dry-run", action="store_true", help="Write the plan without loading datasets or models")
     p.add_argument("--preflight-only", action="store_true", help="Validate data/splits and seal the protocol, without training")
     p.add_argument("--resume", action="store_true", help="Continue the same sealed protocol from last.pth")
     p.add_argument("--aggregate-only", action="store_true")
+    p.add_argument("--skip-test", action="store_true",
+                   help="Train/resume the campaign without running the default combined test split")
     p.add_argument("--audit-only", action="store_true", help="Read-only audit; print all task-state counts without writing results")
     return p.parse_args()
 
@@ -117,7 +120,9 @@ def make_plan(args):
         train = config.setdefault("training", {})
         if train.get("max_train_batches", 0) or train.get("max_val_batches", 0):
             raise ValueError("Campaigns require full train/validation splits; use train.py for smoke tests")
-        train.update(seed=seed, device=args.device, deterministic=True, resume=None, checkpoint_dir="auto")
+        train.update(seed=seed, device=args.device, resume=None, checkpoint_dir="auto")
+        if not args.config:
+            train["deterministic"] = True
         if args.num_workers is not None:
             train["num_workers"] = args.num_workers
         if args.epochs is not None:
@@ -188,17 +193,18 @@ def seal_datasets(plan):
     qualitative = {}
     for job in plan["jobs"]:
         qualitative.setdefault(job["dataset"], sorted(r["id"] for r in identities[job["data_key"]]["splits"]["test"]["records"])[:16])
-    plan["analysis_policy"] = {"display_seed": 42, "sample_selection": "lexicographically first 16 test IDs, fixed before inspecting scores",
-        "qualitative_samples": qualitative, "statistics_seeds": [42, 1051, 2060], "expected_n": 3,
+    plan["analysis_policy"] = {"display_seed": plan["seeds"][0], "sample_selection": "lexicographically first 16 test IDs, fixed before inspecting scores",
+        "qualitative_samples": qualitative, "statistics_seeds": list(plan["seeds"]), "expected_n": len(plan["seeds"]),
         "efficiency": "same device, external shape, physical batch, precision and backend; parameter counts once per architecture"}
     plan["comparison_design"] = audit_plan(plan)
     return prepared_sources
 
 
-def prepare_inputs(plan, sources, output, workers):
+def prepare_inputs(plan, sources, output, workers, cache_root=None):
     from tqdm import tqdm
     from utils.prepared_data import input_signature, preprocessing_identity, prepare_split
     index = {"preprocessing_sha256": preprocessing_identity(), "splits": {}}
+    cache_root = Path(cache_root).expanduser().resolve() if cache_root else output / "cache"
     unique = {}
     for (key, split), (dataset, identities) in sources.items():
         signature = input_signature(dataset)
@@ -226,7 +232,7 @@ def prepare_inputs(plan, sources, output, workers):
                 (output / "progress.txt").write_text(f"Preparing {number}/{len(unique)}: {name}/{split}\n"
                     f"Samples {finished}/{total_samples} | preparation ETA ~{duration(eta)} (estimate)\n")
             progress(0, len(dataset), False)
-            index["splits"][signature] = prepare_split(dataset, identities, output / "cache" / name,
+            index["splits"][signature] = prepare_split(dataset, identities, cache_root / name,
                                                        workers=workers, progress=progress)
         completed_samples += len(dataset)
     path = output / "cache/index.json"
@@ -319,8 +325,8 @@ def aggregate(plan, output, verify_checkpoints=True, *, audit=True, cache=None):
     aggregates = []
     for name in dict.fromkeys(j["experiment"] for j in plan["jobs"]):
         items = groups.get(name, [])
-        expected_seeds = [42, 1051, 2060]
-        entry = {"experiment": name, "n": len(items), "expected_n": 3,
+        expected_seeds = list(plan["seeds"])
+        entry = {"experiment": name, "n": len(items), "expected_n": len(expected_seeds),
                  "complete": sorted(r["seed"] for r in items) == sorted(expected_seeds),
                  "seeds": [r["seed"] for r in items], "expected_seeds": expected_seeds, "metrics": {},
                  "sources": [{"seed": r["seed"], "checkpoint": r["checkpoint"], "config_sha256": r["config_sha256"]} for r in items]}
@@ -440,7 +446,8 @@ def main():
                     "note": "Original config snapshots, checkpoints and per-run protocols remain at their recorded paths."})
     atomic_json(protocol_path, plan)
     if args.preflight_only:
-        aggregate(plan, output)
+        if not args.skip_test:
+            aggregate(plan, output)
         monitor = CampaignProgress(plan, output)
         monitor.refresh(status="ready", force=True)
         monitor.write_index(); monitor.close()
@@ -448,7 +455,7 @@ def main():
         return
     result_cache = {}
     if not args.aggregate_only:
-        index = prepare_inputs(plan, sources, output, args.prepare_workers) if args.cache == "normalized" else None
+        index = prepare_inputs(plan, sources, output, args.prepare_workers, args.cache_root) if args.cache == "normalized" else None
         if index and audit["data_preflight"].get("status") != "verified":
             audit["data_preflight"] = audit_prepared_inputs(plan, output)
             atomic_json(audit_path, audit)
@@ -458,7 +465,8 @@ def main():
         del sources
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", CUBLAS_WORKSPACE_CONFIG=":4096:8", PYTHONUNBUFFERED="1")
         if index: env["DEHCD_PREPARED_INDEX"] = str(index)
-        aggregate(plan, output, cache=result_cache, audit=False)
+        if not args.skip_test:
+            aggregate(plan, output, cache=result_cache, audit=False)
         monitor = CampaignProgress(plan, output)
         states = {r["id"]: r["state"] for r in manifest["tasks"]}
         try:
@@ -474,14 +482,21 @@ def main():
                     command = [sys.executable, str(ROOT / "tools/train.py"), "--config", str(cfg_path), "--run-dir", str(run)]
                     if state == "resume_training": command += ["--resume", str(run / "checkpoints/last.pth")]
                     run_child(command, env, run, job, monitor, "train")
-                result = result_path(output, job, plan)
-                command = [sys.executable, str(ROOT / "tools/test.py"), "--train-root", str(output / "runs"),
-                    "--runs", str(run), "--output-root", str(result.parent), "--result-file", str(result),
-                    "--split", "test", "--checkpoint", "best", "--save-sample-metrics", "--no-confusion-plot"]
-                if not job["config"].get("inference", {}).get("profile_model", True): command += ["--no-profile"]
-                run_child(command, env, run, job, monitor, "test")
-                aggregate(plan, output, verify_checkpoints=False, audit=False, cache=result_cache)
+                if not args.skip_test:
+                    result = result_path(output, job, plan)
+                    command = [sys.executable, str(ROOT / "tools/test.py"), "--train-root", str(output / "runs"),
+                        "--runs", str(run), "--output-root", str(result.parent), "--result-file", str(result),
+                        "--split", "test", "--checkpoint", "best", "--save-sample-metrics", "--no-confusion-plot"]
+                    if not job["config"].get("inference", {}).get("profile_model", True): command += ["--no-profile"]
+                    run_child(command, env, run, job, monitor, "test")
+                    aggregate(plan, output, verify_checkpoints=False, audit=False, cache=result_cache)
                 monitor.finish_job(job)
+            if args.skip_test:
+                atomic_json(output / "summary/training_status.json", {"status": "training_complete",
+                    "seeds": plan["seeds"], "evaluation": "sequential event tests handled by the parent runner"})
+                monitor.refresh(status="training_complete", force=True)
+                print(f"Training campaign complete; combined test skipped: {output}")
+                return
             report = aggregate(plan, output)
             monitor.refresh(status=report["status"], force=True)
         finally:

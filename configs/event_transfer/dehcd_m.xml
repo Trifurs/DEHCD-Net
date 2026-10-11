@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <base_param type="path">../event_transfer_earthquake.xml</base_param>
+  <model>
+    <backbone type="str">dehcd_m</backbone>
+    <base_channels type="int">24</base_channels>
+  </model>
+  <training>
+    <batch_size type="int">8</batch_size>
+    <learning_rate type="float">0.0006</learning_rate>
+  </training>
+  <experiment>
+    <id type="str">dehcd_m</id>
+    <canonical_id type="str">dehcd_m</canonical_id>
+    <model_variant type="str">m</model_variant>
+  </experiment>
+  <logging><run_name type="str">dehcd_m</run_name></logging>
+</project>

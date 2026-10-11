@@ -2,12 +2,13 @@
 from contextlib import nullcontext
 
 
-def predict_outputs(model, optical, sar, amp: bool, tta_mode: str):
+def predict_outputs(model, optical, sar, amp: bool, tta_mode: str, amp_dtype: str = "float16"):
     import torch
     from utils.model_outputs import extract_logits
 
     def forward_once(optical_batch, sar_batch):
-        context = torch.amp.autocast('cuda', enabled=True) if amp else nullcontext()
+        from utils.runtime import autocast_dtype
+        context = torch.amp.autocast('cuda', dtype=autocast_dtype({"amp_dtype": amp_dtype})) if amp else nullcontext()
         with context:
             out = model(optical_batch, sar_batch)
         heads = {'logits': extract_logits(out)}

@@ -20,7 +20,7 @@ CACHE_VERSION = 1
 # display/root-discovery settings. Quality masks, bands and label semantics stay.
 POST_LOAD_FIELDS = {"patch_size", "train_random_crop", "positive_crop_prob", "rare_crop_prob",
                     "rare_crop_classes", "crop_candidate_count", "eval_full_image",
-                    "candidate_roots", "name", "splits"}
+                    "candidate_roots", "name", "splits", "event_filter"}
 
 
 def input_signature(dataset):
