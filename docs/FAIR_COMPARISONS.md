@@ -4,7 +4,7 @@ The 80 canonical configurations use controlled_comparison_v1 and seeds `[42,1051
 
 There are 42 main configurations: S/M/L and six original baselines on every dataset, plus ChangeOS-R50, DamageFormer and ChangeMamba on BRIGHT/Haiti. Splits, bands, masks, normalization, augmentation, sampling, crops, physical batch, accumulation, optimizer/schedule, budget, precision and evaluation rules are common within a dataset. S/M/L external dropout is 0.15. Baseline-internal layers/stochastic depth remain architectural properties.
 
-All main models train from scratch with primary supervision only. Auxiliary localization, deep-supervision and feature-pair weights are zero. Ordinary early stopping is disabled; strict maximum validation foreground mIoU selects best. Complete testing uses primary argmax and no TTA. Numerical/foreground failures do not count as completion. FP32 tensors with TF32 arithmetic are recorded explicitly.
+All main models train from scratch with primary supervision only. Auxiliary localization, deep-supervision and feature-pair weights are zero. Early stopping uses patience 30 on BRIGHT/xBD/CAU-Flood and 100 on Haiti, with minimum delta 0.001. Strict maximum validation foreground mIoU independently selects best. Complete testing uses primary argmax and no TTA. Numerical/foreground failures do not count as completion. FP32 tensors with TF32 arithmetic are recorded explicitly.
 
 This is a common-recipe adapted-architecture comparison, not each baseline's best published benchmark. HRSICD resizes the common external input to its 64×64 core and restores output logits; internal resolutions therefore differ by architecture.
 
@@ -40,6 +40,6 @@ Default points reuse main configurations. No Cartesian product is formed. BRIGHT
 
 CE+Dice changes a loss bundle including smoothing, not a single causal factor. Sampling with replacement is not fixed sample duplication. Crop effects require measured spatial freedom and valid targets. No additional crop control or enlarged input is part of this plan.
 
-Configurations declare comparison.reference/factor/allowed_changes; preflight checks actual differences and three data splits. Historical aliases require full evidence, not renaming, shape matching or equal parameter count. Report per seed and mean±sample SD, n and expected_n=3. Incomplete results stay incomplete. Pair matching seeds to the declared reference. Repeated reference appearances do not increase n. Non-additive scores and feature maps alone do not prove causal synergy or physical separation of sensor/disaster effects. In-domain splits do not establish unseen-event generalization.
+Configurations declare comparison.reference/factor/allowed_changes; preflight checks actual differences and three data splits. Result imports require complete matching configuration, source and checkpoint evidence. Report per seed and mean±sample SD, n and expected_n=3. Incomplete results stay incomplete. Pair matching seeds to the declared reference. Repeated reference appearances do not increase n. Non-additive scores and feature maps alone do not prove causal synergy or physical separation of sensor/disaster effects. In-domain splits do not establish unseen-event generalization.
 
 See [protocol](EXPERIMENT_PROTOCOL.md) and [commands](RUN_WORKFLOW.md).

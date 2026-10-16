@@ -12,7 +12,7 @@ python -W ignore tools/run_all.py --preflight-only
 
 状态证据：history.jsonl记录每轮损失/指标/梯度/前景，gradient_spikes.jsonl记录异常样本与层，failure.json记录故障，training_summary.json记录预算完成和最优轮次，protocol.json记录数据/源码/设置/环境，provenance保留导入来源。
 
-Haiti保留FP32损失、GN epsilon=1e-3、质量掩膜、裁剪、非有限及前景退化保护。普通early stopping在正式配置关闭，控制台的无提升轮数只作监控；崩溃/停滞保护与正常早停分别展示。有限梯度不能排除背景退化，全背景也不能直接等同梯度爆炸。
+Haiti保留FP32损失、GN epsilon=1e-3、质量掩膜、裁剪、非有限及前景退化保护。普通早停在主配置开启：BRIGHT/xBD/CAU-Flood为30次验证，Haiti为100次。控制台显示有效提升阈值对应的耐心计数，崩溃/停滞保护与正常早停分别展示。有限梯度不能排除背景退化，全背景也不能直接等同梯度爆炸。
 
 ```bash
 python tools/validate_results.py path/to/test/result.json --verify-checkpoints

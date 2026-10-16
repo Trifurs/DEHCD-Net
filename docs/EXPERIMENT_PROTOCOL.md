@@ -21,7 +21,7 @@ BRIGHT/Haiti/xBD/CAU-Flood 分别39/23/9/9项、117/69/27/27个种子任务。�
 
 `controlled_comparison_v1` 固定同数据集的划分、波段、标签/ignore、质量掩膜、归一化、增强、采样、裁块、物理batch、累积、预算、优化器、调度、种子、精度和验证/测试规则，只允许声明的因素变化。同effective batch不代表相同microbatch/累积。
 
-全部主比较从头训练、主任务监督；localization、deep-supervision和feature-pair auxiliary权重为零。普通early stopping关闭，完整验证集的严格最大 `foreground_miou` 选best；完整测试集主logits argmax、无TTA。数值异常和前景崩溃/停滞保护保留，触发属于失败，不是正常提前完成。DEHCD S/M/L外部dropout统一0.15，仅预声明结构规格变化。
+全部主比较从头训练、主任务监督；localization、deep-supervision和feature-pair auxiliary权重为零。普通早停开启：BRIGHT/xBD/CAU-Flood耐心30次验证，Haiti为100次，min_delta=0.001；完整验证集的严格最大 `foreground_miou` 独立选best；完整测试集主logits argmax、无TTA。数值异常和前景崩溃/停滞保护保留，触发属于失败，不是正常提前完成。DEHCD S/M/L外部dropout统一0.15，仅预声明结构规格变化。
 
 这是统一策略的适配架构比较，不声称复现基线官方最优成绩。输入stem、BN转GN、输出适配和HRSICD 64×64内核限制见[基线说明](../compare/README.md)。RTX5090使用FP32张量/loss并开启TF32矩阵及卷积运算，不是严格IEEE FP32乘法，详见[运行参数](RUNTIME_PROFILE.md)。
 
@@ -49,6 +49,6 @@ WeightedRandomSampler根据训练类别像素统计计算权重，每epoch有放
 
 指标来自完整测试原始混淆计数。mean_iou包括背景，foreground_miou仅前景；均值只纳入有有效union的类别。混淆分析同时给原始计数、每类指标和分母。行归一化对角线是该类recall，不是总体OA。双头未监督定位头标记localization_supervised=false，正式localization_f1=null，诊断输出不参与定位排名。conditional damage F1、foreground mIoU和全图mIoU不是同一指标。
 
-定性图、特征图、混淆矩阵、参数与测速复用正式checkpoint；展示seed预固定42、样本预登记，不按测试成绩挑选。hook部分算子估计不能称完整FLOPs；实测延迟/吞吐需相同设备、输入、batch、精度/backend。未开展跨事件训练，不能宣称证明unseen-event generalization。
+定性图、特征图、混淆矩阵、参数与测速复用正式checkpoint；展示seed预固定42、样本预登记，不按测试成绩挑选。hook部分算子估计不能称完整FLOPs；实测延迟/吞吐需相同设备、输入、batch、精度/backend。跨事件及小样本实验采用独立协议，见event_transfer.md；域内分割结果本身不能证明未见事件泛化。
 
 入口与结果管理见[运行流程](RUN_WORKFLOW.md)，控制因素见[公平比较](FAIR_COMPARISONS.md)，验证见[测试说明](VALIDATION.md)。

@@ -51,11 +51,11 @@ The Fig.17 order is HOG, DPM, BiCSF, IRB. Plain fusion replaces a disabled DPM; 
 
 Haiti HOG bins use L at K=[2,4,6,8,10], with K=6 supplied by `haiti_dehcd_l`. BRIGHT IRB uses M at T=0–8, with T=3 supplied by `bright_dehcd_m`. BRIGHT HOG guidance uses M at G=[1,2,3,4], with G=2 supplied by the same M run. Guidance covers the first G levels of both branches. All scans retain the other default factors (K=6, G=2, T=3).
 
-`bright_m_irb_steps_0` is an M model and is distinct from the L component control `bright_no_irb`. Former L scan IDs cannot be relabeled as M results. The M guidance assignment is supported by the historical definitions `Heterogeneous_LCD/configs/5090_x1/discussion_hog_levels_bright_m/bright_m_hog_levels_{1..4}.xml`, which inherit `bright_multiclass_hacf_m.xml`. Those definitions establish the variant only: their dropout=0.12, seed=1234 and other earlier settings do not make historical runs compatible with the current protocol.
+`bright_m_irb_steps_0` uses the M architecture; the L component control `bright_no_irb` is a separate canonical experiment. Both IRB and guidance scans inherit the current M reference.
 
 The three BRIGHT training controls separately compare the loss recipe, weighted sampler, and class weights. CE+Dice replaces several loss terms and smoothing and is a recipe comparison. Capacity and DPM controls are limited to BRIGHT. Matched parameter counts do not imply identical receptive fields or operation counts.
 
-Main architecture results share one from-scratch task objective and disable localization, feature-pair, and deep-supervision auxiliary losses. They measure adapted architectures under the common protocol, not each upstream implementation's best benchmark. Ordinary early stopping stays disabled; fixed budgets, validation foreground_miou selection, no TTA, and main-logits argmax remain in force.
+Main architecture results share one from-scratch task objective and disable localization, feature-pair, and deep-supervision auxiliary losses. They measure adapted architectures under the common protocol, not each upstream implementation's best benchmark. Early-stop patience is 30 on BRIGHT/xBD/CAU-Flood and 100 on Haiti, with minimum delta 0.001. Epoch limits, strict validation foreground_miou selection, no TTA and main-logits argmax remain in force.
 
 Table 1 is computed from actual dataset evidence. Confusion plots retain raw counts and explicit denominators; row normalization is not overall accuracy. Efficiency axes use validated full counts or measured latency/throughput under common settings. Postprocessing does not create additional training samples or tasks.
 

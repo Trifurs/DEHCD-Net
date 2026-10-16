@@ -211,7 +211,19 @@ def build_class_balanced_sampler(dataset, train_cfg: Dict[str, Any], num_classes
     if max_samples > 0 and len(weights) < len(dataset):
         weights.extend([1.0] * (len(dataset) - len(weights)))
     weights_tensor = torch.as_tensor(weights, dtype=torch.double)
-    sampler = WeightedRandomSampler(weights_tensor, num_samples=len(weights_tensor), replacement=True,
+    event_probabilities = None
+    if bool(train_cfg.get("event_balanced_sampler", False)):
+        events = [sample.get("event") for sample in dataset.samples]
+        if len(events) != len(weights) or not all(events):
+            raise ValueError("Event-balanced sampling requires complete event metadata")
+        totals = {event: sum(weight for weight, name in zip(weights, events) if name == event) for event in set(events)}
+        weights_tensor = torch.as_tensor([weight / totals[event] for weight, event in zip(weights, events)], dtype=torch.double)
+        weights_tensor *= len(weights) / len(totals)
+        event_probabilities = {event: 1.0 / len(totals) for event in sorted(totals)}
+    draws = int(train_cfg.get("sampler_num_samples", 0) or len(weights_tensor))
+    if draws < 1:
+        raise ValueError("sampler_num_samples must be positive")
+    sampler = WeightedRandomSampler(weights_tensor, num_samples=draws, replacement=True,
                                     generator=torch.Generator().manual_seed(int(train_cfg.get("seed", 42)) + 1))
     sampler.info = {
         "rare_classes": rare_classes,
@@ -219,6 +231,8 @@ def build_class_balanced_sampler(dataset, train_cfg: Dict[str, Any], num_classes
         "weight_min": float(weights_tensor.min().item()),
         "weight_mean": float(weights_tensor.mean().item()),
         "weight_max": float(weights_tensor.max().item()),
+        "draws_per_epoch": draws,
+        **({"event_probabilities": event_probabilities} if event_probabilities else {}),
     }
     return sampler
 
@@ -349,8 +363,19 @@ def build_optimizer(model, train_cfg: Dict[str, Any]):
     if not isinstance(betas, (list, tuple)) or len(betas) != 2:
         raise ValueError(f"optimizer_betas must be a two-value list, got {betas!r}")
     eps = float(train_cfg.get("optimizer_eps", train_cfg.get("eps", 1e-8)))
-    params = list(model.parameters())
-    fused = bool(train_cfg.get("optimizer_fused", False)) and bool(params) and all(p.is_cuda for p in params)
+    parameters = [p for p in model.parameters() if p.requires_grad]
+    multiplier = float(train_cfg.get("encoder_lr_multiplier", 1.0))
+    if not 0 < multiplier <= 1.0:
+        raise ValueError("encoder_lr_multiplier must be in (0, 1]")
+    params = parameters
+    if multiplier != 1.0:
+        named = [(name, p) for name, p in model.named_parameters() if p.requires_grad]
+        encoder = [p for name, p in named if name.startswith(("optical_encoder.", "sar_encoder."))]
+        remainder = [p for name, p in named if not name.startswith(("optical_encoder.", "sar_encoder."))]
+        if not encoder or not remainder:
+            raise ValueError("Discriminative learning rates require optical/SAR encoders and non-encoder parameters")
+        params = [{"params": encoder, "lr": lr * multiplier}, {"params": remainder, "lr": lr}]
+    fused = bool(train_cfg.get("optimizer_fused", False)) and bool(parameters) and all(p.is_cuda for p in parameters)
     if fused and name not in {"adamw", "adamw_amsgrad", "adam", "sgd"}:
         raise ValueError(f"Fused optimizer unsupported for {name}")
     fused_kwargs = {"fused": True} if fused else {}
@@ -536,6 +561,12 @@ def validate(model, loader, device, config) -> Tuple[float, Dict[str, float]]:
     num_classes = int(task_cfg.get("num_classes", 2))
     ignore_index = int(task_cfg.get("ignore_index", 255))
     meter = ConfusionMatrixMeter(num_classes=num_classes, ignore_index=ignore_index, device=device)
+    event_meters = {}
+    event_by_id = {}
+    if train_cfg.get("validation_event_macro", False):
+        event_by_id = {sample["id"]: sample.get("event") for sample in loader.dataset.samples}
+        if not all(event_by_id.values()):
+            raise ValueError("Event-macro validation requires explicit event metadata")
     total_loss = 0.0
     seen_batches = 0
     model.eval()
@@ -562,11 +593,23 @@ def validate(model, loader, device, config) -> Tuple[float, Dict[str, float]]:
             check_finite_many([("validation logits", logits), ("validation loss", loss)], -1, step, batch.get("id", []))
             total_loss += float(loss.item())
             seen_batches += 1
-            meter.update(decode_predictions(model_output, config), label)
+            predicted = decode_predictions(model_output, config)
+            meter.update(predicted, label)
+            if event_by_id:
+                events = [event_by_id[sample_id] for sample_id in batch["id"]]
+                for event in set(events):
+                    positions = [index for index, value in enumerate(events) if value == event]
+                    event_meters.setdefault(event, ConfusionMatrixMeter(num_classes, ignore_index, device=device)).update(
+                        predicted[positions], label[positions])
             reporter.batch(step, loss=total_loss / seen_batches)
             if max_batches > 0 and step >= max_batches:
                 break
-    return total_loss / max(seen_batches, 1), meter.compute()
+    metrics = meter.compute()
+    if event_meters:
+        scores = {event: value.compute()["foreground_miou"] for event, value in event_meters.items()}
+        metrics["event_macro_foreground_miou"] = sum(scores.values()) / len(scores)
+        metrics.update({f"event_{event}_foreground_miou": score for event, score in scores.items()})
+    return total_loss / max(seen_batches, 1), metrics
 
 
 def log_validation_images(model, loader, device, config, writers: ExperimentWriters, epoch: int) -> None:
@@ -703,6 +746,11 @@ def main() -> None:
         sar_channels=train_dataset.num_sar_channels,
         initialize_encoder=not bool(args.resume or train_cfg.get("resume")),
     ).to(device)
+    if train_cfg.get("init_checkpoint") and not (args.resume or train_cfg.get("resume")):
+        from utils.transfer_initialization import initialize_weights
+        initialization = initialize_weights(model, config)
+        atomic_json(run_dir / "initialization.json", initialization)
+        logger.info("Initialized model weights from %s (optimizer and epoch state start fresh)", initialization["checkpoint"])
     logger.info(
         "Model channels: optical=%s, sar=%s",
         train_dataset.num_optical_channels,

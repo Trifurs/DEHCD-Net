@@ -10,8 +10,8 @@
   <dataset>
     <type type="str">event_transfer</type>
     <name type="str">EventTransferEarthquake</name>
-    <root type="path">/media/whu/0d7bb559-7b14-4875-843f-08befb3ca56b/myData/event_transfer_earthquake</root>
-    <candidate_roots type="list">["/media/whu/0d7bb559-7b14-4875-843f-08befb3ca56b/myData/event_transfer_earthquake"]</candidate_roots>
+    <root type="path">data/event_transfer_earthquake</root>
+    <candidate_roots type="list">["data/event_transfer_earthquake"]</candidate_roots>
     <optical_dir type="str">pre-event</optical_dir>
     <sar_dirs type="list">["post-event"]</sar_dirs>
     <label_dir type="str">target</label_dir>

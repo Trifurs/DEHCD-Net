@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <base_param type="path">../event_transfer_earthquake.xml</base_param>
+  <training>
+    <epochs type="int">120</epochs>
+    <learning_rate type="float">0.0006</learning_rate>
+    <early_stop_patience type="int">30</early_stop_patience>
+    <loss type="str">hierarchical_change</loss>
+    <hier_binary_ce_weight type="float">1.0</hier_binary_ce_weight>
+    <hier_binary_reduction type="str">class_mean</hier_binary_reduction>
+    <hier_binary_class_weights type="list">[1.0, 1.0]</hier_binary_class_weights>
+    <hier_binary_dice_weight type="float">0.5</hier_binary_dice_weight>
+    <hier_subclass_ce_weight type="float">1.2</hier_subclass_ce_weight>
+    <hier_subclass_dice_weight type="float">0.6</hier_subclass_dice_weight>
+    <hier_subclass_label_smoothing type="float">0.01</hier_subclass_label_smoothing>
+    <hier_foreground_prior_weight type="float">0.05</hier_foreground_prior_weight>
+    <class_balanced_sampler type="bool">true</class_balanced_sampler>
+    <event_balanced_sampler type="bool">true</event_balanced_sampler>
+    <sampler_max_weight type="float">6.0</sampler_max_weight>
+    <sampler_power type="float">0.5</sampler_power>
+  </training>
+  <augmentation>
+    <optical_scale_jitter type="float">0.1</optical_scale_jitter>
+    <optical_shift_jitter type="float">0.05</optical_shift_jitter>
+    <sar_scale_jitter type="float">0.1</sar_scale_jitter>
+    <sar_shift_jitter type="float">0.05</sar_shift_jitter>
+  </augmentation>
+  <experiment>
+    <protocol type="str">scene_disjoint_transfer_v3</protocol>
+  </experiment>
+</project>

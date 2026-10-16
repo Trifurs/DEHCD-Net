@@ -1,0 +1,8 @@
+{
+  "data_base": "data",
+  "output": "runs/campaign",
+  "event_data_root": "data/event_transfer_earthquake",
+  "event_output": "runs/event_transfer_earthquake",
+  "device": "auto",
+  "runtime_profile": "none"
+}

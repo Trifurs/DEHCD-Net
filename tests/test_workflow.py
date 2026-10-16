@@ -164,7 +164,7 @@ class WorkflowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             job = {"id": "x__seed_42", "dataset": "bright", "experiment": "x", "seed": 42,
                    "config": {"experiment": {"suite": "main"}}}
-            plan = {"layout_version": 2, "jobs": [job]}
+            plan = {"layout_version": 2, "seeds": [42], "jobs": [job]}
             run = run_path(tmp, job, plan)
             atomic_json(run / "training_summary.json", {"status": "complete"})
             atomic_json(result_path(tmp, job, plan), {})

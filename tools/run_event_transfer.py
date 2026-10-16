@@ -18,10 +18,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from utils.protocol import atomic_json
+from utils.local_settings import launch_settings
 
 CONFIGS = {size: ROOT / "configs/event_transfer" / f"dehcd_{size}.xml" for size in ("s", "m", "l")}
-DEFAULT_DATA_ROOT = Path("/media/whu/0d7bb559-7b14-4875-843f-08befb3ca56b/myData/event_transfer_earthquake")
-DEFAULT_OUTPUT = Path("/home/whu/桌面/myResult/DEHCD-Net/event_transfer_earthquake")
+_SETTINGS = launch_settings(ROOT)
+DEFAULT_DATA_ROOT = Path(_SETTINGS["event_data_root"])
+DEFAULT_OUTPUT = Path(_SETTINGS["event_output"])
 DEFAULT_TEST_EVENTS = ["haiti-earthquake", "morocco-earthquake", "noto-earthquake"]
 
 
@@ -29,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060])
     parser.add_argument("--sizes", nargs="+", choices=list(CONFIGS), default=["s", "m", "l"])
-    parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--device", default=_SETTINGS["device"])
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--num-workers", type=int, default=None)

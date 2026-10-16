@@ -1,4 +1,4 @@
-# New building-damage baselines: sources and execution contract
+# Building-damage baselines: sources and execution contract
 
 These are trainable ports of the authors' public architectures with explicitly declared DEHCD-Net input/task adaptations. They are not a claim to reproduce a published benchmark score. No network access or pretrained weight download occurs when constructing a model.
 
@@ -46,7 +46,7 @@ python -m unittest discover -s tests -p 'test_damage_baselines.py' -v
 
 The builder compiles only the used `oflex` variant. It uses PyTorch's visible-GPU architecture detection or `TORCH_CUDA_ARCH_LIST`, rather than upstream hard-coded sm_70/80/90 flags. A CUDA runtime bundled with PyTorch is not by itself a CUDA compiler; see the [NVIDIA installation guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/). CUDA tests compare the extension's outputs **and gradients** with the reference. The test is explicitly skipped when the device/extension is absent.
 
-Local validation (2026-09-29) built and installed the extension in `hlcd` for Python 3.10 / PyTorch 2.11+cu130 / RTX 5090 (sm_120), using CUDA 13.0.88 and GCC 13.4. All forward/backward equivalence tests, including lengths 9, 257 and 1025, passed. This is an environment-specific build; other Torch/CUDA/GPU combinations should rebuild from source.
+Build the extension for the active Python, PyTorch, CUDA toolkit and GPU architecture. Rebuild it when that combination changes. The CUDA test checks forward outputs and gradients against the reference recurrence; it explicitly skips when no device or extension is available.
 
 All generated experiment overlays set `training.amp=false`, including DEHCD-Net, because the nine baseline cores enforce FP32. Their recorded metadata exposes that policy. The benchmark rejects `--amp` for fixed-FP32 cores instead of presenting a partial-autocast run as AMP efficiency; compare all models with its default FP32 mode.
 

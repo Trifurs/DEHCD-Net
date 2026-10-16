@@ -14,7 +14,7 @@ Use a new output directory whenever these settings change.
 | xBD | 256×256 | 4 | 3 | 12 | 100 | 0.0008 |
 
 No model-specific automatic batch reduction, resolution change,
-pretraining, early stopping or shorter epoch budget is applied. The final partial
+pretraining or shorter epoch budget is applied. Early-stop patience is shared within each dataset: 30 on BRIGHT/xBD/CAU-Flood and 100 on Haiti. The final partial
 accumulation window uses its actual number of microbatches. Accumulation preserves
 the nominal batch budget but is not mathematically identical to a large physical
 batch for BatchNorm and batch-dependent Dice/Lovasz losses. Every model in a
@@ -41,16 +41,7 @@ Execution settings:
   profiling is disabled during the multiseed test phase; use `tools/benchmark.py`
   separately with identical device, precision and shapes for all models.
 
-The settings were checked on RTX 5090 32 GiB with synthetic forward/backward
-probes. HAFF at 256×256/batch 8 and DEHCD-L at 256×256/batch 12 ran out of memory.
-Batch 4 passed for every main model at 256×256. The largest observed reserved
-memory was about 24.4 GiB (HAFF); selected Haiti controls stayed near 20.2 GiB.
-A bounded real-Haiti DEHCD-S test (6 train + 2 validation batches per epoch)
-reduced the median of epochs 2–3 from 1.45 s to 1.17 s on this machine. This
-roughly 19% wall-time reduction is not a full-epoch or all-model speed guarantee.
-
-These are bounded resource checks, not convergence results or an upper bound
-under arbitrary GPU contention. Keep other GPU training jobs off this device.
+The profile targets RTX 5090 32 GiB. Memory demand depends on architecture and concurrent GPU use; verify a bounded forward/backward pass on a new device before a full campaign. Numerical and resource checks do not establish convergence.
 
 ```bash
 python tools/run_multiseed.py --suite all --seeds 42 1051 2060 \

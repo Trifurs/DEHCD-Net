@@ -1,33 +1,66 @@
 # DEHCD-Net
 
-Implementation for **Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery**.
+PyTorch implementation of **Selective Difference Learning for Multi-Class Disaster Mapping from Pre-Disaster Optical and Post-Disaster SAR Imagery**.
 
-The formal collection contains **80 unique configurations**, each with seeds **42, 1051, 2060**, for **240 target tasks**. Compatible existing results count toward this total; only missing or incompatible work is scheduled. The [generated catalog and figure coverage](docs/EXPERIMENT_CATALOG.md) derive from configuration metadata, including shared references and default sensitivity points.
+DEHCD-Net combines HOG guidance, difference-aware multimodal fusion (DPM), bidirectional cross-scale fusion (BiCSF) and iterative refinement (IRB). S/M/L variants share the same training and evaluation interface. The repository includes comparison models, component and capacity controls, sensitivity experiments, event transfer and supervised few-shot adaptation.
 
-## Run the local campaign
+## Installation
 
-Use the existing training Python environment. On the configured workstation:
+Use Python 3.10 or newer. Install a matching `torch`/`torchvision` pair for your device, then the project dependencies:
 
 ```bash
-python -W ignore tools/run_all.py --audit-only
-python -W ignore tools/run_all.py --preflight-only
+python -m pip install -r requirements.txt
+```
+
+The verified workstation uses Python 3.10, PyTorch 2.11.0, torchvision 0.26.0 and CUDA 13.0. The requirements list direct project dependencies; the PyTorch installation supplies its own CUDA runtime dependencies. No environment upgrade is needed when using an existing working environment.
+
+ChangeMamba uses a reference scan on CPU. CUDA training requires the bundled selective-scan extension, built against the same PyTorch environment:
+
+```bash
+python -m pip install -r requirements-baselines.txt
+python -m pip install --no-build-isolation ./compare/kernels/selective_scan
+```
+
+If `nvcc` is outside the default location, set `CUDA_HOME` to the toolkit root before building. See [baseline sources and CUDA build](compare/UPSTREAM.md). `requirements-optional.txt` adds W&B and dataset-conversion utilities.
+
+## Data
+
+The main launcher accepts a common parent directory containing:
+
+```text
+data/
+  BRIGHT1/{train,val,test}/{pre-event,post-event,target}/
+  Haiti1/{train,val,test}/{Pre_event,Post_event,Annotations}/
+  xBD1/{train,val,test}/
+  CAU1/{train,val,test}/{opt,vv,flood_vv}/
+```
+
+Exact filenames, sensor bands, quality masks and label definitions are in [dataset configurations](configs/datasets/) and [data preparation](docs/DATA.md). Datasets and weights are supplied separately. BRIGHT preparation groups patches from the same source scene and rejects duplicate sample IDs across splits.
+
+## Train and evaluate
+
+Run from the project root:
+
+```bash
+python -W ignore tools/run_all.py --data-base /path/to/Hete_CD --output /path/to/results --device cuda:0 --runtime-profile rtx5090 --preflight-only
+python -W ignore tools/run_all.py --data-base /path/to/Hete_CD --output /path/to/results --device cuda:0 --runtime-profile rtx5090
+```
+
+The main catalog has **80 unique configurations** and seeds **42, 1051, 2060**, giving **240 tasks**. It finishes all configurations for one seed before moving to the next. Each seed uses **BRIGHT → Haiti → xBD → CAU-Flood**, keeping xBD and CAU-Flood last. Verified completed results are reused; compatible interrupted training resumes from `last.pth`.
+
+Early-stop patience is **30 validation checks** for BRIGHT, xBD and CAU-Flood, and **100** for Haiti. Validation runs every epoch. The best checkpoint is selected by strict maximum validation foreground mIoU; the early-stop minimum delta is tracked separately. Progress shows current and total progress, ETA, best validation score and stopping counters.
+
+Public defaults use `data/`, `runs/campaign`, automatic device selection and no hardware profile. To keep workstation paths out of version control, copy `configs/local.example.json` to `local/settings.json` and edit it. Environment variables override that file; command-line options override both. The supported variables are `DEHCD_DATA_BASE`, `DEHCD_OUTPUT`, `DEHCD_EVENT_DATA_ROOT`, `DEHCD_EVENT_OUTPUT`, `DEHCD_DEVICE` and `DEHCD_RUNTIME_PROFILE`.
+
+After configuring these paths, the full command is:
+
+```bash
 python -W ignore tools/run_all.py
 ```
 
-The first command only inspects. The second validates and records the plan/data/reuse evidence without training. The third completes the outstanding work; repeat it after interruption to continue. The default schedule finishes all configurations for **seed 42**, then **1051**, then **2060**. Within each seed, dataset order is **BRIGHT → Haiti → xBD → CAU-Flood**. Completed results are skipped; necessary reevaluation and compatible continuation precede new training only within the same seed and dataset. An explicit `--seeds` list sets the seed order.
+See [workflow and output layout](docs/RUN_WORKFLOW.md), [experiment protocol](docs/EXPERIMENT_PROTOCOL.md), [controlled comparisons](docs/FAIR_COMPARISONS.md), [runtime profile](docs/RUNTIME_PROFILE.md) and the [generated catalog](docs/EXPERIMENT_CATALOG.md). `--audit-only` is read-only; `--dry-run` writes a plan; `--preflight-only` checks data and evidence without training.
 
-Defaults are `~/桌面/myData/Hete_CD/{BRIGHT1,Haiti1,xBD1,CAU1}` for data and `~/桌面/myResult/DEHCD-Net` for all results, with `cuda:0` and the RTX5090 profile. `--data-base` and `--output` override paths. Console progress includes total/current progress, provisional ETA, best validation foreground mIoU and epoch, early-stop status and foreground-protection counters. Ordinary early stopping is disabled in formal experiments. Python warnings are hidden; errors remain visible.
-
-```bash
-python -W ignore tools/run_all.py --groups main ablation sensitivity scaling --dry-run
-python -W ignore tools/compare_results.py --campaign "$HOME/桌面/myResult/DEHCD-Net" --groups main ablation sensitivity scaling --output "$HOME/桌面/myResult/DEHCD-Net/summary/analysis"
-```
-
-Selecting overlapping groups does not duplicate a canonical ID/seed task. Reports keep incomplete groups explicitly incomplete. See [commands, resume and output layout](docs/RUN_WORKFLOW.md), [protocol](docs/EXPERIMENT_PROTOCOL.md), [comparison factors](docs/FAIR_COMPARISONS.md), and [hardware settings](docs/RUNTIME_PROFILE.md).
-
-## Network
-
-The custom four-level convolutional backbone uses depthwise local/dilated branches, channel expansion, GRN and context gates; it is not an unnamed external pretrained backbone. The two modality stems and levels 0–1 are independent. Levels 2–3 and their downsampling modules share parameter objects. Both binary and multiclass tasks use the same three-stage decoder structure; only the output class count changes.
+## Models and comparisons
 
 | Variant | Channels | Stage depths | Expansion |
 | --- | --- | --- | ---: |
@@ -35,44 +68,42 @@ The custom four-level convolutional backbone uses depthwise local/dilated branch
 | M | 24,48,96,144 | 1,2,3,2 | 2 |
 | L | 32,64,128,192 | 2,2,4,2 | 3 |
 
-HOG means Histogram of Oriented Gradients. Its affine modulation guides the first two levels by default with six bins. DPM combines bounded flow alignment, modality weighting and difference gating. BiCSF contains both Global Context Bridge Modulation (GCBM) and bidirectional Weighted Adjacent-Scale Merge (WASM); WASM gates the **absolute** difference of neighboring features. IRB reuses one denoiser for three iterations by default. `tanh` bounds its residual, while learned step scalars remain unconstrained; it does not bound the full update independently of those scalars.
+The two modality stems and levels 0–1 are independent; levels 2–3 share parameter objects. HOG modulates the first two levels by default with six orientation bins. DPM combines bounded flow alignment, modality weighting and difference gating. BiCSF contains GCBM and bidirectional WASM. IRB reuses one denoiser for three iterations; its bounded residual does not independently bound learned step scalars.
 
-The architecture aims to select useful heterogeneous evidence. Feature heatmaps or non-additive ablation scores alone do not prove physical separation of sensor effects and true changes or causal synergy.
-
-## Data and experiments
-
-| Dataset | Inputs | Classes | Patch | Unique configurations |
+| Dataset | Inputs | Classes | Patch | Configurations |
 | --- | --- | ---: | ---: | ---: |
 | BRIGHT | Optical/SAR | 4 | 256 | 39 |
 | Haiti | Optical/SAR | 4 | 128 | 23 |
 | xBD | Optical/Optical | 5 | 256 | 9 |
 | CAU-Flood | Optical/SAR | 2 | 256 | 9 |
 
-All four datasets retain S/M/L and ICIF-Net, DMINet, HFA-PANet, WaveHFG, HRSICD and HAFF; BRIGHT/Haiti also include ChangeOS-R50, DamageFormer and ChangeMamba. These are adapted architectures under the shared scratch-training strategy, not claimed reproductions of official best benchmark scores. See [baseline adaptations and licenses](compare/README.md) and [pinned sources/CUDA scan](compare/UPSTREAM.md).
+ICIF-Net, DMINet, HFA-PANet, WaveHFG, HRSICD and HAFF cover all four datasets. BRIGHT and Haiti also include ChangeOS-R50, DamageFormer and ChangeMamba. These are adapted architectures under a common scratch-training recipe. Data, supervision, sampling, optimizer, budget, precision and inference rules are held common within each dataset. Baseline-specific internal restrictions are described in [comparison models](compare/README.md).
 
-Formal comparisons use primary supervision only, fixed dataset-specific budgets, strict best validation `foreground_miou`, full-test primary argmax and no TTA. RTX5090 uses FP32 tensors/losses with TF32 math enabled. Physical batch and accumulation are identical within a dataset; no per-model hidden fallback is allowed. The protocol discloses the BRIGHT compound loss/class weights/sampling and Haiti hierarchical loss. Only BRIGHT receives the additional capacity, DPM-part and recipe controls.
+## Event transfer and few-shot adaptation
 
-Shared templates live in configs/base.xml, configs/datasets/ and configs/dehcd/. The executable formal definitions live once each in configs/experiments/. Templates are not extra experiment tasks; resolved per-seed snapshots are necessary evidence. `python tools/build_experiment_configs.py` regenerates the formal catalog, groups and usage documentation.
+```bash
+python -W ignore tools/run_event_transfer.py --data-root /path/to/event_data --output /path/to/event_results --seeds 42 1051 2060
+python -W ignore tools/run_transfer_study.py --protocols fewshot --sizes m --events noto-earthquake --seeds 42 1051 2060 --source-root /path/to/event_results --source-seed 3402 --output /path/to/fewshot_results
+```
 
-## Results and postprocessing
+The second command requires the specified source checkpoint. It compares target-only scratch training, weight-initialized fine-tuning and a fixed zero-shot reference on the same held-out scenes. Target training and validation labels are reported separately. A fixed source checkpoint is not counted as multiple independent zero-shot runs. See [event transfer](docs/event_transfer.md) and [transfer-study protocols](configs/event_transfer/README.md).
 
-Each seed retains its snapshot, protocol, history, full best/last checkpoint and complete test evidence. Summaries report raw per-seed metrics, mean, sample SD (ddof=1), n, expected_n=3 and completeness. A shared reference appearing in several figures still has only three independent training repeats. Missing seeds are never filled with zero. Three-seed exact two-sided sign-flip tests cannot produce p<0.05 (minimum 0.25).
+## Results
 
-OA is overall accuracy. Foreground P/R/F1 are classwise foreground aggregates; mean_iou includes background and foreground_miou excludes it, using classes with a valid union. Raw confusion counts and per-class denominators support confusion analysis. Row-normalized diagonal values are class recall, not OA. Unsupervised localization heads have formal localization_f1=null and are excluded from localization rankings.
+Each run retains resolved configuration, data/source fingerprints, training history, best/last checkpoints and full test evidence. Summaries report per-seed metrics, mean, sample SD (`ddof=1`), n and completeness. Missing seeds remain missing. P/R/F1 are foreground classwise aggregates; mIoU includes background and FmIoU excludes it. Metric relationships are derived from raw confusion counts.
 
-Prediction panels, feature responses, confusion matrices, parameter counts and efficiency measurements reuse checkpoints. Display seed and samples are fixed before comparing scores. Partial hook operation counts are not complete FLOPs; efficiency reports use matched-device latency/throughput settings. In-domain results do not establish unseen-event generalization.
+Evaluation, feature export and efficiency profiling reuse saved checkpoints. Latency and throughput require matched device, input size, batch, precision and scan backend. Partial operation estimates are not complete FLOPs. Prediction panels and feature responses require real inference outputs.
 
-## Environment and verification
-
-The existing hlcd environment includes PyTorch and the selective-scan CUDA extension; do not rebuild it for ordinary runs. For a new environment, install a suitable PyTorch build then dependencies from requirements.txt and follow the CUDA build instructions in compare/UPSTREAM.md.
+## Verification
 
 ```bash
 python -m unittest discover -s tests -v
+python scripts/check_source.py
 ```
 
-Tests and bounded smoke checks validate execution and evidence handling, not completed scientific results or convergence. See [validation](docs/VALIDATION.md).
+Public source includes code, configurations, tests, documentation and retained third-party licenses. Workstation settings, data, results, weights, caches and editor files are ignored by Git. [Validation commands](docs/VALIDATION.md) describe CPU and CUDA checks.
 
-## Citation
+## Citation and licenses
 
 ```bibtex
 @misc{liu2026dehcdnet,
@@ -82,4 +113,4 @@ Tests and bounded smoke checks validate execution and evidence handling, not com
 }
 ```
 
-Check the project license and the retained licenses of included baseline implementations before redistribution or commercial use.
+A project-wide license has not been specified. Included third-party implementations retain their source notices and licenses; see [baseline sources](compare/UPSTREAM.md).

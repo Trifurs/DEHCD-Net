@@ -23,11 +23,11 @@ POST_LOAD_FIELDS = {"patch_size", "train_random_crop", "positive_crop_prob", "ra
                     "candidate_roots", "name", "splits", "event_filter"}
 
 
-def input_signature(dataset):
-    cfg = {k: v for k, v in dataset.dataset_cfg.items() if k not in POST_LOAD_FIELDS}
+def input_signature(dataset, dataset_cfg=None, split=None):
+    cfg = {k: v for k, v in (dataset_cfg if dataset_cfg is not None else dataset.dataset_cfg).items() if k not in POST_LOAD_FIELDS}
     cfg["root"] = str(dataset.root.resolve())
     return digest({"class": type(dataset).__name__, "dataset": cfg,
-                   "normalization": dataset.normalization_cfg, "split": dataset.split})
+                   "normalization": dataset.normalization_cfg, "split": split or dataset.split})
 
 
 @functools.lru_cache(maxsize=1)
@@ -52,6 +52,8 @@ def attach_prepared_split(dataset):
     signature = input_signature(dataset)
     manifest_path = index["splits"].get(signature)
     if manifest_path is None:
+        if dataset.dataset_cfg.get("manifest"):
+            return attach_manifest_view(dataset, index)
         raise ValueError(f"No prepared input entry for {dataset.root}/{dataset.split}; prepare this configuration first")
     prepared = PreparedSplit(manifest_path, signature)
     manifest = prepared.manifest
@@ -62,6 +64,80 @@ def attach_prepared_split(dataset):
     dataset._prepared_split = prepared
     dataset._prepared_identities = manifest["identities"]
     return True
+
+
+def attach_manifest_view(dataset, index):
+    """Select scene-disjoint rows from shared source shards without copying tensors."""
+    from utils.split_manifest import read_manifest
+    rows = [row for row in read_manifest(dataset.dataset_cfg["manifest"]) if row["split"] == dataset.split]
+    if not rows:
+        raise ValueError(f"Manifest contains no {dataset.split} samples")
+    base_cfg = {k: v for k, v in dataset.dataset_cfg.items() if k != "manifest"}
+    shards, lookups = {}, {}
+    for source_split in sorted({row["source_split"] for row in rows}):
+        signature = input_signature(dataset, dataset_cfg=base_cfg, split=source_split)
+        path = index["splits"].get(signature)
+        if path is None:
+            raise ValueError(f"Missing shared source cache: {dataset.root}/{source_split}")
+        shard = PreparedSplit(path, signature)
+        shards[source_split] = shard
+        lookups[source_split] = {sample["id"]: position for position, sample in enumerate(shard.manifest["samples"])}
+    entries, samples = [], []
+    modes = set.intersection(*(set(shard.manifest["identities"]) for shard in shards.values()))
+    records = {mode: [] for mode in modes}
+    for row in rows:
+        source, sample_id = row["source_split"], row["id"]
+        if sample_id not in lookups[source]:
+            raise ValueError(f"Manifest sample not present in the shared cache: {sample_id}")
+        position = lookups[source][sample_id]
+        original = shards[source].manifest["samples"][position]
+        if (original.get("group"), original.get("event")) != (row["group"], row["event"]):
+            raise ValueError(f"Manifest metadata differs from source scene/event: {sample_id}")
+        samples.append(dict(original))
+        entries.append((source, position))
+        for mode in modes:
+            records[mode].append(shards[source].manifest["identities"][mode]["records"][position])
+    identities = {}
+    for mode, selected in records.items():
+        value = {"split": dataset.split, "samples": len(selected), "mode": mode, "records": selected}
+        identities[mode] = {**value, "sha256": digest(value)}
+    view = ManifestPreparedView(shards, entries)
+    dataset.samples = samples
+    channels = next(iter(shards.values())).manifest["channels"]
+    if any(shard.manifest["channels"] != channels for shard in shards.values()):
+        raise ValueError("Inconsistent optical/SAR channels between source shards")
+    dataset.num_optical_channels, dataset.num_sar_channels = channels["optical"], channels["sar"]
+    dataset.sar_channel_counts = channels["sar_files"]
+    dataset._prepared_split = view
+    dataset._prepared_identities = identities
+    return True
+
+
+class ManifestPreparedView:
+    def __init__(self, shards, entries):
+        self.shards, self.entries = shards, entries
+
+    def get(self, index):
+        source, position = self.entries[index]
+        return self.shards[source].get(position)
+
+    def label_distribution(self, num_classes, ignore_index, max_samples=0):
+        entries = self.entries[:max_samples] if max_samples > 0 else self.entries
+        arrays, counts = {}, []
+        for source, position in entries:
+            shard = self.shards[source]
+            if source not in arrays:
+                info = shard.manifest["tensors"]["label"]
+                arrays[source] = np.memmap(shard.path.parent / "label.bin", dtype=info["dtype"], mode="r")
+            offset, shape = shard.manifest["offsets"][position]["label"]
+            label = arrays[source][offset:offset + int(np.prod(shape))]
+            valid = (label != ignore_index) & (label >= 0) & (label < num_classes)
+            counts.append(np.bincount(label[valid].astype(np.int64), minlength=num_classes).astype(np.float64))
+        total = np.sum(counts, axis=0)
+        frequencies = total / max(float(total.sum()), 1.0)
+        return {"sample_counts": counts, "counts": total,
+                "class_frequencies": {i: float(frequencies[i]) for i in range(num_classes)},
+                "foreground_ratio": float(frequencies[1:].sum()), "sample_count": len(counts)}
 
 
 class PreparedSplit:

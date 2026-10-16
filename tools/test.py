@@ -34,6 +34,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--event", default=None, help="Evaluate only one event in an event-aware test split.")
+    parser.add_argument("--manifest", default=None, help="Explicit scene-disjoint evaluation manifest; saved weights are unchanged.")
     parser.add_argument("--batch-size", type=int, default=None, help="Override evaluation batch size.")
     parser.add_argument("--num-workers", type=int, default=None, help="Override DataLoader workers.")
     parser.add_argument("--device", default=None, help="Override training.device from the run snapshot.")
@@ -239,7 +240,10 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
             raise ValueError("--event requires an event_transfer dataset")
         config = copy.deepcopy(config)
         config.setdefault("dataset", {})["event_filter"] = event
-    dataset = build_dataset(config, split=args.split, training=False)
+    dataset_config = copy.deepcopy(config)
+    if getattr(args, "manifest", None):
+        dataset_config.setdefault("dataset", {})["manifest"] = str(Path(args.manifest).expanduser().resolve(strict=True))
+    dataset = build_dataset(dataset_config, split=args.split, training=False)
     loader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -396,6 +400,7 @@ def evaluate_run(run_dir: Path, args: argparse.Namespace, artifact_dir: Path) ->
         "checkpoint": str(checkpoint_path.resolve()),
         "checkpoint_selector": args.checkpoint,
         "evaluation_event": event,
+        "evaluation_manifest": dataset_config.get("dataset", {}).get("manifest"),
         "checkpoint_epoch": int(checkpoint.get("epoch", -1)),
         "checkpoint_best_metric_name": checkpoint.get("best_metric_name"),
         "checkpoint_best_metric": float(checkpoint.get("best_metric", 0.0)),
@@ -1215,6 +1220,8 @@ def main() -> None:
             try:
                 from datasets import build_dataset
                 selected_config = copy.deepcopy(effective)
+                if args.manifest:
+                    selected_config.setdefault("dataset", {})["manifest"] = str(Path(args.manifest).expanduser().resolve(strict=True))
                 if args.event:
                     if args.split != "test" or selected_config.get("dataset", {}).get("type") != "event_transfer":
                         raise ValueError("--event requires an event_transfer test split")

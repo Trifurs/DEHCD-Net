@@ -407,7 +407,9 @@ def main():
     sources = seal_datasets(plan)
     audit_path = output / "audit_report.json"
     previous_audit = json.loads(audit_path.read_text()) if audit_path.exists() else {}
-    manifest = audit_campaign(plan, output, reviews=previous_audit.get("source_reviews", []))
+    from utils.local_settings import local_source_reviews
+    reviews = previous_audit.get("source_reviews", []) + local_source_reviews(ROOT)
+    manifest = audit_campaign(plan, output, reviews=reviews)
     for state, count in manifest["counts"].items(): print(f"{state} = {count}")
     print(f"total = {manifest['target_tasks']}")
     if args.audit_only:
