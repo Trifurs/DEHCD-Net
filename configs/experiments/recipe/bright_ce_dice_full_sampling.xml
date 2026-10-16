@@ -8,8 +8,7 @@
     <suite type="str">recipe</suite>
     <model_variant type="str">l</model_variant>
     <roles type="list">['recipe']</roles>
-    <uses type="list">[{'group': 'recipe', 'role': 'control', 'paper_refs': ['Additional recipe comparison']}]</uses>
-    <paper_refs type="list">['Additional recipe comparison']</paper_refs>
+    <uses type="list">[{'group': 'recipe', 'role': 'control'}]</uses>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

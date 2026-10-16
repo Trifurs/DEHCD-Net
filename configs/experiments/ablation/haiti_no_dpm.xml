@@ -8,8 +8,7 @@
     <suite type="str">ablation</suite>
     <model_variant type="str">l</model_variant>
     <roles type="list">['ablation']</roles>
-    <uses type="list">[{'group': 'ablation', 'role': 'control', 'paper_refs': ['Fig.17']}, {'group': 'fig17_haiti', 'role': 'control', 'paper_refs': ['Fig.17'], 'modules': [1, 0, 1, 1]}]</uses>
-    <paper_refs type="list">['Fig.17']</paper_refs>
+    <uses type="list">[{'group': 'ablation', 'role': 'control'}, {'group': 'components_haiti', 'role': 'control', 'modules': [1, 0, 1, 1]}]</uses>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

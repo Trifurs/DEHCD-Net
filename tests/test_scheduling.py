@@ -12,7 +12,8 @@ from utils.campaign_layout import run_path
 from utils.campaign_reuse import dispatch_order
 
 ROOT = Path(__file__).resolve().parents[1]
-SEEDS = [42, 1051, 2060]
+from utils.defaults import DEFAULT_SEEDS
+SEEDS = list(DEFAULT_SEEDS)
 DATASETS = ['bright', 'haiti', 'xbd', 'cau_flood']
 
 
@@ -27,10 +28,10 @@ def plan_for(seeds=None, datasets=None, groups=None):
 
 
 class SchedulingTests(unittest.TestCase):
-    def test_full_plan_has_three_complete_seed_rounds(self):
+    def test_full_plan_has_complete_seed_rounds(self):
         plan = plan_for()
-        self.assertEqual(240, len(plan['jobs']))
-        self.assertEqual(240, len({job['id'] for job in plan['jobs']}))
+        self.assertEqual(80*len(SEEDS), len(plan['jobs']))
+        self.assertEqual(80*len(SEEDS), len({job['id'] for job in plan['jobs']}))
         for index, seed in enumerate(SEEDS):
             block = plan['jobs'][index * 80:(index + 1) * 80]
             self.assertEqual({seed}, {job['seed'] for job in block})
@@ -41,8 +42,9 @@ class SchedulingTests(unittest.TestCase):
 
     def test_explicit_seed_order_preserves_task_identity_and_run_paths(self):
         before = plan_for()
-        after = plan_for(seeds=[2060, 42, 1051], datasets=list(reversed(DATASETS)))
-        self.assertEqual([2060] * 80 + [42] * 80 + [1051] * 80,
+        order=SEEDS[-1:]+SEEDS[:-1]
+        after = plan_for(seeds=order, datasets=list(reversed(DATASETS)))
+        self.assertEqual([seed for seed in order for _ in range(80)],
                          [job['seed'] for job in after['jobs']])
         def identities(plan):
             return {job['id']: (job['experiment'], job['seed'], job['config_sha256'],
@@ -53,8 +55,8 @@ class SchedulingTests(unittest.TestCase):
     def test_group_union_and_dataset_filter_still_have_complete_seed_rounds(self):
         plan = plan_for(datasets=['cau_flood', 'bright'],
                         groups=['main', 'scaling', 'main_bright'])
-        self.assertEqual(63, len(plan['jobs']))
-        self.assertEqual(63, len({job['id'] for job in plan['jobs']}))
+        self.assertEqual(21*len(SEEDS), len(plan['jobs']))
+        self.assertEqual(21*len(SEEDS), len({job['id'] for job in plan['jobs']}))
         for index, seed in enumerate(SEEDS):
             block = plan['jobs'][index * 21:(index + 1) * 21]
             self.assertEqual([seed] * 21, [job['seed'] for job in block])

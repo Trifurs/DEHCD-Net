@@ -1,18 +1,5 @@
 {
   "schema_version": 3,
-  "seeds": [
-    42,
-    1051,
-    2060
-  ],
-  "unique_configurations": 80,
-  "target_tasks": 240,
-  "counts_by_dataset": {
-    "bright": 39,
-    "haiti": 23,
-    "xbd": 9,
-    "cau_flood": 9
-  },
   "experiments": [
     {
       "id": "bright_dehcd_s",
@@ -30,66 +17,40 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         },
         {
           "group": "scaling_bright",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -118,83 +79,53 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         },
         {
           "group": "scaling_bright",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         },
         {
           "group": "sensitivity",
-          "role": "reference",
-          "paper_refs": [
-            "Figs.18/19"
-          ]
+          "role": "reference"
         },
         {
           "group": "irb_steps",
           "role": "default",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 3,
           "reference": "bright_dehcd_m"
         },
         {
           "group": "hog_levels",
           "role": "default",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 2,
           "levels": [
             0,
@@ -202,14 +133,6 @@
           ],
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16",
-        "Figs.18/19",
-        "Fig.18",
-        "Fig.19"
       ],
       "comparison": {
         "kind": "architecture",
@@ -243,82 +166,52 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "scaling_bright",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "data_statistics",
           "role": "data",
-          "paper_refs": [
-            "Table 1"
-          ],
           "postprocess_only": true
         },
         {
           "group": "ablation",
-          "role": "reference",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "reference"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "reference",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -329,44 +222,21 @@
         {
           "group": "features",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.12"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "capacity",
-          "role": "reference",
-          "paper_refs": [
-            "Additional capacity comparison"
-          ]
+          "role": "reference"
         },
         {
           "group": "dpm",
-          "role": "reference",
-          "paper_refs": [
-            "Additional dpm comparison"
-          ]
+          "role": "reference"
         },
         {
           "group": "recipe",
-          "role": "reference",
-          "paper_refs": [
-            "Additional recipe comparison"
-          ]
+          "role": "reference"
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16",
-        "Table 1",
-        "Fig.17",
-        "Fig.12",
-        "Additional capacity comparison",
-        "Additional dpm comparison",
-        "Additional recipe comparison"
       ],
       "comparison": {
         "kind": "architecture",
@@ -393,50 +263,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -463,50 +313,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -533,50 +363,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -603,50 +413,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -673,50 +463,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -743,50 +513,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -813,50 +563,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -883,50 +613,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -953,50 +663,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "main_bright",
-          "role": "model",
-          "paper_refs": [
-            "Table 2"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 2",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1024,66 +714,40 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         },
         {
           "group": "scaling_haiti",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1111,66 +775,40 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         },
         {
           "group": "scaling_haiti",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1202,82 +840,52 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "scaling_haiti",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "data_statistics",
           "role": "data",
-          "paper_refs": [
-            "Table 1"
-          ],
           "postprocess_only": true
         },
         {
           "group": "ablation",
-          "role": "reference",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "reference"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "reference",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -1288,37 +896,19 @@
         {
           "group": "features",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.12"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "sensitivity",
-          "role": "reference",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "reference"
         },
         {
           "group": "hog_bins",
           "role": "default",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 6,
           "reference": "haiti_dehcd_l"
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16",
-        "Table 1",
-        "Fig.17",
-        "Fig.12",
-        "Fig.19"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1345,50 +935,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1415,50 +985,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1485,50 +1035,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1555,50 +1085,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1625,50 +1135,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1695,50 +1185,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1765,50 +1235,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1835,50 +1285,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1905,50 +1335,30 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "main_haiti",
-          "role": "model",
-          "paper_refs": [
-            "Table 3"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "confusion",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.8–11"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 3",
-        "Figs.8–11",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -1975,57 +1385,34 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         },
         {
           "group": "scaling_xbd",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2052,57 +1439,34 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         },
         {
           "group": "scaling_xbd",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2130,66 +1494,39 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "scaling_xbd",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "data_statistics",
           "role": "data",
-          "paper_refs": [
-            "Table 1"
-          ],
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16",
-        "Table 1"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2215,41 +1552,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2275,41 +1595,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2335,41 +1638,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2395,41 +1681,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2455,41 +1724,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2515,41 +1767,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "main_xbd",
-          "role": "model",
-          "paper_refs": [
-            "Table 5"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.14"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 5",
-        "Fig.14",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2576,57 +1811,34 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         },
         {
           "group": "scaling_cau_flood",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "s"
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2653,57 +1865,34 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         },
         {
           "group": "scaling_cau_flood",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "m"
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2731,66 +1920,39 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "scaling",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "scaling_cau_flood",
           "role": "size",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "x": "l"
         },
         {
           "group": "data_statistics",
           "role": "data",
-          "paper_refs": [
-            "Table 1"
-          ],
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16",
-        "Table 1"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2816,41 +1978,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2876,41 +2021,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2936,41 +2064,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -2996,41 +2107,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -3056,41 +2150,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -3116,41 +2193,24 @@
       "uses": [
         {
           "group": "main",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "main_cau_flood",
-          "role": "model",
-          "paper_refs": [
-            "Table 4"
-          ]
+          "role": "model"
         },
         {
           "group": "qualitative",
           "role": "checkpoint",
-          "paper_refs": [
-            "Fig.13"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         },
         {
           "group": "efficiency",
           "role": "checkpoint",
-          "paper_refs": [
-            "Figs.15/16"
-          ],
           "display_seed": 42,
           "postprocess_only": true
         }
-      ],
-      "paper_refs": [
-        "Table 4",
-        "Fig.13",
-        "Figs.15/16"
       ],
       "comparison": {
         "kind": "architecture",
@@ -3174,17 +2234,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             0,
@@ -3192,9 +2246,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3218,17 +2269,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -3236,9 +2281,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3263,17 +2305,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -3281,9 +2317,6 @@
             0
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3307,17 +2340,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             1,
@@ -3325,9 +2352,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3351,17 +2375,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3369,9 +2387,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3396,17 +2411,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3414,9 +2423,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3443,17 +2449,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_bright",
+          "group": "components_bright",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3461,9 +2461,6 @@
             0
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3491,17 +2488,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             0,
@@ -3509,9 +2500,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3535,17 +2523,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -3553,9 +2535,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3580,17 +2559,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             1,
             1,
@@ -3598,9 +2571,6 @@
             0
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3624,17 +2594,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             1,
@@ -3642,9 +2606,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3668,17 +2629,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3686,9 +2641,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3713,17 +2665,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3731,9 +2677,6 @@
             1
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3760,17 +2703,11 @@
       "uses": [
         {
           "group": "ablation",
-          "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ]
+          "role": "control"
         },
         {
-          "group": "fig17_haiti",
+          "group": "components_haiti",
           "role": "control",
-          "paper_refs": [
-            "Fig.17"
-          ],
           "modules": [
             0,
             0,
@@ -3778,9 +2715,6 @@
             0
           ]
         }
-      ],
-      "paper_refs": [
-        "Fig.17"
       ],
       "comparison": {
         "kind": "control",
@@ -3808,14 +2742,8 @@
       "uses": [
         {
           "group": "capacity",
-          "role": "control",
-          "paper_refs": [
-            "Additional capacity comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional capacity comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3840,14 +2768,8 @@
       "uses": [
         {
           "group": "capacity",
-          "role": "control",
-          "paper_refs": [
-            "Additional capacity comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional capacity comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3871,14 +2793,8 @@
       "uses": [
         {
           "group": "capacity",
-          "role": "control",
-          "paper_refs": [
-            "Additional capacity comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional capacity comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3903,14 +2819,8 @@
       "uses": [
         {
           "group": "capacity",
-          "role": "control",
-          "paper_refs": [
-            "Additional capacity comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional capacity comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3934,14 +2844,8 @@
       "uses": [
         {
           "group": "dpm",
-          "role": "control",
-          "paper_refs": [
-            "Additional dpm comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional dpm comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3965,14 +2869,8 @@
       "uses": [
         {
           "group": "dpm",
-          "role": "control",
-          "paper_refs": [
-            "Additional dpm comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional dpm comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -3996,14 +2894,8 @@
       "uses": [
         {
           "group": "recipe",
-          "role": "control",
-          "paper_refs": [
-            "Additional recipe comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional recipe comparison"
       ],
       "comparison": {
         "kind": "recipe_bundle",
@@ -4036,14 +2928,8 @@
       "uses": [
         {
           "group": "recipe",
-          "role": "control",
-          "paper_refs": [
-            "Additional recipe comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional recipe comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -4067,14 +2953,8 @@
       "uses": [
         {
           "group": "recipe",
-          "role": "control",
-          "paper_refs": [
-            "Additional recipe comparison"
-          ]
+          "role": "control"
         }
-      ],
-      "paper_refs": [
-        "Additional recipe comparison"
       ],
       "comparison": {
         "kind": "control",
@@ -4098,23 +2978,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_bins",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 2,
           "reference": "haiti_dehcd_l"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4138,23 +3009,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_bins",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 4,
           "reference": "haiti_dehcd_l"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4178,23 +3040,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_bins",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 8,
           "reference": "haiti_dehcd_l"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4218,23 +3071,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_bins",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 10,
           "reference": "haiti_dehcd_l"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4258,23 +3102,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 0,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4298,23 +3133,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 1,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4338,23 +3164,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 2,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4378,23 +3195,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 4,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4418,23 +3226,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 5,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4458,23 +3257,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 6,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4498,23 +3288,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 7,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4538,23 +3319,14 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ]
+          "role": "point"
         },
         {
           "group": "irb_steps",
           "role": "point",
-          "paper_refs": [
-            "Fig.18"
-          ],
           "x": 8,
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.18"
       ],
       "comparison": {
         "kind": "control",
@@ -4578,26 +3350,17 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_levels",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 1,
           "levels": [
             0
           ],
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4621,17 +3384,11 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_levels",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 3,
           "levels": [
             0,
@@ -4640,9 +3397,6 @@
           ],
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",
@@ -4666,17 +3420,11 @@
       "uses": [
         {
           "group": "sensitivity",
-          "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ]
+          "role": "point"
         },
         {
           "group": "hog_levels",
           "role": "point",
-          "paper_refs": [
-            "Fig.19"
-          ],
           "x": 4,
           "levels": [
             0,
@@ -4686,9 +3434,6 @@
           ],
           "reference": "bright_dehcd_m"
         }
-      ],
-      "paper_refs": [
-        "Fig.19"
       ],
       "comparison": {
         "kind": "control",

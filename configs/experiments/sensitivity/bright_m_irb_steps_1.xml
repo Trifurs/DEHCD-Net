@@ -8,8 +8,7 @@
     <suite type="str">sensitivity</suite>
     <model_variant type="str">m</model_variant>
     <roles type="list">['sensitivity']</roles>
-    <uses type="list">[{'group': 'sensitivity', 'role': 'point', 'paper_refs': ['Fig.18']}, {'group': 'irb_steps', 'role': 'point', 'paper_refs': ['Fig.18'], 'x': 1, 'reference': 'bright_dehcd_m'}]</uses>
-    <paper_refs type="list">['Fig.18']</paper_refs>
+    <uses type="list">[{'group': 'sensitivity', 'role': 'point'}, {'group': 'irb_steps', 'role': 'point', 'x': 1, 'reference': 'bright_dehcd_m'}]</uses>
     <protocol type="str">controlled_comparison_v1</protocol>
     <status type="str">configured</status>
     <comparison>

@@ -18,6 +18,7 @@ def launch_settings(root=None):
     values = {"data_base": str(root / "data"), "output": str(root / "runs/campaign"),
               "event_data_root": str(root / "data/event_transfer_earthquake"),
               "event_output": str(root / "runs/event_transfer_earthquake"),
+              "target_exposure_note": "Not declared",
               "device": "auto", "runtime_profile": "none"}
     path = root / "local/settings.json"
     if path.exists():

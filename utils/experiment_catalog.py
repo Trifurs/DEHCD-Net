@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
 from pathlib import Path
 
 from utils.config import XMLConfigParser
@@ -35,7 +34,7 @@ def derive_catalog(root, paths):
             raise ValueError(f"Duplicate scientific definitions: {signatures[signature]} and {exp['id']}")
         signatures[signature] = exp["id"]
         rows.append({key: exp[key] for key in
-                     ("id", "canonical_id", "dataset", "suite", "model_variant", "roles", "uses", "paper_refs", "comparison")})
+                     ("id", "canonical_id", "dataset", "suite", "model_variant", "roles", "uses", "comparison")})
         rows[-1]["config"] = str(path.relative_to(root))
     if len(rows) != len({row["canonical_id"] for row in rows}):
         raise ValueError("Duplicate canonical_id")
@@ -72,40 +71,9 @@ def select_experiments(catalog, groups, datasets=None):
             and (datasets is None or row["dataset"] in datasets)]
 
 
-def write_catalog_views(root, rows, seeds=(42, 1051, 2060)):
+def write_catalog_views(root, rows):
     root = Path(root)
-    counts = dict(Counter(row["dataset"] for row in rows))
     atomic_json(root / "configs/experiments/catalog.json", {
-        "schema_version": 3, "seeds": list(seeds), "unique_configurations": len(rows),
-        "target_tasks": len(rows) * len(seeds), "counts_by_dataset": counts, "experiments": rows})
-    groups = analysis_groups(rows)
+        "schema_version": 3, "experiments": rows})
     atomic_json(root / "configs/experiments/groups.json", {
-        "schema_version": 1, "seeds": list(seeds), "groups": groups,
-        "note": "Views reference canonical IDs only. Union IDs before expanding seeds."})
-    lines = ["# Experiment catalog", "", "Generated from the metadata in the formal XML definitions by `python tools/build_experiment_configs.py`.", "",
-        f"There are **{len(rows)} unique configurations** and **{len(rows) * len(seeds)} target tasks** with seeds `{list(seeds)}`. Compatible completed tasks count toward this total; it is not the remaining training count.", "",
-        "Shared `base`, `datasets`, `dehcd`, and runtime files are templates, not additional scheduled tasks. Each formal configuration lives in exactly one location. Group views reuse the same canonical ID and seed results.", "",
-        "| Dataset | Unique configurations | Target tasks |", "|---|---:|---:|"]
-    lines += [f"| {ds} | {count} | {count * len(seeds)} |" for ds, count in counts.items()]
-    lines += ["", "## Coverage and analysis views", "",
-        "Main metrics use all three complete test seeds, sample SD (`ddof=1`), `n`, and `expected_n=3`. A shared reference still has only three independent runs. Qualitative displays use seed 42; parameter counting and fixed-device efficiency profiling reuse checkpoints and do not train extra models.", "",
-        "| Analysis group | Paper use | Canonical IDs (reference/default marked *) |", "|---|---|---|"]
-    for name, members in groups.items():
-        refs = list(dict.fromkeys(ref for member in members for ref in member["paper_refs"]))
-        labels = [f"`{member['canonical_id']}`" + (" *" if member["role"] in ("reference", "default") else "")
-                  + (f" (x={member['x']})" if "x" in member else "") for member in members]
-        lines.append(f"| {name} | {', '.join(refs)} | {'<br>'.join(labels)} |")
-    lines += ["", "## Fixed factors", "",
-        "The Fig.17 order is HOG, DPM, BiCSF, IRB. Plain fusion replaces a disabled DPM; disabling BiCSF turns off both GCBM and WASM. Each dataset uses its existing L main model as full reference.", "",
-        "Haiti HOG bins use L at K=[2,4,6,8,10], with K=6 supplied by `haiti_dehcd_l`. BRIGHT IRB uses M at T=0–8, with T=3 supplied by `bright_dehcd_m`. BRIGHT HOG guidance uses M at G=[1,2,3,4], with G=2 supplied by the same M run. Guidance covers the first G levels of both branches. All scans retain the other default factors (K=6, G=2, T=3).",
-        "", "`bright_m_irb_steps_0` uses the M architecture; the L component control `bright_no_irb` is a separate canonical experiment. Both IRB and guidance scans inherit the current M reference.", "",
-        "The three BRIGHT training controls separately compare the loss recipe, weighted sampler, and class weights. CE+Dice replaces several loss terms and smoothing and is a recipe comparison. Capacity and DPM controls are limited to BRIGHT. Matched parameter counts do not imply identical receptive fields or operation counts.", "",
-        "Main architecture results share one from-scratch task objective and disable localization, feature-pair, and deep-supervision auxiliary losses. They measure adapted architectures under the common protocol, not each upstream implementation's best benchmark. Early-stop patience is 30 on BRIGHT/xBD/CAU-Flood and 100 on Haiti, with minimum delta 0.001. Epoch limits, strict validation foreground_miou selection, no TTA and main-logits argmax remain in force.", "",
-        "Table 1 is computed from actual dataset evidence. Confusion plots retain raw counts and explicit denominators; row normalization is not overall accuracy. Efficiency axes use validated full counts or measured latency/throughput under common settings. Postprocessing does not create additional training samples or tasks.", "",
-        "## Unique definitions", "", "| Canonical ID | Variant | Roles | Declared reference | Allowed scientific changes |", "|---|---|---|---|---|"]
-    for row in rows:
-        comp = row["comparison"]
-        lines.append(f"| `{row['canonical_id']}` | {row['model_variant']} | {', '.join(row['roles'])} | {comp['reference'] or 'dataset root'} | {', '.join(comp['allowed_changes'])} |")
-    path = root / "docs/EXPERIMENT_CATALOG.md"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        "schema_version": 1, "groups": analysis_groups(rows)})

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 from utils.protocol import atomic_json
 from utils.local_settings import launch_settings
+from utils.defaults import DEFAULT_SEEDS
 
 CONFIGS = {size: ROOT / "configs/event_transfer" / f"dehcd_{size}.xml" for size in ("s", "m", "l")}
 _SETTINGS = launch_settings(ROOT)
@@ -29,7 +30,7 @@ DEFAULT_TEST_EVENTS = ["haiti-earthquake", "morocco-earthquake", "noto-earthquak
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060])
+    parser.add_argument("--seeds", nargs="+", type=int, default=list(DEFAULT_SEEDS))
     parser.add_argument("--sizes", nargs="+", choices=list(CONFIGS), default=["s", "m", "l"])
     parser.add_argument("--device", default=_SETTINGS["device"])
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)

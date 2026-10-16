@@ -1,4 +1,4 @@
-"""Run the four-dataset, three-seed experiment campaign."""
+"""Launch configured training jobs."""
 from __future__ import annotations
 
 import argparse
@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT))
 from utils.local_settings import launch_settings
+from utils.defaults import DEFAULT_SEEDS
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
     parser.add_argument("--datasets", nargs="+", choices=["bright", "haiti", "xbd", "cau_flood"],
                         default=["bright", "haiti", "xbd", "cau_flood"])
     parser.add_argument("--groups", nargs="+", default=["all"])
-    parser.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060])
+    parser.add_argument("--seeds", nargs="+", type=int, default=list(DEFAULT_SEEDS))
     parser.add_argument("--device", default=settings["device"])
     parser.add_argument("--runtime-profile", choices=["none", "rtx5090"], default=settings["runtime_profile"])
     parser.add_argument("--prepare-workers", type=int, default=8)

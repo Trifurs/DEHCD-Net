@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT))
 from utils.config import XMLConfigParser
+from utils.defaults import DEFAULT_SEEDS
 from utils.protocol import atomic_json, config_digest, source_identity, dataset_identity, assert_disjoint, digest
 from tools.validate_results import validate_result
 from utils.comparison_protocol import audit_plan, declaration
@@ -32,7 +33,7 @@ def parse_args():
     p.add_argument("--datasets", nargs="+", default=["bright", "haiti", "xbd", "cau_flood"])
     p.add_argument("--experiments", nargs="+", help="Exact experiment ids; selects across suites")
     p.add_argument("--config", help="One explicitly isolated custom XML/JSON configuration for smoke checks")
-    p.add_argument("--seeds", nargs="+", type=int, default=[42, 1051, 2060])
+    p.add_argument("--seeds", nargs="+", type=int, default=list(DEFAULT_SEEDS))
     p.add_argument("--output", required=True, help="Campaign directory; existing compatible evidence is audited and reused")
     p.add_argument("--data-root", action="append", default=[], metavar="DATASET=PATH")
     p.add_argument("--encoder-checkpoint", action="append", default=[], metavar="MODEL=PATH",
@@ -73,11 +74,9 @@ def assignments(values):
 
 
 def make_plan(args):
-    if len(args.seeds) != len(set(args.seeds)) or any(s < 0 or s >= 2**32 for s in args.seeds):
+    if not args.seeds or len(args.seeds) != len(set(args.seeds)) or any(s < 0 or s >= 2**32 for s in args.seeds):
         raise ValueError("Seeds must be distinct integers in [0, 2**32)")
     catalog = json.loads(Path(args.catalog).read_text())["experiments"]
-    if not args.config and sorted(args.seeds) != [42, 1051, 2060]:
-        raise ValueError("Formal configurations require exactly seeds [42, 1051, 2060]")
     if not args.config and args.epochs is not None:
         raise ValueError("Formal configurations preserve their fixed epoch budgets; use isolated --config smoke runs")
     if args.config:

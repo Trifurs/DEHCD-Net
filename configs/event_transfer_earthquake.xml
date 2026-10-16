@@ -103,7 +103,6 @@
     <protocol type="str">event_transfer_fast_v2</protocol>
     <status type="str">configured</status>
     <roles type="list">["event_transfer", "held_out_event_test"]</roles>
-    <paper_refs type="list">["cross-event generalization analysis"]</paper_refs>
   </experiment>
   <logging>
     <root_dir type="path">runs</root_dir>

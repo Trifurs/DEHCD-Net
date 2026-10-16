@@ -173,7 +173,7 @@ class ReuseTests(unittest.TestCase):
     def test_metadata_changes_preserve_reuse_but_effective_changes_do_not(self):
         with tempfile.TemporaryDirectory() as tmp:
             fixture = RunFixture(tmp)
-            fixture.cfg["experiment"].update(roles=["scaling", "main"], paper_refs=["another caption"])
+            fixture.cfg["experiment"].update(roles=["scaling", "main"], display_notes=["another caption"])
             fixture.cfg["logging"] = {"run_name": "a display name"}
             self.assertEqual("reuse_complete", fixture.inspect()["state"])
             for section, field, value in (("model", "variant", "l"), ("training", "loss", "other"),
@@ -286,18 +286,18 @@ class ReuseTests(unittest.TestCase):
             atomic_json(summary_path, summary)
             with self.assertRaises(ValueError): aggregate(fixture.plan, fixture.output)
 
-    def test_all_240_target_states_are_exhaustive_and_unique(self):
+    def test_target_states_are_exhaustive_and_unique(self):
         plan = full_plan()
         with tempfile.TemporaryDirectory() as tmp:
             first = run_path(tmp, plan["jobs"][0], plan)
             first.mkdir(parents=True); (first / "unclassified.txt").write_text("fixture")
             manifest = audit_campaign(plan, tmp, environment_info=ENV)
-            self.assertEqual(240, manifest["target_tasks"])
+            self.assertEqual(len(plan["jobs"]), manifest["target_tasks"])
             self.assertEqual(set(STATES), set(manifest["counts"]))
-            self.assertEqual(240, sum(manifest["counts"].values()))
-            self.assertEqual(239, manifest["counts"]["train_new"])
+            self.assertEqual(len(plan["jobs"]), sum(manifest["counts"].values()))
+            self.assertEqual(len(plan["jobs"])-1, manifest["counts"]["train_new"])
             self.assertEqual(1, manifest["counts"]["blocked_review"])
-            self.assertEqual(240, len({row["id"] for row in manifest["tasks"]}))
+            self.assertEqual(len(plan["jobs"]), len({row["id"] for row in manifest["tasks"]}))
 
     def test_alias_migration_preserves_checkpoint_bytes_and_repeat_reuse(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,4 +1,4 @@
-"""Source-checked three-seed summaries and shared canonical analysis views."""
+"""Validate run outputs and summarize matched training repetitions."""
 from __future__ import annotations
 import argparse
 import csv
@@ -16,24 +16,22 @@ from utils.comparison_protocol import comparability, pair_policy
 from utils.experiment_catalog import analysis_groups
 from utils.experiment_statistics import paired_seed_comparison, holm_adjust
 
-EXPECTED_SEEDS = [42, 1051, 2060]
-
-
 def make_report(campaign, references=None, metrics=None, comparators=None, repeats=20000, seed=20260929, groups=None):
     campaign = Path(campaign)
     metrics = metrics or ["mean_iou", "foreground_miou", "oa"]
     plan = json.loads((campaign / "protocol.json").read_text())
+    expected_seeds = list(plan["seeds"])
     checked = aggregate(plan, campaign)
     with summary_path(campaign, plan, "per_seed.csv").open() as stream:
         rows = list(csv.DictReader(stream))
     observations = {}
     for row in rows:
         name, run_seed = row["experiment"], int(row["seed"])
-        if run_seed not in EXPECTED_SEEDS: raise ValueError("Unexpected seed in formal summary")
+        if run_seed not in expected_seeds: raise ValueError("Unexpected seed in run summary")
         if run_seed in observations.setdefault(name, {}): raise ValueError("Duplicate training repetition")
         observations[name][run_seed] = row
     registry = {j["experiment"]: j["config"]["experiment"] for j in plan["jobs"]}
-    # Custom smoke campaigns do not define manuscript groups.
+    # Custom configurations may omit grouped views.
     view_rows = [dict(v, canonical_id=v.get("canonical_id", name)) for name, v in registry.items()]
     views = analysis_groups(view_rows)
     selected_groups = groups or []
@@ -48,14 +46,14 @@ def make_report(campaign, references=None, metrics=None, comparators=None, repea
         if name not in selected: continue
         values_by_seed = observations.get(name, {})
         for metric in metrics:
-            values = [float(values_by_seed[s][metric]) for s in EXPECTED_SEEDS if s in values_by_seed]
+            values = [float(values_by_seed[s][metric]) for s in expected_seeds if s in values_by_seed]
             if not all(0 <= value <= 1 for value in values): raise ValueError("Only 0..1 accuracy metrics may be expressed as percentages")
-            tables.append({"experiment": name, "metric": metric, "n": len(values), "expected_n": 3,
-                "complete": sorted(values_by_seed) == sorted(EXPECTED_SEEDS),
+            tables.append({"experiment": name, "metric": metric, "n": len(values), "expected_n": len(expected_seeds),
+                "complete": sorted(values_by_seed) == sorted(expected_seeds),
                 "mean_percent": 100 * statistics.mean(values) if values else None,
                 "sample_std_percentage_points": 100 * statistics.stdev(values) if len(values) > 1 else None,
-                "per_seed": {str(s): float(values_by_seed[s][metric]) for s in EXPECTED_SEEDS if s in values_by_seed},
-                "sources": [{"seed": s, "checkpoint": values_by_seed[s]["checkpoint"], "config_sha256": values_by_seed[s]["config_sha256"]} for s in EXPECTED_SEEDS if s in values_by_seed]})
+                "per_seed": {str(s): float(values_by_seed[s][metric]) for s in expected_seeds if s in values_by_seed},
+                "sources": [{"seed": s, "checkpoint": values_by_seed[s]["checkpoint"], "config_sha256": values_by_seed[s]["config_sha256"]} for s in expected_seeds if s in values_by_seed]})
     pairs = set()
     if references:
         for ref in references:
@@ -78,16 +76,16 @@ def make_report(campaign, references=None, metrics=None, comparators=None, repea
             if comparators: raise
             excluded.append({"reference": reference, "candidate": name, "reason": str(exc)}); continue
         a, b = observations.get(reference, {}), observations.get(name, {})
-        paired = [s for s in EXPECTED_SEEDS if s in a and s in b]
+        paired = [s for s in expected_seeds if s in a and s in b]
         for metric in metrics:
             delta = {str(s): float(a[s][metric]) - float(b[s][metric]) for s in paired}
             entry = {"reference": reference, "comparator": name, "dataset": jobs[0]["dataset"],
                 "metric": metric, "comparison_contract": contract, "paired_seeds": paired,
-                "expected_n": 3, "complete": paired == EXPECTED_SEEDS, "n": len(paired),
+                "expected_n": len(expected_seeds), "complete": paired == expected_seeds, "n": len(paired),
                 "per_seed_differences": delta, "direction": "reference_minus_comparator", "reference_point": "declared default, not necessarily curve starting point",
                 "mean_difference_percentage_points": 100 * statistics.mean(delta.values()) if delta else None,
                 "p_value": None, "p_holm": None}
-            if len(paired) == 3:
+            if paired == expected_seeds and len(paired) >= 2:
                 result = paired_seed_comparison({s: float(a[s][metric]) for s in paired}, {s: float(b[s][metric]) for s in paired}, repeats=repeats, seed=seed)
                 entry.update(result)
             comparisons.append(entry)
@@ -98,7 +96,7 @@ def make_report(campaign, references=None, metrics=None, comparators=None, repea
         "analysis_groups": chosen_views, "excluded_comparisons": excluded,
         "qualitative_policy": plan.get("analysis_policy", {"display_seed": 42}),
         "multiplicity": "Holm over all complete exported paired comparisons and endpoints",
-        "interpretation": "Mean and sample SD use ddof=1 across three seeds. Missing seeds remain incomplete, never zero-filled. Reused references do not increase n. Three seeds give a minimum two-sided exact sign-flip p of 0.25; no significance labels are generated. Seed variation does not demonstrate unseen-event generalization."}
+        "interpretation": "Mean and sample SD use ddof=1 across the requested independent repetitions. Missing repetitions remain incomplete. Shared references are counted once. Seed variation does not demonstrate unseen-event generalization."}
 
 
 def main():
@@ -118,13 +116,13 @@ def main():
     with (out / "raw_metrics_percent.csv").open("w", newline="", encoding="utf-8") as stream:
         fields = ["experiment", "metric", "n", "expected_n", "complete", "mean_percent", "sample_std_percentage_points"]
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore"); writer.writeheader(); writer.writerows(report["tables"])
-    lines = ["# Test metrics across seeds", "", "| Experiment | Metric | n/3 | Mean (%) | Sample SD (pp) | Status |", "|---|---|---:|---:|---:|---|"]
+    lines = ["# Test metrics across seeds", "", "| Experiment | Metric | n/expected | Mean (%) | Sample SD (pp) | Status |", "|---|---|---:|---:|---:|---|"]
     for row in report["tables"]:
         mean, sd = row["mean_percent"], row["sample_std_percentage_points"]
         mean = "NA" if mean is None else f"{mean:.3f}"
         sd = "NA" if sd is None else f"{sd:.3f}"
         state = "complete" if row["complete"] else "incomplete"
-        lines.append(f"| {row['experiment']} | {row['metric']} | {row['n']}/3 | {mean} | {sd} | {state} |")
+        lines.append(f"| {row['experiment']} | {row['metric']} | {row['n']}/{row['expected_n']} | {mean} | {sd} | {state} |")
     (out / "raw_metrics.md").write_text("\n".join(lines) + "\n\n" + report["interpretation"] + "\n")
     print(f"{report['status']}: {out / 'statistics.json'}")
 

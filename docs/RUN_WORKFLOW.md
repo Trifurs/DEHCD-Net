@@ -1,84 +1,47 @@
-# Campaign workflow
+# Running tools
 
-## Entry point
-
-Run from the repository with the existing training Python environment:
+Launch from the repository root with the configured Python environment:
 
 ```bash
-python -W ignore tools/run_all.py --audit-only
-python -W ignore tools/run_all.py --dry-run
-python -W ignore tools/run_all.py --preflight-only
-python -W ignore tools/run_all.py
+python -W ignore tools/run_all.py --help
+python -W ignore tools/run_all.py --data-base /path/to/data --output /path/to/runs --dry-run
+python -W ignore tools/run_all.py --data-base /path/to/data --output /path/to/runs --preflight-only
+python -W ignore tools/run_all.py --data-base /path/to/data --output /path/to/runs
 ```
 
-`--audit-only` reads current definitions and results without modifying the result directory. `--dry-run` writes the target plan. `--preflight-only` audits data and existing evidence, registers compatible imports and stops before training. The default command completes outstanding work, and repeating the same command continues after interruption. `--prepare-only` prepares shared deterministic inputs without training.
+`--dry-run` writes a plan without loading data or training. `--audit-only` reads current definitions and existing run evidence without writing the result directory. `--prepare-only` seals data and prepares shared normalized inputs. The batch queue completes one requested seed before the next; xBD and CAU-Flood are placed after BRIGHT and Haiti within each seed. CLI seed order is preserved.
 
-The default collection is 80 unique configurations with seeds 42,1051,2060, hence 240 target tasks including existing compatible work. The default schedule completes **seed 42 → seed 1051 → seed 2060**. Within each seed, all configurations run in dataset order **BRIGHT → Haiti → xBD → CAU-Flood**, so xBD and CAU-Flood remain last in every seed round. An explicit `--seeds` list sets the seed order. Completed results are skipped; required reevaluation and compatible continuation precede missing/new training only within the same seed and dataset. A paused run resumes from its last durable checkpoint when its turn arrives. Current task state, not a stale configuration-directory scan, determines the remaining queue.
+Use `--groups`, `--datasets` and `--seeds` to choose work. `tools/run_multiseed.py --config` accepts an isolated XML/JSON configuration. Presets are indexed by canonical IDs, so overlapping group selections do not duplicate a job.
 
-Public defaults: data at `data/{BRIGHT1,Haiti1,xBD1,CAU1}`, results at `runs/campaign`, device `auto` and runtime profile `none`. Workstation overrides live in ignored `local/settings.json`; environment variables override that file and CLI options override both. Use `--runtime-profile rtx5090` only for the declared hardware settings.
+## Progress and continuation
 
-```bash
-python -W ignore tools/run_all.py --groups main ablation sensitivity scaling --dry-run
-python -W ignore tools/compare_results.py --campaign "runs/campaign" --groups main ablation sensitivity scaling --output "runs/campaign/summary/analysis"
-```
+Console output includes overall and current progress, provisional ETA, best validation score, learning rate, early-stop progress and numerical-health counters. Warnings can be suppressed with `-W ignore`; errors retain their log paths. ETA adapts to measured timings and model types.
 
-Groups refer to canonical IDs. Their union is taken before seed expansion, so main/scaling/default points do not repeat training. The [generated catalog](EXPERIMENT_CATALOG.md) lists all groups and figure coverage. Group statistics report only verified per-seed test results, n, expected_n=3 and complete status. Missing runs remain incomplete, not zero-filled.
+Repeating a compatible command resumes interrupted work from `last.pth` and verifies completed outputs. Continuation restores optimizer, scheduler, RNG and tracker state. Inference-only weight files cannot restore training state. Data, configuration and source checks reject incompatible reuse. Changes to weights, data processing or optimization require separate validation.
 
-## Progress
+## Output layout
 
-Interactive output shows total runs, current epoch and train/validation/test batches, with provisional ETA. It includes the best validation foreground_miou and its epoch, current validation result, learning rate and no-improvement count. **Early stopping is enabled** with patience 30 for BRIGHT/xBD/CAU-Flood and 100 for Haiti, minimum delta 0.001. Validation runs every epoch. Strict best-checkpoint selection remains independent of the early-stop improvement threshold. Foreground collapse/stall counters are shown separately as numerical/learning-health protection. These failures cannot count as completed experiments.
-
-Total ETA uses measured timings, preferring the same experiment or model family, then dataset rates. It is provisional and recalibrates as different architectures finish; unmeasured model families can differ greatly. It is not a completion deadline or a guaranteed upper bound. Initialization is shown until timings are available.
-
-Root progress.json/progress.txt and each run's progress.json/logs remain readable when stdout is redirected. Python warnings are suppressed in the launcher and subprocesses. Real errors and their log paths remain visible. No full prediction masks are transferred just to refresh console counters.
-
-## Files and provenance
+All generated files belong under the selected output directory:
 
 ```text
-DEHCD-Net/
+output/
   plan.json
   protocol.json
-  reuse_manifest.json
-  cleanup_manifest.json
-  audit_report.json
-  progress.json
-  progress.txt
-  campaign/configs/<canonical_id>__seed_<seed>.json
-  summary/{jobs.csv,per_seed.csv,aggregate.json,...}
-  cache/<dataset>/<content-key>/
-  runs/<dataset>/<suite>/<canonical_id>/seed_<seed>/
+  summary/
+  cache/
+  runs/<dataset>/<group>/<configuration>/seed_<seed>/
     config_snapshot.json
-    protocol.json
     history.jsonl
-    progress.json
-    training_summary.json
     checkpoints/{best,last}.pth
     logs/
-    test/{result.json,sample_metrics.csv,sample_confusion_matrices.json,...}
+    test/
     artifacts/
 ```
 
-Provenance records preserve the original source/config hashes and connect imported evidence to the current canonical task. Documentation and display metadata do not invalidate scientifically compatible weights; training-affecting changes still require strict review. No unconditional force mode bypasses scientific compatibility. Historical stat verification is labeled stat_verified and cannot be promoted to proof of historical byte content by hashing today.
+The saved configuration identifies the checkpoint's model and input processing. `tools/test.py`, `tools/infer.py`, `tools/export_features.py` and `tools/benchmark.py` expose their checkpoint and output options through `--help`. Evaluation requires complete split coverage and finite predictions. Summary tools read the requested repetition set from the plan and leave incomplete inputs incomplete.
 
-Best and last retain full model/optimizer/scheduler/scaler/RNG/epoch/best/protection state. Last updates atomically each epoch. Asynchronous writing uses immutable CPU snapshots and at most one pending write, whose failure propagates before completion is recorded. Identical best/last bytes may share a hard link; later atomic last replacement leaves the older best unchanged. Inference-only weights cannot provide full continuation. Active run files are not hot-edited, migrated or deleted.
+## Input reuse and profiling
 
-Cleanup is restricted to confirmed project/results paths and recorded with reason, migration validation and actual status. Required heads/licenses, source evidence, unaudited checkpoints and data are retained.
+Deterministic input preparation is cached before random augmentation. Cache identities include data and preprocessing settings; generated cache corruption is detected. Each sampled occurrence retains its own augmentation seed.
 
-## Shared preparation
-
-Each distinct data version is sealed once. Deterministic alignment, normalization and label preparation produce lossless FP32 inputs and exact integer labels before random crops/augmentation. Haiti quality masks are preserved. Full label counts support unchanged weighting/sampling; every sampled occurrence keeps its own run/epoch/draw RNG seed. Read-only memmaps are copied before augmentation.
-
-Cache keys include source fingerprints, preprocessing settings/code. Cache bytes are verified on reuse, corrupt generated caches rebuilt, and source identity rechecked before publication. Crop freedom/target applicability and actual sampler nonuniformity are audited from current data, without adding training groups. Integer GPU confusion accumulation and shared per-image counts avoid redundant transfers while retaining metric definitions.
-
-## Checkpoint postprocessing
-
-Use existing run snapshots, not unrelated templates, for evaluation and efficiency. Seed42 and the first16 lexical test IDs are fixed for displays; feature --sample-id may select only a subset of that pool. Feature response PNGs are mean absolute activations, scaled independently per image/module. Raw CHW arrays and scaling metadata are saved; colors across independently scaled modules are not comparable absolute magnitudes.
-
-```bash
-python -W ignore tools/export_features.py --run-dir "runs/campaign/runs/bright/main/bright_dehcd_l/seed_42" --output "runs/campaign/runs/bright/main/bright_dehcd_l/seed_42/artifacts/features" --device cuda:0
-python -W ignore tools/benchmark.py --config "runs/campaign/runs/bright/main/bright_dehcd_l/seed_42/config_snapshot.json" --checkpoint "runs/campaign/runs/bright/main/bright_dehcd_l/seed_42/checkpoints/best.pth" --optical-channels 3 --sar-channels 1 --size 256 256 --batch-size 1 --device cuda:0 --warmup 20 --iterations 100 --output "runs/campaign/runs/bright/main/bright_dehcd_l/seed_42/artifacts/benchmark.json"
-```
-
-These commands require that run's checkpoint to exist. Feature export never trains or creates accuracy results. HOG keeps optical/SAR streams; after DPM fusion the captured representation is shared, not two independent modality rows. Feature maps cannot prove causal synergy or physical separation. Parameter counting and matched-device profiling need not repeat for every seed. Benchmark reports checkpoint SHA, backend, execution precision, forward latency/throughput and peak allocated memory on synthetic device-resident inputs; it excludes disk I/O and TTA and is not epoch training time. Omit --checkpoint only for explicitly labeled random-initialization structural profiling; --weights-only selects restricted loading of plain weight files.
-
-All full-test results still require complete split coverage and finite outputs. No feature/visualization subset or partial smoke result enters formal statistics.
+Parameter counting and forward profiling are separate tools. Benchmark inputs are randomly initialized device tensors; the report identifies this scope and excludes data loading, output writing and TTA. Compare timings only under matched device, shape, batch, precision and scan backend. Forward latency is not epoch training time.

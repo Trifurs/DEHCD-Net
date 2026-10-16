@@ -1,6 +1,6 @@
 # Comparison models
 
-Six original baselines (ICIF-Net, DMINet, HFA-PANet, WaveHFG, HRSICD, HAFF) run on all four datasets. ChangeOS-R50, DamageFormer and ChangeMamba are included on BRIGHT and Haiti. Sources reside in official/; official_adapters.py and damage_adapters.py expose forward(optical, second_modality). extract_logits(output) selects the primary prediction. Required heads and upstream licenses are retained.
+The baseline models (ICIF-Net, DMINet, HFA-PANet, WaveHFG, HRSICD, HAFF) run on all four datasets. ChangeOS-R50, DamageFormer and ChangeMamba are included on BRIGHT and Haiti. Sources reside in official/; official_adapters.py and damage_adapters.py expose forward(optical, second_modality). extract_logits(output) selects the primary prediction. Required heads and upstream licenses are retained.
 
 Formal main comparisons train from scratch with the same primary-task loss, data, sampler, budget and validation foreground-mIoU selection as DEHCD-Net. Localization/deep-supervision/feature-pair weights are zero. Dual-head structures remain compatible; unsupervised localization has localization_supervised=false and formal localization_f1=null. Diagnostics do not enter localization rankings.
 
@@ -17,4 +17,4 @@ These are adapted architectures under a common strategy, not official best bench
 
 Original sources: [ICIF-Net](https://github.com/ZhengJianwei2/ICIF-Net), [DMINet](https://github.com/ZhengJianwei2/DMINet), [HFA-PANet](https://github.com/TongfeiLiu/HFA-PANet-for-MCD), [WaveHFG](https://github.com/songxy9037/WaveHFG), [HRSICD](https://github.com/Lucky-DW/HRSICD), [HAFF](https://github.com/ImgSciGroup/HAFF).
 
-See [pinned sources/CUDA](UPSTREAM.md), [controlled comparisons](../docs/FAIR_COMPARISONS.md), and [protocol](../docs/EXPERIMENT_PROTOCOL.md).
+See [pinned sources/CUDA](UPSTREAM.md) and [configuration](../docs/CONFIGURATION.md).

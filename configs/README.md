@@ -1,17 +1,13 @@
-# Configuration layout
+# Configurations
 
-`base.xml`, `datasets/*.xml`, `dehcd/*.xml` and `runtime/*.json` are shared templates. The 80 XML files indexed by `experiments/catalog.json` define the main canonical collection. `event_transfer/` contains separate event-transfer and adaptation settings.
+`base.xml` defines shared options. `datasets/` describes data layouts and labels; `dehcd/` selects model variants. `config.xml` redirects to a runnable preset. `runtime/` contains optional device execution profiles.
 
-The catalog derives from configuration metadata. `experiments/groups.json` references canonical IDs; the union of selected groups is taken before expanding seeds `[42,1051,2060]`, giving 240 main tasks. Shared references and default sensitivity points train once.
+The batch registry in `experiments/` maps IDs to configurations and reusable groups. It contains executable settings and reference relationships. It does not store results or prescribe a publication schedule. Regenerate presets and their JSON index with:
 
 ```bash
-python -W ignore tools/run_all.py --dry-run
-python -W ignore tools/run_all.py --preflight-only
-python -W ignore tools/run_all.py
+python tools/build_experiment_configs.py
 ```
 
-Configure paths using `local/settings.json`, environment variables or CLI arguments as described in the root README. CLI settings take precedence. The default seed rounds are 42, 1051 and 2060; each uses BRIGHT, Haiti, xBD and CAU-Flood in that order. Compatible completed results are reused.
+`event_transfer/` provides source-training and scene-disjoint transfer settings. `local.example.json` is a portable path template; copy it to ignored `local/settings.json` for machine settings.
 
-Main early stopping uses patience 30 for BRIGHT/xBD/CAU-Flood and 100 for Haiti. The best checkpoint uses strict maximum validation foreground mIoU. All models within each dataset use the same stopping rule, budget and runtime settings.
-
-`python tools/build_experiment_configs.py` regenerates canonical definitions, catalog, groups and [coverage documentation](../docs/EXPERIMENT_CATALOG.md). See [protocol](../docs/EXPERIMENT_PROTOCOL.md), [runtime profile](../docs/RUNTIME_PROFILE.md) and [transfer studies](event_transfer/README.md).
+See [configuration fields](../docs/CONFIGURATION.md), [launcher usage](../docs/RUN_WORKFLOW.md) and [transfer tools](event_transfer/README.md).

@@ -11,10 +11,8 @@ sys.path.insert(0, str(ROOT))
 from utils.experiment_catalog import derive_catalog, write_catalog_views
 
 DATASETS = ("bright", "haiti", "xbd", "cau_flood")
-LEGACY_BASELINES = ("icif_net", "dminet", "hfa_panet", "wavehfg", "hrsicd", "haff")
+BASELINES = ("icif_net", "dminet", "hfa_panet", "wavehfg", "hrsicd", "haff")
 DAMAGE_BASELINES = ("changeos", "damageformer", "changemamba")
-SEEDS = (42, 1051, 2060)
-TABLES = {"bright": "Table 2", "haiti": "Table 3", "cau_flood": "Table 4", "xbd": "Table 5"}
 COMPONENTS = {
     "no_dpm": {"fusion_mode": "plain"},
     "no_bicsf": {"global_context": False, "cross_scale_fusion": False},
@@ -52,8 +50,8 @@ def xml_write(path, config):
     ET.ElementTree(tree).write(path, encoding="utf-8", xml_declaration=True)
 
 
-def use(group, role, paper_refs=(), **fields):
-    return {"group": group, "role": role, "paper_refs": list(paper_refs), **fields}
+def use(group, role, **fields):
+    return {"group": group, "role": role, **fields}
 
 
 def generate(root=ROOT):
@@ -85,7 +83,6 @@ def generate(root=ROOT):
         config["experiment"] = {
             "id": identifier, "canonical_id": identifier, "dataset": ds, "suite": suite,
             "model_variant": variant, "roles": list(dict.fromkeys(roles)), "uses": list(uses),
-            "paper_refs": list(dict.fromkeys(ref for entry in uses for ref in entry["paper_refs"])),
             "protocol": "controlled_comparison_v1", "status": "configured",
             "comparison": {"kind": kind, "reference": reference or "", "factor": factor or suffix,
                            "allowed_changes": allowed_changes},
@@ -105,42 +102,41 @@ def generate(root=ROOT):
                 "share_damage_encoder": ds == "xbd"}
 
     for ds in DATASETS:
-        qualitative_refs = ["Figs.8–11"] if ds in ("bright", "haiti") else ["Fig.13" if ds == "cau_flood" else "Fig.14"]
-        for name in ("dehcd_s", "dehcd_m", "dehcd_l", *LEGACY_BASELINES,
+        for name in ("dehcd_s", "dehcd_m", "dehcd_l", *BASELINES,
                      *(DAMAGE_BASELINES if ds in ("bright", "haiti") else ())):
             variant = name.rsplit("_", 1)[-1] if name.startswith("dehcd_") else name
             roles = ["main", "qualitative", "efficiency"]
-            uses = [use("main", "model", [TABLES[ds]]), use(f"main_{ds}", "model", [TABLES[ds]]),
-                    use("qualitative", "checkpoint", qualitative_refs, display_seed=42, postprocess_only=True),
-                    use("efficiency", "checkpoint", ["Figs.15/16"], display_seed=42, postprocess_only=True)]
+            uses = [use("main", "model"), use(f"main_{ds}", "model"),
+                    use("qualitative", "checkpoint", display_seed=42, postprocess_only=True),
+                    use("efficiency", "checkpoint", display_seed=42, postprocess_only=True)]
             if ds in ("bright", "haiti"):
                 roles.append("confusion")
-                uses.append(use("confusion", "checkpoint", ["Figs.8–11"], display_seed=42, postprocess_only=True))
+                uses.append(use("confusion", "checkpoint", display_seed=42, postprocess_only=True))
             if name.startswith("dehcd_"):
                 roles.append("scaling")
-                uses.extend([use("scaling", "size", ["Figs.15/16"], x=variant),
-                             use(f"scaling_{ds}", "size", ["Figs.15/16"], x=variant)])
+                uses.extend([use("scaling", "size", x=variant),
+                             use(f"scaling_{ds}", "size", x=variant)])
             if name == "dehcd_l":
                 roles.append("data_statistics")
-                uses.append(use("data_statistics", "data", ["Table 1"], postprocess_only=True))
+                uses.append(use("data_statistics", "data", postprocess_only=True))
                 if ds in ("bright", "haiti"):
                     roles.extend(["ablation", "features"])
-                    uses.extend([use("ablation", "reference", ["Fig.17"]),
-                                 use(f"fig17_{ds}", "reference", ["Fig.17"], modules=[1, 1, 1, 1]),
-                                 use("features", "checkpoint", ["Fig.12"], display_seed=42, postprocess_only=True)])
+                    uses.extend([use("ablation", "reference"),
+                                 use(f"components_{ds}", "reference", modules=[1, 1, 1, 1]),
+                                 use("features", "checkpoint", display_seed=42, postprocess_only=True)])
                 if ds == "bright":
                     for group in ("capacity", "dpm", "recipe"):
                         roles.append(group)
-                        uses.append(use(group, "reference", [f"Additional {group} comparison"]))
+                        uses.append(use(group, "reference"))
                 if ds == "haiti":
                     roles.append("sensitivity")
-                    uses.extend([use("sensitivity", "reference", ["Fig.19"]),
-                                 use("hog_bins", "default", ["Fig.19"], x=6, reference="haiti_dehcd_l")])
+                    uses.extend([use("sensitivity", "reference"),
+                                 use("hog_bins", "default", x=6, reference="haiti_dehcd_l")])
             if ds == "bright" and name == "dehcd_m":
                 roles.append("sensitivity")
-                uses.extend([use("sensitivity", "reference", ["Figs.18/19"]),
-                             use("irb_steps", "default", ["Fig.18"], x=3, reference="bright_dehcd_m"),
-                             use("hog_levels", "default", ["Fig.19"], x=2, levels=[0, 1], reference="bright_dehcd_m")])
+                uses.extend([use("sensitivity", "reference"),
+                             use("irb_steps", "default", x=3, reference="bright_dehcd_m"),
+                             use("hog_levels", "default", x=2, levels=[0, 1], reference="bright_dehcd_m")])
             model = {"backbone": name, "base_channels": {"s": 16, "m": 24, "l": 32}[variant]} if name.startswith("dehcd_") else baseline(ds, name)
             overrides = {"model": model}
             if not name.startswith("dehcd_"):
@@ -155,12 +151,12 @@ def generate(root=ROOT):
                        int(switches.get("global_context", True) and switches.get("cross_scale_fusion", True)),
                        int(switches.get("diffusion_steps", 3) > 0)]
             emit(ds, name, "ablation", {"model": switches}, roles=["ablation"],
-                 uses=[use("ablation", "control", ["Fig.17"]),
-                       use(f"fig17_{ds}", "control", ["Fig.17"], modules=modules)], factor="components")
+                 uses=[use("ablation", "control"),
+                       use(f"components_{ds}", "control", modules=modules)], factor="components")
     for group, changes in (("capacity", CAPACITY), ("dpm", DPM)):
         for name, switches in changes.items():
             emit("bright", name, "ablation", {"model": switches}, roles=[group],
-                 uses=[use(group, "control", [f"Additional {group} comparison"])])
+                 uses=[use(group, "control")])
     simple_loss = {"loss": "compound", "ce_weight": 1.0, "dice_weight": 1.0,
                    "focal_weight": 0.0, "lovasz_weight": 0.0, "tversky_weight": 0.0,
                    "foreground_dice_weight": 0.0, "label_smoothing": 0.0,
@@ -169,24 +165,24 @@ def generate(root=ROOT):
             ("no_weighted_sampler", {"class_balanced_sampler": False}, "weighted_sampler"),
             ("no_class_weights", {"class_weights": []}, "class_weights")):
         emit("bright", name, "recipe", {"training": settings}, roles=["recipe"],
-             uses=[use("recipe", "control", ["Additional recipe comparison"])], factor=factor,
+             uses=[use("recipe", "control")], factor=factor,
              kind="recipe_bundle" if name == "ce_dice_full_sampling" else "control")
     for bins in (2, 4, 8, 10):
         emit("haiti", f"hog_bins_{bins}", "sensitivity", {"model": {"hog_bins": bins}}, roles=["sensitivity"],
-             uses=[use("sensitivity", "point", ["Fig.19"]),
-                   use("hog_bins", "point", ["Fig.19"], x=bins, reference="haiti_dehcd_l")], factor="hog_bins")
+             uses=[use("sensitivity", "point"),
+                   use("hog_bins", "point", x=bins, reference="haiti_dehcd_l")], factor="hog_bins")
     for steps in (0, 1, 2, 4, 5, 6, 7, 8):
         emit("bright", f"m_irb_steps_{steps}", "sensitivity", {"model": {"diffusion_steps": steps}},
              variant="m", reference="bright_dehcd_m", factor="diffusion_steps", roles=["sensitivity"],
-             uses=[use("sensitivity", "point", ["Fig.18"]),
-                   use("irb_steps", "point", ["Fig.18"], x=steps, reference="bright_dehcd_m")])
+             uses=[use("sensitivity", "point"),
+                   use("irb_steps", "point", x=steps, reference="bright_dehcd_m")])
     for levels in (1, 3, 4):
         emit("bright", f"m_hog_levels_{levels}", "sensitivity", {"model": {"hog_modulation_levels": levels}},
              variant="m", reference="bright_dehcd_m", factor="hog_modulation_levels", roles=["sensitivity"],
-             uses=[use("sensitivity", "point", ["Fig.19"]),
-                   use("hog_levels", "point", ["Fig.19"], x=levels, levels=list(range(levels)), reference="bright_dehcd_m")])
+             uses=[use("sensitivity", "point"),
+                   use("hog_levels", "point", x=levels, levels=list(range(levels)), reference="bright_dehcd_m")])
     catalog = derive_catalog(root, paths)
-    write_catalog_views(root, catalog, SEEDS)
+    write_catalog_views(root, catalog)
     return catalog
 
 

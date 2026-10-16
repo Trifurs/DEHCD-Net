@@ -97,14 +97,14 @@ class RuntimeProfileTests(unittest.TestCase):
             configs[row['id']] = cfg
         self.assertEqual(76, len(validate_design(configs)))
 
-    def test_runtime_plan_has_240_jobs_and_profiles_references(self):
+    def test_runtime_plan_profiles_selected_jobs(self):
         args = SimpleNamespace(catalog=str(ROOT / 'configs/experiments/catalog.json'), suite=['all'],
             datasets=['bright', 'haiti', 'cau_flood', 'xbd'], experiments=None, config=None,
             seeds=[42, 1051, 2060], data_root=[], manifest=[], encoder_checkpoint=[],
             device='cuda:0', num_workers=None, epochs=None, batch_size=None,
             gradient_accumulation_steps=None, fingerprint='stat', runtime_profile='rtx5090')
         plan = make_plan(args)
-        self.assertEqual(240, len(plan['jobs']))
+        self.assertEqual(len(args.seeds)*len(json.loads((ROOT / 'configs/experiments/catalog.json').read_text())['experiments']), len(plan['jobs']))
         self.assertTrue(all(j['config']['training']['num_workers'] == 8 for j in plan['jobs']))
         args.experiments = ['haiti_no_bicsf']; args.num_workers = 2
         plan = make_plan(args)

@@ -13,7 +13,8 @@ from utils.experiment_catalog import analysis_groups, derive_catalog, load_catal
 from utils.protocol import config_digest
 
 ROOT = Path(__file__).resolve().parents[1]
-SEEDS = (42, 1051, 2060)
+from utils.defaults import DEFAULT_SEEDS
+SEEDS = DEFAULT_SEEDS
 BASELINES = {"icif_net", "dminet", "hfa_panet", "wavehfg", "hrsicd", "haff"}
 
 
@@ -29,7 +30,7 @@ class CatalogTests(unittest.TestCase):
         counts = Counter(row["dataset"] for row in self.rows)
         self.assertEqual({"bright": 39, "haiti": 23, "cau_flood": 9, "xbd": 9}, counts)
         tasks = {(row["canonical_id"], seed) for row in self.rows for seed in SEEDS}
-        self.assertEqual(240, len(tasks))
+        self.assertEqual(len(self.rows)*len(SEEDS), len(tasks))
         self.assertEqual(80, len({config_digest(config) for config in self.configs.values()}))
         formal = {str(path.relative_to(ROOT)) for path in (ROOT / "configs/experiments").rglob("*.xml")}
         self.assertEqual({row["config"] for row in self.rows}, formal)
@@ -50,22 +51,22 @@ class CatalogTests(unittest.TestCase):
     def test_group_union_precedes_seed_expansion(self):
         rows = select_experiments(self.rows, ["main", "ablation", "sensitivity", "scaling"])
         self.assertEqual(71, len(rows))
-        self.assertEqual(213, len({(r["id"], s) for r in rows for s in SEEDS}))
+        self.assertEqual(len(rows)*len(SEEDS), len({(r["id"], s) for r in rows for s in SEEDS}))
         full = select_experiments(self.rows, ["main", "ablation", "sensitivity", "scaling", "capacity", "dpm", "recipe"])
         self.assertEqual(80, len(full))
         self.assertEqual(39, len(select_experiments(self.rows, ["all"], ["bright"])))
         with self.assertRaisesRegex(ValueError, "Unknown analysis"):
             select_experiments(self.rows, ["missing"])
 
-    def test_fig17_switches_and_unique_full_references(self):
+    def test_component_switches_and_unique_full_references(self):
         expected = {
             "dehcd_l": [1, 1, 1, 1], "no_dpm": [1, 0, 1, 1], "no_bicsf": [1, 1, 0, 1],
             "no_irb": [1, 1, 1, 0], "no_hog": [0, 1, 1, 1], "no_hog_no_dpm": [0, 0, 1, 1],
             "no_hog_no_dpm_no_bicsf": [0, 0, 0, 1], "all_off": [0, 0, 0, 0],
         }
         for ds in ("bright", "haiti"):
-            self.assertEqual(8, len(self.groups[f"fig17_{ds}"]))
-            for member in self.groups[f"fig17_{ds}"]:
+            self.assertEqual(8, len(self.groups[f"components_{ds}"]))
+            for member in self.groups[f"components_{ds}"]:
                 cfg = self.configs[member["canonical_id"]]
                 model = cfg["model"]
                 actual = [int(model["use_hog"]), int(model["fusion_mode"] == "dpm"),
@@ -107,7 +108,7 @@ class CatalogTests(unittest.TestCase):
     def test_presentation_metadata_is_not_a_training_identity(self):
         before = self.configs["bright_dehcd_m"]
         after = copy.deepcopy(before)
-        after["experiment"].update(roles=["another_view"], paper_refs=["different caption"], uses=[])
+        after["experiment"].update(roles=["another_view"], display_notes=["different caption"], uses=[])
         after["logging"]["run_name"] = "different_display_name"
         self.assertEqual(config_digest(before), config_digest(after))
         for section, key, value in (("model", "diffusion_steps", 5), ("training", "loss", "different"),
@@ -120,7 +121,7 @@ class CatalogTests(unittest.TestCase):
         derived = derive_catalog(ROOT, [ROOT / row["config"] for row in self.rows])
         self.assertEqual(self.rows, derived)
         stored = json.loads((ROOT / "configs/experiments/groups.json").read_text())
-        self.assertEqual(list(SEEDS), stored["seeds"])
+        self.assertNotIn("seeds", stored)
         self.assertEqual(self.groups, stored["groups"])
         for group, members in self.groups.items():
             for member in members:
@@ -129,7 +130,7 @@ class CatalogTests(unittest.TestCase):
         for row in self.rows:
             self.assertTrue(row["roles"])
             self.assertTrue(row["uses"])
-            self.assertTrue(row["paper_refs"])
+            self.assertNotIn("paper_refs", row)
             self.assertEqual(row["id"], row["canonical_id"])
 
 

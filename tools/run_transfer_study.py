@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
 from tools.run_event_transfer import CONFIGS, DEFAULT_DATA_ROOT, DEFAULT_OUTPUT, run_directory
 from utils.config import XMLConfigParser, merge_dicts
 from utils.local_settings import launch_settings
+from utils.defaults import DEFAULT_SEEDS
 from utils.protocol import atomic_json, config_digest, dataset_identity, digest, file_digest, source_identity
 from utils.transfer_study import (EVENTS, fewshot_partition, loeo_partition, scan_records,
     seal_json, source_class_weights, validate_partition, write_partition)
@@ -44,7 +45,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--protocols", nargs="+", choices=["loeo", "fewshot"], default=["loeo"])
     parser.add_argument("--sizes", nargs="+", choices=["s", "m", "l"], default=["s", "m", "l"])
-    parser.add_argument("--seeds", nargs="+", type=int, default=[3402])
+    parser.add_argument("--seeds", nargs="+", type=int, default=list(DEFAULT_SEEDS))
+    parser.add_argument("--target-exposure-note", default=launch_settings(ROOT)["target_exposure_note"],
+                        help="Optional declaration of prior target-data inspection")
     parser.add_argument("--events", nargs="+", choices=EVENTS)
     parser.add_argument("--arms", nargs="+", choices=["zero_shot", "finetune", "scratch"],
                         default=["zero_shot", "finetune", "scratch"], help="Few-shot comparisons on the same fixed held-out scenes")
@@ -133,7 +136,7 @@ def make_plan(args, records):
                 "target_total_samples": target_total,
                 "label_budget_note": "Reference labels stratify benchmark scenes; target train and validation annotations are reported separately",
                 "grouping_note": "Original scene IDs are disjoint; absolute geographic separation cannot be established without footprint metadata",
-                "historical_test_exposure": "Existing target events were evaluated in the previous study; this is an exploratory supplementary protocol"}
+                "historical_test_exposure": getattr(args, "target_exposure_note", "Not declared")}
             seal_json(case_dir / "split_audit.json", case)
             cases[case_id] = case
             arms = (["finetune"] if args.loeo_init == "auto" and event != "turkey-earthquake" else ["scratch"]) if protocol == "loeo" else args.arms
@@ -288,7 +291,7 @@ def summarize(plan, output):
     atomic_json(output / "summary/aggregate.json", {"status": "complete", "groups": aggregates,
         "loeo_event_macro": loeo_macro,
         "interpretation": "LOEO is event-held-out generalization; few-shot uses explicitly reported target training and validation labels",
-        "historical_test_exposure": "These events were previously evaluated; this supplementary study is exploratory"})
+        "historical_test_exposure": {key: case.get("historical_test_exposure", "Not declared") for key, case in plan["cases"].items()}})
     with (output / "summary/per_seed.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
