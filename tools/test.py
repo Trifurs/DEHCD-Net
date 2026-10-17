@@ -476,11 +476,8 @@ def save_json(payload: Dict[str, Any], path: Path) -> None:
 
 
 def profile_model(model, dataset, device, args: argparse.Namespace) -> Dict[str, Any]:
-    import torch
-    import torch.nn as nn
     import torch.nn.functional as F
-
-    from utils.model_outputs import extract_logits
+    from utils.flops import profile_forward
 
     sample = dataset[0]
     optical = sample["optical"].unsqueeze(0).to(device)
@@ -489,99 +486,7 @@ def profile_model(model, dataset, device, args: argparse.Namespace) -> Dict[str,
         size = tuple(int(v) for v in args.profile_size)
         optical = F.interpolate(optical, size=size, mode="bilinear", align_corners=False)
         sar = F.interpolate(sar, size=size, mode="bilinear", align_corners=False)
-
-    total_params = sum(param.numel() for param in model.parameters())
-    trainable_params = sum(param.numel() for param in model.parameters() if param.requires_grad)
-    param_bytes = sum(param.numel() * param.element_size() for param in model.parameters())
-    buffer_bytes = sum(buffer.numel() * buffer.element_size() for buffer in model.buffers())
-
-    macs_by_type: Dict[str, int] = {}
-    macs_by_module: Dict[str, int] = {}
-    hooks = []
-
-    def add_macs(module_type: str, module_name: str, value: int) -> None:
-        macs_by_type[module_type] = macs_by_type.get(module_type, 0) + int(value)
-        macs_by_module[module_name] = macs_by_module.get(module_name, 0) + int(value)
-
-    def conv_hook(module_name: str, module_type: str):
-        def hook(module, inputs, output):
-            if not isinstance(output, torch.Tensor) or not inputs:
-                return
-            x = inputs[0]
-            if not isinstance(x, torch.Tensor) or output.ndim < 4:
-                return
-            kernel_h, kernel_w = module.kernel_size
-            in_channels = int(module.in_channels)
-            groups = int(module.groups)
-            out_elements = int(output.numel())
-            macs_per_element = (in_channels // max(groups, 1)) * kernel_h * kernel_w
-            add_macs(module_type, module_name, out_elements * macs_per_element)
-
-        return hook
-
-    def linear_hook(module_name: str):
-        def hook(module, inputs, output):
-            if not isinstance(output, torch.Tensor):
-                return
-            add_macs("Linear", module_name, int(output.numel()) * int(module.in_features))
-
-        return hook
-
-    def norm_hook(module_name: str, module_type: str):
-        def hook(module, inputs, output):
-            if isinstance(output, torch.Tensor):
-                add_macs(module_type, module_name, int(output.numel()) * 2)
-
-        return hook
-
-    for name, module in model.named_modules():
-        if isinstance(module, nn.Conv2d):
-            hooks.append(module.register_forward_hook(conv_hook(name, "Conv2d")))
-        elif isinstance(module, nn.ConvTranspose2d):
-            hooks.append(module.register_forward_hook(conv_hook(name, "ConvTranspose2d")))
-        elif isinstance(module, nn.Linear):
-            hooks.append(module.register_forward_hook(linear_hook(name)))
-        elif isinstance(module, (nn.BatchNorm2d, nn.GroupNorm, nn.InstanceNorm2d, nn.LayerNorm)):
-            hooks.append(module.register_forward_hook(norm_hook(name, module.__class__.__name__)))
-
-    try:
-        with torch.no_grad():
-            logits = extract_logits(model(optical, sar))
-    finally:
-        for hook in hooks:
-            hook.remove()
-
-    total_macs = int(sum(macs_by_type.values()))
-    top_modules = sorted(macs_by_module.items(), key=lambda item: item[1], reverse=True)[:30]
-    return {
-        "input_shape": {
-            "optical": list(optical.shape),
-            "sar": list(sar.shape),
-            "logits": list(logits.shape),
-        },
-        "parameters": {
-            "total": int(total_params),
-            "trainable": int(trainable_params),
-            "total_millions": float(total_params / 1e6),
-            "trainable_millions": float(trainable_params / 1e6),
-            "parameter_memory_mb": float(param_bytes / (1024 ** 2)),
-            "buffer_memory_mb": float(buffer_bytes / (1024 ** 2)),
-        },
-        "complexity": {
-            "macs": None,
-            "partial_module_operation_estimate": total_macs,
-            "gmacs": None,
-            "flops_2x_macs": None,
-            "gflops_2x_macs": None,
-            "complete": False,
-            "macs_by_type": {key: int(value) for key, value in sorted(macs_by_type.items())},
-            "top_modules_by_macs": [
-                {"module": name, "macs": int(value), "gmacs": float(value / 1e9)}
-                for name, value in top_modules
-            ],
-            "note": "PARTIAL module-operation estimate, not total MACs/FLOPs. Excludes selective SSM scan, Swin functional attention/projections, einsum, grid_sample, HOG, interpolation and softmax. Norm estimates are mixed operations. Do not use it to rank architectures; measure same-device latency with tools/benchmark.py.",
-        },
-    }
+    return profile_forward(model, optical, sar)
 
 
 def parse_heatmap_specs(value: str, num_classes: int) -> list[str]:
@@ -1180,6 +1085,10 @@ def write_summary(results: List[Dict[str, Any]], output_root: Path) -> None:
         "best_metric_value",
         "params_total_m",
         "params_trainable_m",
+        "gflops",
+        "flops_complete",
+        "flops_convention",
+        "matrix_gmacs",
         "gmacs",
         "gflops_2x_macs",
     ]
@@ -1194,6 +1103,10 @@ def write_summary(results: List[Dict[str, Any]], output_root: Path) -> None:
             complexity = profile.get("complexity") if isinstance(profile, dict) else {}
             row["params_total_m"] = (params or {}).get("total_millions")
             row["params_trainable_m"] = (params or {}).get("trainable_millions")
+            row["gflops"] = (complexity or {}).get("gflops")
+            row["flops_complete"] = (complexity or {}).get("complete", False)
+            row["flops_convention"] = (complexity or {}).get("convention")
+            row["matrix_gmacs"] = (complexity or {}).get("matrix_gmacs")
             row["gmacs"] = (complexity or {}).get("gmacs")
             row["gflops_2x_macs"] = (complexity or {}).get("gflops_2x_macs")
             row.update(result.get("metrics", {}))

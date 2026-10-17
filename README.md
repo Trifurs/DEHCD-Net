@@ -44,12 +44,15 @@ python tools/test.py --help
 python tools/infer.py --help
 python tools/export_features.py --help
 python tools/benchmark.py --help
+python tools/profile_models.py --help
 python tools/compare_results.py --help
 python tools/run_event_transfer.py --help
 python tools/run_transfer_study.py --help
 ```
 
 [Running tools](docs/RUN_WORKFLOW.md) describes continuation, output files and command options. [Transfer tools](configs/event_transfer/README.md) describes source-weight initialization and scene-disjoint adaptation.
+
+[Forward complexity](docs/PROFILING.md) describes operator coverage, the FLOPs convention and standalone profiling. `gflops` includes supported functional operations and analytical state-space scans; unsupported operators prevent a complete total from being published.
 
 ## Model interface
 
